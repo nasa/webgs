@@ -1,16 +1,15 @@
-[submodule "jQuery-Flight-Indicators"]
-	path = jQuery-Flight-Indicators
-	url = https://github.com/sebmatton/jQuery-Flight-Indicators.git
-[submodule "Leaflet-semicircle"]
-	path = Leaflet-semicircle
-	url = https://github.com/jieter/Leaflet-semicircle.git
-[submodule "Leaflet.contextmenu"]
-	path = Leaflet.contextmenu
-	url = https://github.com/aratcliffe/Leaflet.contextmenu.git
-[submodule "Leaflet.RotatedMarker"]
-	path = Leaflet.RotatedMarker
-	url = https://github.com/bbecquet/Leaflet.RotatedMarker.git
 [submodule "spin.js"]
 	path = spin.js
 	url = https://github.com/fgnass/spin.js.git
-
+[submodule "Leaflet.RotatedMarker"]
+	path = Leaflet.RotatedMarker
+	url = https://github.com/bbecquet/Leaflet.RotatedMarker.git
+[submodule "Leaflet.contextmenu"]
+	path = Leaflet.contextmenu
+	url = https://github.com/aratcliffe/Leaflet.contextmenu.git
+[submodule "Leaflet-semicircle"]
+	path = Leaflet-semicircle
+	url = https://github.com/jieter/Leaflet-semicircle.git
+[submodule "jQuery-Flight-Indicators"]
+	path = jQuery-Flight-Indicators
+	url = https://github.com/sebmatton/jQuery-Flight-Indicators.git
