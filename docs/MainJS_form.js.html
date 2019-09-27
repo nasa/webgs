@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: MainJS/form.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: MainJS/form.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *
+ * @module form
+ * @version 1.0.0
+ * @description &lt;b> Library of panel layout control functions. &lt;/b>
+ *
+ *
+ * @example none
+ * @author Andrew Peters
+ * @date May 2019
+ * @copyright
+ * there will be one
+ *
+ *
+ *
+ *
+ */
+
+import * as Aircraft from './aircraft.js';
+import * as comms from './comms.js';
+import * as map from './map.js';
+import * as E from './eventFunctions.js';
+import * as F from '../FlyByFile/flyByFile.js';
+import * as IC from './icSettings.js'
+
+import {
+    Spinner
+} from '../LoadingSpinner/spinner.js';
+
+
+/**
+ * @function &lt;a name="setSummaryPanelInfo">setSummaryPanelInfo&lt;/a>
+ * @description Sets Summary panel information. Shows basic info about each aircraft.
+ * @param none
+ * @memberof module:form
+ */
+export function setSummaryPanelInfo() {
+    // display all info from load flight plan message
+    let summary_page = document.getElementById('blank');
+    summary_page.innerHTML = ''
+    let div_summary = document.createElement('div');
+    div_summary.setAttribute('id', 'summary_info');
+
+    let ac_list = comms.getAircraftList();
+    let p1 = document.createElement('H5');
+    let p2 = document.createElement('P');
+
+    p1.innerHTML = 'Aircraft Summary:'
+    div_summary.append(p1);
+
+    let MODE = E.getMode()
+    let mode_info = document.createElement('P');
+    mode_info.setAttribute('id', 'mode_status');
+    mode_info.innerHTML = 'Curent GCS Mode: ' + MODE.mode
+    summary_page.appendChild(mode_info)
+
+    for (let item of ac_list) {
+        let message = ''
+        if (item.status == 0) {
+            message = 'No Flight Plan Submitted'
+        } else if (item.status == 1) {
+            message = 'Plan Submitted and Loaded on Aircraft'
+        } else if (item.status == 2) {
+            message = 'Aircraft in Flight'
+        } else {
+            message = 'Unable to communicate with Aircraft'
+        }
+
+        p2.innerHTML = p2.innerHTML +
+            '&lt;br>&lt;b>Aircraft: ' + item.name +
+            '&lt;p> Status: ' + message +
+            '&lt;/p>&lt;p> Flight Mode: ' + item.mode + '&lt;/p>&lt;/b>'
+        // *******************
+        // Add more info here
+        // *******************
+    }
+    div_summary.append(p2);
+    summary_page.appendChild(div_summary);
+}
+
+/**
+ * @function &lt;a name="createFilePanel">createFilePanel&lt;/a>
+ * @description Renders a panel that displays text loaded from a file.
+ * @param pan_id {string} Id of node.
+ * @memberof module:form
+ */
+export function createFilePanel(pan_id) {
+    // create panel
+    let ac_pan_div = document.createElement('div');
+    ac_pan_div.setAttribute('class', 'panel-body wrapper hide');
+    ac_pan_div.setAttribute('id', pan_id);
+    document.getElementById('data-display').appendChild(ac_pan_div);
+
+    // Add label to panel
+    let pan_label = document.createElement('h5');
+    let name = pan_id.split('_').splice(2, pan_id.split('_').length - 2).join(' ');
+    pan_label.innerHTML = 'File Name: ' + name
+    ac_pan_div.appendChild(pan_label);
+
+    // display all info from file
+    let input = document.createElement('textarea');
+    input.setAttribute('class', 'fileplan')
+    input.setAttribute('id', 'contents_' + name)
+    input.setAttribute('wrap', 'off')
+    input.rows = 50
+    input.cols = 40
+
+    ac_pan_div.appendChild(input);
+
+    // add cancel plan button
+    ac_pan_div.appendChild(addBlockButton(name, 'Cancel', 'Cancel Plan', E.clickCancel));
+
+    // add a save button
+    // ac_pan_div.appendChild(addBlockButton(name, 'Save', 'Save Plan To File', E.clickSave));
+
+    // add fly by file button
+    ac_pan_div.appendChild(addBlockButton(name, 'FlyByFile', 'Fly By File', F.flybyfile));
+}
+
+/**
+ * @function &lt;a name="createLoadingPanel">createloadingPanel&lt;/a>
+ * @description Renders a panel that displays spinner and info while waiting for response from server.
+ * @param type {string} Name of calling function. ex. loadFlightplan, startup
+ * @param ac {object} Aircraft this panel is associated with.
+ * @memberof module:form
+ */
+export function createLoadingPanel(type, ac) {
+    let loading_div = document.createElement('div');
+    loading_div.setAttribute('class', 'panel-body wrapper loading hide');
+    loading_div.setAttribute('id', 'loading_' + type + '_' + ac.id);
+    document.getElementById('data-display').appendChild(loading_div);
+
+    let h4 = document.createElement('H5');
+    h4.setAttribute('id', 'loading_p1');
+    h4.innerHTML = 'Loading... '
+    loading_div.appendChild(h4)
+
+    addLoadingContent(type, loading_div)
+    addSpinner(type, ac.id)
+
+    // add shutdown button
+    let btn_div = document.createElement('div');
+    btn_div.appendChild(addBlockButton(ac.id, 'shutdown', 'Shutdown', E.clickShutdown));
+    loading_div.appendChild(btn_div);
+}
+
+
+/**
+ * @function &lt;a name="addLoadingContent">addLoadingContent&lt;/a>
+ * @description Updates and adds information to the loading panel.
+ * @param type {string} Type of loading panel. Also used in id.
+ * @param parent {object} The HTML Parent node the new info will be appended to.
+ * @memberof module:form
+ */
+function addLoadingContent(type, parent) {
+    let p1;
+    if (type == 'startup') {
+        p1 = document.createElement('P');
+        p1.setAttribute('id', 'loading_wait');
+        p1.innerHTML = 'Waiting for Heartbeat. '
+        parent.appendChild(p1)
+
+    } else if (type == 'sendwaypoints') {
+        p1 = document.createElement('P');
+        p1.setAttribute('id', 'loading_contacting');
+        p1.innerHTML = 'Contacting Aircraft. '
+        parent.appendChild(p1)
+
+    } else if (type == 'startflight') {
+        p1 = document.createElement('P');
+        p1.setAttribute('id', 'startflight');
+        p1.innerHTML = 'Prepare for liftoff in 3...2...1... '
+        parent.appendChild(p1)
+
+    } else if (type == 'paramupdate') {
+        p1 = document.createElement('P');
+        p1.setAttribute('id', 'paramupdate');
+        p1.innerHTML = 'Updating Parameters'
+        parent.appendChild(p1)
+    }
+}
+
+/**
+ * @function &lt;a name="updateAcInMenu">updateAcInMenu&lt;/a>
+ * @description Updates the Aircraft menu in the header.
+ * @param doThis {boolean} Id of node. Default = True. If false wil not list all of
+ *                         Aircraft in the menu.
+ * @memberof module:form
+ */
+export function updateAcInMenu(doThis = true) {
+    // clear the menu
+    let btns = document.getElementById('ac_buttons')
+    while (btns.lastChild) {
+        btns.removeChild(btns.lastChild)
+    }
+    let MODE = E.getMode()
+    if (MODE.mode == 'SITL') {
+        // add new ac button
+        btns.appendChild(addNewAircraftButtonToMenu())
+    }
+    if (doThis) {
+        // add all of the ac to the menu
+        let ac_list = comms.getAircraftList()
+        for (let item of ac_list) {
+            btns.appendChild(addACToMenu(item))
+        }
+    }
+}
+
+
+/**
+ * @function &lt;a name="addACToMenu">addACToMenu&lt;/a>
+ * @description Adds a aircraft button to the header menu.
+ * @param ac {object} Aircraft to be added to the header menu.
+ * @memberof module:form
+ */
+export function addACToMenu(ac) {
+    // check mode
+    let MODE = E.getMode()
+    if (!MODE.multi) {
+        // remove add new aircraft button
+        let new_btn = document.getElementById('ac_pan_btn_new_ac')
+        new_btn.classList.add('hide')
+    }
+    // add button to drop down
+    let li_item = document.createElement("LI");
+    // show name if it has one otherwise id
+    if (ac.name == ac.id) {
+        li_item.appendChild(addBlockButton(ac.id, 'ac_pan', 'Aircraft ' + ac.id, E.clickACPanelShow))
+    } else {
+        li_item.appendChild(addBlockButton(ac.id, 'ac_pan', ac.name, E.clickACPanelShow))
+    }
+    li_item.setAttribute('class', 'menu_li')
+    return li_item
+}
+
+/**
+ * @function &lt;a name="addNewAircraftToMenu">addNewAircraftToMenu&lt;/a>
+ * @description Adds new aircraft button to the header menu. Not exported
+ * @memberof module:form
+ */
+function addNewAircraftButtonToMenu() {
+    let li_item = document.createElement("LI");
+    li_item.appendChild(addBlockButton('new_ac', 'ac_pan', 'New Aircraft ', E.createNewAircraft))
+    li_item.firstChild.classList.add('show')
+    return li_item
+}
+
+/**
+ * @function &lt;a name="createSettingsPanel">createSettingsPanel&lt;/a>
+ * @description Creates settings panel.
+ * @memberof module:form
+ */
+export function createSettingsPanel() {
+    let set_pan = document.getElementById('settings');
+
+    // Add label to panel
+    let pan_label = document.createElement('h5');
+    pan_label.innerHTML = 'WebGCS Settings'
+    set_pan.appendChild(pan_label);
+    let id = 'set';
+
+    //connect to remote host
+    let conn_div = document.createElement('DIV')
+    conn_div.setAttribute('id', 'conn_div')
+    let title = document.createElement('p')
+    title.setAttribute('id', 'connection_status')
+    title.innerHTML = 'Connection Status: Disconnected'
+    let p = document.createElement('p')
+    p.innerHTML = 'Connect To Remote Host'
+    conn_div.appendChild(title)
+    conn_div.appendChild(p)
+    conn_div.appendChild(addTextInput('new_ip_', "IP Address", '127.0.0.1', comms.createNewConnectionIp))
+    conn_div.appendChild(addTextInput('new_port_', 'Port', '8000', comms.createNewConnectionPort))
+    conn_div.appendChild(addButtonSwitch('observeonly_toggle', 'Observe Only', function () {
+        E.clickToggleButton('observeonly_toggle')
+    }))
+    conn_div.appendChild(addBlockButton('new_connection', '', 'Create New Connection', comms.createNewConnection))
+    set_pan.appendChild(conn_div)
+
+    // Set mode
+    let p1 = document.createElement('p')
+    p1.innerHTML = '&lt;br />Set GCS Mode'
+    set_pan.appendChild(p1)
+
+    // SITL, HITL or playback
+    let mode_div = document.createElement('DIV');
+    set_pan.appendChild(mode_div);
+
+    // Description
+    let mod_p = document.createElement('P');
+    mod_p.innerHTML = 'GCS Mode'
+    mod_p.setAttribute('class', 'input_label')
+    mode_div.appendChild(mod_p);
+
+    // selection box
+    let sel = document.createElement('select');
+    sel.setAttribute('class', 'input_class');
+    sel.setAttribute('id', 'select_mode');
+    sel.setAttribute('autofocus', 'true');
+    mode_div.appendChild(sel);
+
+    // Mode options
+    let opt1 = document.createElement('option');
+    opt1.setAttribute('value', 'SITL');
+    opt1.innerHTML = 'SITL'
+    sel.appendChild(opt1)
+    let opt2 = document.createElement('option');
+    opt2.setAttribute('value', 'HITL');
+    opt2.innerHTML = 'Connect to Hardware'
+    sel.appendChild(opt2)
+    let opt3 = document.createElement('option');
+    opt3.setAttribute('value', 'Playback');
+    opt3.innerHTML = 'Playback'
+    sel.appendChild(opt3)
+
+    // Show inner panel with other options when one of the options above is selected
+    sel.addEventListener('change', function (e) {
+        E.changeModeSelection(e)
+    })
+
+    // mode settings div
+    let mode_set_div = document.createElement('DIV')
+    mode_set_div.setAttribute('id', 'mode_set_div')
+    set_pan.appendChild(mode_set_div)
+
+    // add elements to mode settings div
+    let MODE = E.getMode();
+    MODE.modeOptionsSwitch(mode_set_div)
+
+    // create div for buttons
+    let btn_div = document.createElement('DIV')
+    btn_div.setAttribute('class', 'btndiv')
+
+    id = 0;
+
+    // add button for Icarous settings
+    btn_div.appendChild(addBlockButton('ic', 'user_settings', 'Save User Settings', E.saveSettings));
+
+    // reset params button - sets all params to default values and stays on page
+    btn_div.appendChild(addBlockButton(id, 'reset_settings', 'Reset to Default Settings', E.clickResetSettings));
+
+    set_pan.appendChild(btn_div)
+    // exactly what it sounds like
+    E.highlightCurrentSettings()
+}
+
+
+/**
+ * @function &lt;a name="updateSettingsPanel">updateSettingsPanel&lt;/a>
+ * @description Updates settings panel based on current mode settings.
+ * @memberof module:form
+ */
+export function updateSettingsPanel() {
+    let MODE = E.getMode()
+    // remove the old div
+    let p_node = document.getElementById('mode_set_div')
+    let last;
+    while (last = p_node.lastChild) {
+        p_node.removeChild(last)
+    }
+    // add the new div
+    let parent_div = document.getElementById('mode_set_div')
+    MODE.modeOptionsSwitch(parent_div)
+
+    // update connection status
+    let con = document.getElementById('conn_div')
+    if (con) {
+        while (last = con.lastChild) {
+            con.removeChild(last)
+        }
+        updateSettingsConnection(con)
+    }
+}
+
+/**
+ * @function &lt;a name="updateSettingsConnection">updateSettingsConnection&lt;/a>
+ * @description Updates the socket connection information.
+ * @param con_div {object} HTML div displaying connection information for the socket server.
+ * @memberof module:form
+ */
+export function updateSettingsConnection(conn_div) {
+    let MODE = E.getMode()
+    let title = document.createElement('p')
+    title.setAttribute('id', 'connection_status')
+    title.innerHTML = MODE.con_status
+    let p = document.createElement('p')
+    p.innerHTML = 'Connect To Remote Host'
+    conn_div.appendChild(title)
+    conn_div.appendChild(p)
+    conn_div.appendChild(addTextInput('new_ip_', "IP Address", MODE.ipAddress, comms.createNewConnectionIp))
+    conn_div.appendChild(addTextInput('new_port_', 'Port', MODE.outport, comms.createNewConnectionPort))
+    conn_div.appendChild(addButtonSwitch('observeonly_toggle', 'Observe Only', function () {
+        E.clickToggleButton('observeonly_toggle')
+    }))
+    conn_div.appendChild(addBlockButton('new_connection', '', 'Create New Connection', comms.createNewConnection))
+
+    E.highlightCurrentSettings()
+}
+
+/**
+ * @function &lt;a name="createParameterPanel">createParameterPanel&lt;/a>
+ * @description Creates the aircraft parameter panel.
+ * @param ac {object} Aircraft object.
+ * @memberof module:form
+ */
+export function createParameterPanel(ac) {
+    let MODE = E.getMode()
+    let pan_id = 'ac_param_pan_' + ac.id
+
+    // add panel
+    let ac_pan_div = document.createElement('div');
+    ac_pan_div.setAttribute('class', 'panel-body wrapper param hide');
+    ac_pan_div.setAttribute('id', pan_id);
+    document.getElementById('data-display').appendChild(ac_pan_div);
+
+    // Add label to panel
+    let pan_label = document.createElement('h5');
+    pan_label.setAttribute('class', 'acName')
+    pan_label.innerHTML = 'Aircraft ' + ac.id + ' Parameters:'
+    ac_pan_div.appendChild(pan_label);
+
+    let save_div = document.createElement('div')
+    save_div.setAttribute('class', 'param_save')
+
+    // load params from file
+    save_div.appendChild(addTextInput('param_file_load_' + ac.id, "Load Param File", MODE.load_param_default, E.enterLoadParamsFile))
+
+    // save to file
+    save_div.appendChild(addTextInput('param_file_save_' + ac.id, "Save Parameters To File", MODE.save_param_default, E.enterSaveParam))
+
+    ac_pan_div.appendChild(save_div);
+
+    // display all parameter names and inputs
+    let list_div = document.createElement('div')
+    list_div.setAttribute('class', 'param_list')
+    console.log(ac)
+    ac.parameters.map(function (x) {
+        // addNumberInput(id, name, text, step, size, value)
+        let param_div = addNumberInput(ac.id, 'PARAM_', x.name, 1, 6, parseFloat(x.value), E.onInputHighlight);
+        list_div.appendChild(param_div);
+    });
+
+    ac_pan_div.appendChild(list_div)
+
+    let btn_div = document.createElement('div')
+    btn_div.setAttribute('class', 'btndiv')
+    // reload parameters button
+    btn_div.appendChild(addBlockButton(ac.id, 'reload_param', 'Reload Parameters', E.clickReloadParameters));
+
+    // add submit changes button
+    btn_div.appendChild(addBlockButton(ac.id, 'submit_param', 'Submit Changes', E.clickSubmitChanges));
+
+    // add cancel changes button
+    btn_div.appendChild(addBlockButton(ac.id, 'cancel_change', 'Cancel Changes', E.clickCancelChanges));
+
+    ac_pan_div.appendChild(btn_div)
+}
+
+/**
+ * @function &lt;a name="updateParamPanel">updateParamPanel&lt;/a>
+ * @description Updates the Aircraft parameter information.
+ * @param ac {object} Aircraft object.
+ * @memberof module:form
+ */
+export function updateParamPanel(ac) {
+    let ac_param_pan = document.getElementById('ac_param_pan_' + ac.id);
+    if (ac_param_pan != null) {
+        ac_param_pan.parentNode.removeChild(ac_param_pan);
+    }
+    // recreate the panel
+    createParameterPanel(ac)
+    // make it active
+    makePanelActive('ac_param_pan_' + ac.id)
+}
+
+/**
+ * @function &lt;a name="createFlightPlanPanel">createFlightPlanPanel&lt;/a>
+ * @description Creates the flight plan panel. Allows user to input wp's add traffic and gefences.
+ * @param ac {object} Aircraft object.
+ * @memberof module:form
+ */
+export function createFlightPlanPanel(ac) {
+    // create a panel
+    let ac_pan_div = document.createElement('div');
+    ac_pan_div.setAttribute('class', 'panel-body wrapper ac plan hide');
+    ac_pan_div.setAttribute('id', 'ac_pan_' + ac.id);
+    document.getElementById('data-display').appendChild(ac_pan_div);
+
+    // Add label to panel
+    let pan_label = document.createElement('h5');
+    pan_label.setAttribute('class', 'acName')
+    if (ac.id == ac.name) {
+        pan_label.innerHTML = 'Aircraft ' + ac.id
+    } else {
+        pan_label.innerHTML = ac.name
+    }
+    ac_pan_div.appendChild(pan_label);
+
+    // mode checking
+    let MODE = E.getMode();
+    let btn_div = MODE.aircraftModeCheck(ac)
+
+    ac_pan_div.appendChild(btn_div)
+}
+
+/**
+ * @function &lt;a name="createInfoPanel">createInfoPanel&lt;/a>
+ * @description Displays pre flight information after the flight plan is built.
+ * @param ac {object} Aircraft object.
+ * @memberof module:form
+ */
+export function createInfoPanel(ac) {
+    let pan_id = 'ac_info_pan_' + ac.id
+
+    // add panel
+    let ac_pan_div = document.createElement('div');
+    ac_pan_div.setAttribute('class', 'panel-body wrapper ac info hide');
+    ac_pan_div.setAttribute('id', pan_id);
+    document.getElementById('data-display').appendChild(ac_pan_div);
+
+    // Add label to panel
+    let pan_label = document.createElement('h5');
+    pan_label.setAttribute('class', 'acName')
+    pan_label.innerHTML = 'Aircraft ' + ac.name
+    ac_pan_div.appendChild(pan_label);
+
+    // display all info from load flight plan message
+    let div_info = document.createElement('div');
+    div_info.setAttribute('id', 'pre_flight_info_div_' + ac.id);
+    div_info.setAttribute('class', 'myform')
+    let p1 = aircraftInfo(ac)
+    div_info.append(p1);
+    ac_pan_div.appendChild(div_info);
+
+    // mode checking
+    let MODE = E.getMode();
+    let btn_div = MODE.aircraftModeCheck(ac);
+
+    ac_pan_div.appendChild(btn_div)
+
+    return pan_id;
+}
+
+
+/**
+ * @function &lt;a name="createInFlightPanel">createInFlightPanel&lt;/a>
+ * @description Displays in-flight information after the flight has started.
+ * @param ac {object} Aircraft object.
+ * @memberof module:form
+ */
+export function createInFlightPanel(ac) {
+    let pan_id = 'ac_inFlight_pan_' + ac.id
+
+    // add panel
+    let ac_pan_div = document.createElement('div');
+    ac_pan_div.setAttribute('class', 'panel-body wrapper ac inFlight hide');
+    ac_pan_div.setAttribute('id', pan_id);
+    document.getElementById('data-display').appendChild(ac_pan_div);
+
+    // Add label to panel
+    let pan_label = document.createElement('h5');
+    pan_label.setAttribute('class', 'acName')
+    pan_label.innerHTML = 'Aircraft ' + ac.name
+    ac_pan_div.appendChild(pan_label);
+
+    // display all info from load flight plan message
+    let div_info = document.createElement('div');
+    div_info.setAttribute('id', 'flight_info_div_' + ac.id);
+    console.log(ac)
+    let p1 = aircraftInfo(ac)
+    div_info.append(p1);
+    ac_pan_div.appendChild(div_info);
+
+    // mode checking
+    let MODE = E.getMode();
+    let btn_div = MODE.aircraftModeCheck(ac)
+
+    ac_pan_div.appendChild(btn_div)
+
+    return pan_id;
+}
+
+/**
+ * @function &lt;a name="setPanelInfo">setPanelInfo&lt;/a>
+ * @description Updates the information displayed on the info and in-flight panels.
+ * @param ac {object} Aircraft object.
+ * @param div_id {string} panel id minus the aircraft id.
+ * @memberof module:form
+ */
+export function setPanelInfo(ac, div_id) {
+    // clear the info div
+    document.getElementById(div_id + ac.id).innerHTML = '';
+
+    // update the div
+    let p1 = aircraftInfo(ac)
+    document.getElementById(div_id + ac.id).appendChild(p1);
+}
+
+/**
+ * @function &lt;a name="aircraftInfo">aircraftInfo&lt;/a>
+ * @description Formats the aircraft information.
+ * @param ac {Object} Aircraft object.
+ * @memberof module:form
+ */
+export function aircraftInfo(ac) {
+    let p1 = document.createElement('P');
+    let stuff = '&lt;ul>' +
+        '&lt;li>Flight Mode ' + ac.flightmode + '&lt;/li>' +
+        '&lt;li>Lat: ' + ac.lat + ' Lng: ' + ac.lng + '&lt;/li>' +
+        '&lt;li>Altitude (m agl): ' + ac.alt + ' Relative alt: ' + ac.rel_alt + '&lt;/li>' +
+        '&lt;li>Velocity (m/s) vx: ' + ac.vx + ' vy: ' + ac.vy + ' vz: ' + ac.vz + '&lt;/li>' +
+        '&lt;li>Heading: ' + ac.hdg + '&lt;/li>' +
+        '&lt;li>Roll: ' + ac.roll.toPrecision(3) + ' Pitch: ' + ac.pitch.toPrecision(3) + ' Yaw: ' + ac.yaw.toPrecision(3) + '&lt;/li>' +
+        '&lt;li>Rv: ' + ac.rollSpeed.toPrecision(3) + ' Pv: ' + ac.pitchSpeed.toPrecision(3) + ' Yv: ' + ac.yawSpeed.toPrecision(3) + '&lt;/li>' +
+        '&lt;li>Start Time: ' + ac.start + '&lt;/li>' +
+        '&lt;ul>Flight Plan: '
+
+    let count = 0
+    for (let item of ac.flightplan) {
+        stuff = stuff + '&lt;li>WP ' + count +
+            ' Lat: ' + item.wpMarker._latlng.lat.toPrecision(6) +
+            ' Lng: ' + item.wpMarker._latlng.lng.toPrecision(6) +
+            ' Alt: ' + item.alt + '&lt;/li>'
+        count = count + 1;
+    }
+
+    stuff = stuff + '&lt;/ul>' +
+        '&lt;li>Battery (mAh): ' + ac.voltage + ' &lt;/li>' +
+        '&lt;li>&lt;/li>' +
+        '&lt;/ul>';
+
+    p1.innerHTML = stuff;
+    return p1
+}
+
+/**
+ * @function &lt;a name="makePanelActive">makePanelActive&lt;/a>
+ * @description Link buttons to panels. When btn pressed panel becomes active.
+ * @param id {string} Panel id.
+ * @memberof module:form
+ */
+export function makePanelActive(id) {
+    removeActive()
+    removeHighlight()
+
+    let id_array = id.split('_');
+    let pan_type = id_array[0];
+    let id_ac = id_array[id_array.length - 1]
+    let ac = Aircraft.getAircraftById(id_ac);
+
+    // turn the view off for all other ac and subpanels
+    let ac_list = comms.getAircraftList()
+    ac_list.forEach(el => {
+        if (ac == 'Aircraft Not Found' || ac.id != el.id) {
+            if (ac == 'Aircraft Not Found') {
+                console.log('Do nothing')
+            } else {
+                el.activeView = false
+                el.icon = ac.setAcIcon(el.id)
+            }
+        } else if (ac.id == el.id) {
+            el.activeView = true
+            el.icon = ac.setAcIconWithShadow(el.id)
+        } else {
+            el.activeView = false
+            el.icon = ac.setAcIcon(el.id)
+        }
+    })
+
+    let other = ['blank', 'file', 'loading']
+    // make the panel active
+    if (pan_type == 'ac') {
+        if (id_array[1] == 'param') {
+            document.getElementById('ac_param_pan_' + ac.id).classList.replace('hide', 'active');
+        } else if (ac.status == 3) {
+            console.log('Build post flight panel.')
+        } else if (ac.status == 2) {
+            // create the panel if needed
+            checkPanelCreation('ac_inFlight_pan_' + ac.id, ac)
+            ac.prev_panel = 'inFlight_pan'
+            document.getElementById('ac_inFlight_pan_' + ac.id).classList.replace('hide', 'active');
+        } else if (ac.status == 1) {
+            // create the panel if needed
+            checkPanelCreation('ac_info_pan_' + ac.id, ac)
+            ac.prev_panel = 'info_pan'
+            document.getElementById('ac_info_pan_' + ac.id).classList.replace('hide', 'active');
+
+        } else if (ac.status == 0) {
+            // create the panel if needed
+            checkPanelCreation('ac_pan_' + ac.id, ac)
+            ac.prev_panel = 'pan'
+            document.getElementById('ac_pan_' + ac.id).classList.replace('hide', 'active');
+        } else {
+            console.log('You screwed up. Please fix it.')
+        }
+        // adjust the form size
+        adjustFormSize()
+        // make subpanels associated with this ac active
+        subPanelHandler(ac)
+    } else if (pan_type == 'settings') {
+        document.getElementById(id).classList.replace('hide', 'active');
+        updateSettingsPanel();
+        subPanelHandler('settings')
+    } else if (other.includes(pan_type)) {
+        document.getElementById(id).classList.replace('hide', 'active');
+        updateSettingsPanel();
+    } else {
+        console.log('This is worse than the other screw up. ')
+    }
+    contextmenuControl()
+}
+
+/**
+ * @function &lt;a name="contextMenuControl">contextMenuControl&lt;/a>
+ * @description Controls what elements are shown and active in the context menu.
+ * @memberof module:form
+ */
+export function contextmenuControl() {
+    let mymap = map.getMap()
+    let ac_list = comms.getAircraftList()
+    let MODE = E.getMode()
+    if (MODE.mode == 'Playback') {
+        return
+    }
+    // no ac
+    if (ac_list.length &lt; 1) {
+        for (let item of mymap.contextmenu._items) {
+            // only enable add new
+            if (item.el.textContent != 'New Aircraft') {
+                mymap.contextmenu.setDisabled(item.el, true)
+            }
+        }
+
+    } else {
+        let ac = Aircraft.getActiveAc()
+        // no active ac
+        if (ac == 'Aircraft Not Found' || ac == null) {
+            for (let item of mymap.contextmenu._items) {
+                // only enable add new
+                if (item.el.textContent != 'New Aircraft') {
+                    mymap.contextmenu.setDisabled(item.el, true)
+                }
+            }
+
+            // active ac
+        } else {
+
+            MODE.updateContextMenu(ac)
+            // inFlight
+            if (ac.status == 2) {
+                // enable all options except add new wp
+                for (let item of mymap.contextmenu._items) {
+                    if (item.el.textContent == 'Add Waypoint') {
+                        mymap.contextmenu.setDisabled(item.el, true)
+                    } else {
+                        mymap.contextmenu.setDisabled(item.el, false)
+                    }
+                }
+                // pre flight
+            } else if (ac.status &lt; 2) {
+                // enable all options
+                for (let item of mymap.contextmenu._items) {
+                    mymap.contextmenu.setDisabled(item.el, false)
+                }
+                // post flight
+            } else {
+                // disable all except shutdown
+                for (let item of mymap.contextmenu._items) {
+                    if (item.el.textContent == 'Shutdown') {
+                        mymap.contextmenu.setDisabled(item.el, false)
+                    } else {
+                        mymap.contextmenu.setDisabled(item.el, true)
+                    }
+                }
+            }
+            // check if geofence has been created
+            if (ac.gf_list.length == 0) {
+                for (let item of mymap.contextmenu._items) {
+                    if (item.el.textContent == 'Add Vertex') {
+                        mymap.contextmenu.setDisabled(item.el, true)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * @function &lt;a name="subPanelHandler">subPanelHandler&lt;/a>
+ * @description Displays and hides desired subpanels.
+ * @param ac {Object} Aircraft object.
+ * @memberof module:form
+ */
+export function subPanelHandler(ac) {
+    let MODE = E.getMode()
+    // max 4, sub 2-5; 1 &amp; 6 are smaller and will hold custom indicators
+    let opt = document.getElementById('option_div')
+    let sub;
+    for (let i = 2; i &lt; 6; i++) {
+        // clear sub option_div_sub_(#) div's move to option_div
+        sub = document.getElementById('option_div_sub_' + i)
+        while (sub.childNodes.length) {
+            opt.appendChild(sub.firstChild)
+        }
+    }
+    let active_sub = []
+    if (ac == 'settings') {
+        // check for active sub panels
+        for (let item of MODE.activeSubPanels) {
+            active_sub.push(document.getElementById(item))
+        }
+        IC.updateIcSettingsPanel()
+    } else {
+        // check ac for active subpanels
+        for (let item of ac.activeSubPanels) {
+            active_sub.push(document.getElementById(item))
+        }
+
+        // sort the array for a clean output
+        if (ac.activeSubPanels.length > 1) {
+            active_sub.sort((a, b) => {
+                if (a.id.includes('loading')) {
+                    return -1
+                }
+                if (b.id.includes('loading')) {
+                    return 1
+                }
+                if (a.id > b.id) {
+                    return 1
+                }
+                if (b.id > a.id) {
+                    return -1
+                }
+                return 0
+            })
+        }
+    }
+    // make the panels active and move to sub option div
+    // fill from right to left - 5,4,3,2
+    let count = 5;
+
+    for (let item of active_sub) {
+        sub = document.getElementById('option_div_sub_' + count)
+        sub.appendChild(item)
+        item.classList.replace('hide', 'active')
+        count -= 1
+    }
+}
+
+/**
+ * @function &lt;a name="createForwardingSubPanel">createForwardingSubPanel&lt;/a>
+ * @description Creates forwarding sub-panel.
+ * @memberof module:form
+ */
+export function createForwardingSubPanel() {
+    let ac = Aircraft.getActiveAc()
+    let opt = document.getElementById('option_div')
+    let pan = document.createElement('div')
+    pan.setAttribute('class', 'panel-body wrapper forwarding hide sub')
+    pan.setAttribute('id', 'forwarding_' + ac.id)
+    opt.appendChild(pan)
+    updateForwardingSubPanel()
+}
+
+/**
+ * @function &lt;a name="updateForwardingSubPanel">updateForwardingSubPanel&lt;/a>
+ * @description Controls content of forwarding sub-panel
+ * @memberof module:form
+ */
+export function updateForwardingSubPanel() {
+    let ac = Aircraft.getActiveAc()
+    let pan = document.getElementById('forwarding_' + ac.id)
+    // if not forwarding
+
+    while (pan.hasChildNodes()) {
+        let c = pan.lastChild
+        c.parentNode.removeChild(c)
+    }
+
+    if (!ac.forwarding) {
+        // add label
+        let pan_label = document.createElement('h5')
+        pan_label.innerHTML = ' Forward ' + ac.name + ' Data to: '
+
+        // input ip
+        let ip = addTextInput('forward_ip_' + ac.id, 'IP address', ac.f_ip)
+        let port = addTextInput('forward_port_' + ac.id, 'Port', ac.f_port)
+        let baud = addTextInput('forward_baud_' + ac.id, 'Port', ac.f_baud)
+
+        // submit
+        let btn = addBlockButton(ac.id, 'forward_submit', 'Submit', E.submitForwardData)
+        let hide = addBlockButton(ac.id, 'forward_hide', 'Hide Panel', E.hideForwardData)
+
+        pan.appendChild(pan_label)
+        pan.appendChild(ip)
+        pan.appendChild(port)
+        pan.appendChild(baud)
+        pan.appendChild(btn)
+        pan.appendChild(hide)
+
+    } else {
+        // if forwarding
+        let pan_label = document.createElement('h5')
+        pan_label.innerHTML = ' Forward ' + ac.name + ' Data to: '
+        // show ip
+        let p1 = document.createElement('p')
+        p1.innerHTML = 'Remote IP: ' + ac.f_ip
+        // show port
+        let p2 = document.createElement('p')
+        p2.innerHTML = 'Remote Port: ' + ac.f_port
+        // show baud
+        let p3 = document.createElement('p')
+        p3.innerHTML = 'Remote Port: ' + ac.f_baud
+        // remove
+        let btn = addBlockButton(ac.id, 'forward_remove', 'Stop Forwarding Data', E.removeForwardData)
+        let hide = addBlockButton(ac.id, 'forward_hide', 'Hide Panel', E.hideForwardData)
+
+        pan.appendChild(pan_label)
+        pan.appendChild(p1)
+        pan.appendChild(p2)
+        pan.appendChild(p3)
+        pan.appendChild(btn)
+        pan.appendChild(hide)
+    }
+}
+
+/**
+ * @function &lt;a name="checkPanelCreation">checkPanelCreation&lt;/a>
+ * @description Checks for panel creation, if it hasn't been created will create it.
+ * @param pan_id {string} Panel id.
+ * @param ac {Object} Aircraft object.
+ * @memberof module:form
+ */
+export function checkPanelCreation(pan_id, ac) {
+    let pan = document.getElementById(pan_id)
+    if (pan == null) {
+        if (ac.status == 3) {
+            console.log('create post flight panel')
+        } else if (ac.status == 2) {
+            createInFlightPanel(ac)
+        } else if (ac.status == 1) {
+            createInfoPanel(ac)
+        } else if (ac.status == 0) {
+            createFlightPlanPanel(ac)
+        }
+    }
+}
+
+/**
+ * @function &lt;a name="removeActive">removeActive&lt;/a>
+ * @description Swaps class from active to hide for all active items.
+ * @memberof module:form
+ */
+export function removeActive() {
+    try {
+        let act = document.getElementsByClassName("active")
+        for (let i = act.length - 1; i >= 0; i--) {
+            act[i].classList.replace('active', 'hide');
+        }
+    } catch (e) {
+        console.log('Unable to Find active panel.', e);
+    }
+}
+
+/**
+ * @function &lt;a name="removeHighlight">removeHighlight&lt;/a>
+ * @description Removes highlight class from all items.
+ * @memberof module:form
+ */
+export function removeHighlight() {
+    try {
+        let highlight = document.getElementsByClassName('highlight')
+        for (let i = highlight.length - 1; i >= 0; i--) {
+            highlight[i].classList.remove('highlight')
+        };
+    } catch (e) {
+        console.log('No Highlighted Rows ', e)
+    }
+}
+
+/**
+ * @function &lt;a name="adjustFormSize">adjustFormSize&lt;/a>
+ * @description Ensures panels maintain a certian size based on the screen size.
+ * @memberof module:form
+ */
+export function adjustFormSize() {
+    let ac = Aircraft.getActiveAc()
+    if (ac != null) {
+        // get the parent element
+        let par = document.getElementById('ac_' + ac.prev_panel + '_' + ac.id)
+        let h = 0
+        // get the sum of the heights of the children
+        for (let item of par.childNodes) {
+            h = h + item.clientHeight
+        }
+        // subtract the height of the form
+        h = h - document.getElementById('btn_div_' + ac.prev_panel + '_' + ac.id).previousElementSibling.clientHeight
+        let prev = document.getElementById('btn_div_' + ac.prev_panel + '_' + ac.id).previousElementSibling
+        // adjust the min/max height of the form to fit the remaining space in the panel
+        prev.style.maxHeight = (par.clientHeight - h - (par.clientHeight * .05)).toString() + 'px'
+        prev.style.minHeight = (par.clientHeight - h - (par.clientHeight * .05)).toString() + 'px'
+    }
+}
+
+
+/**
+ * @function &lt;a name="createFlightPlanTable">createFlightPlanTable&lt;/a>
+ * @description Creates table of waypoints for the planning panel
+ * @param ac {Object} Aircraft object.
+ * @memberof module:form
+ */
+export function createFlightPlanTable(ac) {
+    // add altitude input
+    // let alt_div = addNumberInput(ac.id, 'ALT', 'Altitude: MSL ', 1, 6, ac.u_alt);
+    // document.getElementById('ac_fp_form_' + ac.id).appendChild(alt_div);
+
+    // add velocity input
+    let vel_div = addNumberInput(ac.id, 'VEL', 'Velocity: m/s ', 1, 6, ac.u_vel)
+    vel_div.addEventListener('input', E.inputUpdateUVelocity)
+    document.getElementById('ac_fp_form_' + ac.id).appendChild(vel_div);
+
+
+    // build the table
+    let table = document.createElement("TABLE");
+    table.setAttribute('id', "ac_fp_table_" + ac.id);
+    table.setAttribute('class', "table ac")
+    document.getElementById('ac_fp_form_' + ac.id).appendChild(table);
+
+    let header = table.createTHead();
+    let rowh = header.insertRow(0);
+    let cols = ['ID', 'LAT', 'LNG', 'ALT(m)', '', ''];
+    // insert elements into header
+    for (let i = 0; i &lt; cols.length; i++) {
+        let cell_head = rowh.insertCell();
+        cell_head.innerHTML = cols[i];
+    }
+
+    map.updateFlightPlanOnRowCreate(ac);
+    let row_num = 0;
+    updateTable(table, ac.id, 'fp', row_num, E.clickAddRowButton, E.clickRemoveRowButton);
+
+    // highlights selected row
+    table.addEventListener('click', E.clickTable);
+}
+
+/**
+ * @function &lt;a name="updateTable">updateTable&lt;/a>
+ * @description Adds row to table
+ * @param table {Object} HTML Table
+ * @param id {string} Either ac id, ac id and traffic, or geofence id, point id and aircraft id.
+ * @param type {string} ac, fence, traffic
+ * @param count {string} row number
+ * @param f_a {function} optional: function to add row
+ * @param f_r {function} optional: function to remove row
+ * @memberof module:form
+ */
+export function updateTable(table, id, type, count, f_a = 0, f_r = 0) {
+    let new_row = addRowToTable(id, type, count, f_a, f_r)
+    table.firstChild.appendChild(new_row)
+}
+
+/**
+ * @function &lt;a name="addRowToTable">addRowToTable&lt;/a>
+ * @description creates a new row.
+ * @param id {string} Either ac id, ac id and traffic, or geofence id, point id and aircraft id.
+ * @param type {string} ac, fence, traffic
+ * @param count {string} row number
+ * @param f_a {function} optional: function to add row
+ * @param f_r {function} optional: function to remove row
+ * @param center {Array} [Real, Real]: lat, lng pair
+ * @return {Object} HTML Table Row
+ * @memberof module:form
+ */
+export function addRowToTable(id, type, count, f_a = 0, f_r = 0, center = map.getCenter(), a = 1) {
+
+    // add rows to table
+    let row1 = document.createElement('tr')
+    // let row1 = table.insertRow();
+    row1.setAttribute('id', 'row_' + type + '_' + id + '_' + count)
+    row1.setAttribute('class', 'fp_row')
+    let cell_0 = row1.insertCell();
+    cell_0.setAttribute('class', 'seq')
+    cell_0.innerHTML = count;
+
+    let input_block_3 = document.createElement("INPUT");
+    input_block_3.setAttribute('type', 'number');
+    input_block_3.setAttribute('step', '1');
+    input_block_3.setAttribute('class', 'input_row');
+    input_block_3.setAttribute('id', 'LAT_' + type + '_' + id + '_' + count);
+    input_block_3.value = center[0]
+
+    let cell_3 = row1.insertCell();
+    cell_3.setAttribute('class', 'latlng')
+    cell_3.appendChild(input_block_3);
+
+    let input_block_4 = document.createElement("INPUT");
+    input_block_4.setAttribute('type', 'number');
+    input_block_4.setAttribute('step', '1');
+    input_block_4.setAttribute('class', 'input_row');
+    input_block_4.setAttribute('id', 'LNG_' + type + '_' + id + '_' + count);
+    input_block_4.value = center[1]
+
+    let cell_4 = row1.insertCell();
+    cell_4.setAttribute('class', 'latlng')
+    cell_4.appendChild(input_block_4);
+
+    if (a == 1) {
+        let input_block_5 = document.createElement('INPUT')
+        input_block_5.setAttribute('type', 'number');
+        input_block_5.setAttribute('step', '1');
+        input_block_5.setAttribute('class', 'input_row');
+        input_block_5.setAttribute('id', 'ALT_' + type + '_' + id + '_' + count);
+        input_block_5.value = 10
+        input_block_5.addEventListener('input', E.inputUpdateWpAlt)
+
+        let cell_5 = row1.insertCell();
+        cell_5.setAttribute('class', 'alt')
+        cell_5.appendChild(input_block_5);
+    }
+
+
+
+    // create buttons
+    if (f_a != 0 || f_r != 0) {
+        let {
+            add_button,
+            remove_button
+        } = createPlusMinusButtons(id, type, count, f_a, f_r);
+
+        let cell_6 = row1.insertCell();
+        cell_6.setAttribute('class', 'btnpm')
+        cell_6.id = 'cell_add_' + type + '_' + id + '_' + count;
+        cell_6.appendChild(add_button);
+
+        let cell_7 = row1.insertCell();
+        cell_7.setAttribute('class', 'btnpm')
+        cell_7.id = 'cell_rem_' + type + '_' + id + '_' + count;
+        cell_7.appendChild(remove_button);
+    }
+
+    // remove +/- buttons from previous row
+    if (count > 0 &amp;&amp; f_a != 0) {
+
+        let id_add = 'add_btn_' + type + '_' + id + '_' + (count - 1).toString();
+        let added = document.getElementById(id_add);
+        if (added != null) {
+            added.parentNode.removeChild(added);
+        }
+        let id_rem = 'remove_btn_' + type + '_' + id + '_' + (count - 1).toString();
+        let removed = document.getElementById(id_rem);
+        if (removed != null) {
+            removed.parentNode.removeChild(removed);
+        }
+    }
+    return row1
+};
+
+/**
+ * @function &lt;a name="createPlusMinusButtons">createPlusMinusButtons&lt;/a>
+ * @description Creates HTML Buttons for adding and removing rows.
+ * @param id {string} Either ac id, ac id and traffic, or geofence id, point id and aircraft id.
+ * @param type {string} ac, fence, traffic
+ * @param count {string} row number
+ * @param f_a {function} optional: function to add row
+ * @param f_r {function} optional: function to remove row
+ * @return {object} add button and return button
+ * @memberof module:form
+ */
+function createPlusMinusButtons(id, type, count, f_a = 0, f_r = 0) {
+    let add_button = document.createElement('BUTTON');
+    add_button.setAttribute('class', 'btn btn-table add-new-waypoint');
+    add_button.setAttribute('id', 'add_btn_' + type + '_' + id + '_' + count);
+    add_button.setAttribute('type', 'button')
+    add_button.innerHTML = '+  ';
+    add_button.addEventListener('click', f_a);
+
+    let remove_button = document.createElement('BUTTON');
+    remove_button.setAttribute('class', 'btn btn-table remove-waypoint');
+    remove_button.setAttribute('id', 'remove_btn_' + type + '_' + id + '_' + count);
+    remove_button.setAttribute('type', 'button')
+    remove_button.innerHTML = '-  ';
+    remove_button.addEventListener('click', f_r);
+    return {
+        add_button,
+        remove_button
+    };
+}
+
+/**
+ * @function &lt;a name="addBlockButton">addBlockButton&lt;/a>
+ * @description Creates button.
+ * @param id {string} Either ac id, ac id and traffic, or geofence id, point id and aircraft id.
+ * @param type {string} Part of the id.
+ * @param text {string} Displayed text.
+ * @param f_a {function} click function
+ * @return {Object} returns a div containing the button
+ * @memberof module:form
+ */
+export function addBlockButton(id, type, text, click_function) {
+    let div = document.createElement('DIV');
+    let p = document.createElement('p')
+    p.innerHTML = text
+    let block_button = document.createElement('BUTTON');
+    block_button.setAttribute('class', 'btn btn-block');
+    block_button.setAttribute('id', type + '_btn_' + id);
+    block_button.setAttribute('type', 'button')
+    block_button.innerHTML = text
+    block_button.addEventListener('click', click_function);
+    div.appendChild(block_button);
+    return div;
+}
+
+/**
+ * @function &lt;a name="addTextInput">addTextInput&lt;/a>
+ * @description Creates text input and label.
+ * @param id {string} Part of the id.
+ * @param text {string} Displayed text next to the input.
+ * @param value {string} Start value.
+ * @param onInput_function {function} optional: input function
+ * @return {Object} returns a div containing the input and label
+ * @memberof module:form
+ */
+export function addTextInput(id, text, value, onInput_function = 'none') {
+    let alt_div = document.createElement('div');
+    alt_div.setAttribute('id', 'alt_div_' + id);
+
+    let p = document.createElement('P');
+    p.setAttribute('class', 'input_label')
+    p.innerHTML = text;
+    alt_div.appendChild(p)
+
+    let input_alt = document.createElement("INPUT");
+    input_alt.setAttribute('type', 'text');
+    input_alt.setAttribute('class', 'input_class');
+    input_alt.setAttribute('value', value);
+    input_alt.setAttribute('id', id + '_input');
+    if (onInput_function !== 'none') {
+        input_alt.addEventListener('keyup', function (e) {
+            onInput_function(e)
+        })
+    }
+    alt_div.appendChild(input_alt);
+    return alt_div;
+}
+
+/**
+ * @function &lt;a name="addTextInput">addTextInput&lt;/a>
+ * @description Creates text input and label.
+ * @param id {string} Part of the id.
+ * @param name {string} Part of the id.
+ * @param text {string} Displayed text next to the input.
+ * @param value {string} Start value.
+ * @param onInput_function {function} optional: input function
+ * @return {Object} returns a div containing the input and label
+ * @memberof module:form
+ */
+export function addNumberInput(id, name, text, step, size, value, onInput_function = 'none') {
+    let alt_div = document.createElement('div');
+    alt_div.setAttribute('id', 'alt_div_' + id);
+
+    let p = document.createElement('P');
+    p.setAttribute('class', 'input_label')
+    p.innerHTML = text;
+    alt_div.appendChild(p)
+
+    let input_alt = document.createElement("INPUT");
+    input_alt.setAttribute('type', 'number');
+    input_alt.setAttribute('step', step);
+    input_alt.setAttribute('class', 'input_class');
+    input_alt.setAttribute('size', size);
+    input_alt.setAttribute('id', name + '_' + text + '_' + id);
+    if (onInput_function !== 'none') {
+        input_alt.addEventListener('keyup', function (e) {
+            onInput_function(e)
+        })
+    }
+    input_alt.defaultValue = value;
+    alt_div.appendChild(input_alt);
+    return alt_div;
+}
+
+/**
+ * @function &lt;a name="addButtonSwitch">addButtonSwitch&lt;/a>
+ * @description Creates on/off toggle buttons.
+ * @param name {string} Part of the id.
+ * @param text {string} Displayed text next to the input.
+ * @param onInput_function {function} optional: input function
+ * @return {Object} returns a div containing the buttons and label
+ * @memberof module:form
+ */
+export function addButtonSwitch(name, text, onInput_function = 'none') {
+
+    let toggle_div = document.createElement('div');
+    toggle_div.setAttribute('id', 'alt_div_' + name);
+
+    let p = document.createElement('P');
+    p.setAttribute('class', 'input_label')
+    p.innerHTML = text;
+    toggle_div.appendChild(p)
+
+    let button_on = document.createElement("BUTTON");
+    let button_off = document.createElement("BUTTON");
+
+    button_on.setAttribute('class', 'toggle_class');
+    button_off.setAttribute('class', 'toggle_class');
+    button_on.setAttribute('id', name + '_on');
+    button_off.setAttribute('id', name + '_off');
+    button_on.innerHTML = 'On';
+    button_off.innerHTML = 'Off'
+
+    if (onInput_function !== 'none') {
+        button_on.addEventListener('click', onInput_function)
+        button_off.addEventListener('click', onInput_function)
+    }
+
+    toggle_div.appendChild(button_on);
+    toggle_div.appendChild(button_off);
+    return toggle_div;
+}
+
+/**
+ * @function &lt;a name="addRadioButtonGroup">addRadioButtonGroup&lt;/a>
+ * @description Creates a group of radio buttons.
+ * @param name {string} Pard of the id.
+ * @param text {string} Displayed text next to the input.
+ * @param in_array {Array} Array[string] of button labels.
+ * @param onInput_function {function} optional: input function
+ * @return {Object} returns a div containing the buttons
+ * @memberof module:form
+ */
+export function addRadioButtonGroup(name, text, in_array, onInput_function = null) {
+    let radio_div = document.createElement('div')
+    radio_div.setAttribute('id', 'alt_div_' + name)
+
+    let p = document.createElement('P')
+    p.setAttribute('class', 'radio_text')
+    p.innerHTML = text;
+    radio_div.appendChild(p)
+
+    let label
+    let radio
+    for (let item of in_array) {
+
+        radio = document.createElement('INPUT')
+        radio.setAttribute('class', 'radio_' + name)
+        radio.setAttribute('type', 'radio')
+        radio.setAttribute('name', name)
+        radio.setAttribute('value', item)
+        radio.addEventListener('click', onInput_function)
+        radio_div.appendChild(radio)
+
+        label = document.createElement('Label')
+        label.setAttribute('class', 'radio')
+        label.setAttribute('for', radio)
+        label.innerHTML = item
+
+        radio_div.appendChild(label)
+    }
+    return radio_div
+}
+
+/**
+ * @function &lt;a name="alertBannerGreen">alertBannerGreen&lt;/a>
+ * @description Creates green alert baner.
+ * @param text {string} Displayed text.
+ * @memberof module:form
+ */
+export function alertBannerGreen(text) {
+    // check for other banners and remove them
+    let b = document.getElementById('alertBanner')
+    if (b) {
+        b.parentNode.removeChild(b)
+    }
+
+    let banner = document.createElement('div')
+    banner.setAttribute('id', 'alertBanner')
+    banner.setAttribute('class', 'g_overlay')
+    let b_text = document.createElement('div')
+    b_text.setAttribute('id', 'g_text')
+    b_text.innerHTML = text
+    banner.appendChild(b_text)
+    document.body.appendChild(banner)
+    setTimeout(function () {
+        if (banner.parentNode) {
+            banner.parentNode.removeChild(banner)
+        }
+    }, 3000)
+}
+
+/**
+ * @function &lt;a name="alertBannerRed">alertBannerRed&lt;/a>
+ * @description Creates red alert baner.
+ * @param text {string} Displayed text.
+ * @memberof module:form
+ */
+export function alertBannerRed(text) {
+    // check for other banners and remove them
+    let b = document.getElementById('alertBanner')
+    if (b) {
+        b.parentNode.removeChild(b)
+    }
+
+    let banner = document.createElement('div')
+    banner.setAttribute('id', 'alertBanner')
+    banner.setAttribute('class', 'r_overlay')
+    let b_text = document.createElement('div')
+    b_text.setAttribute('id', 'r_text')
+    b_text.innerHTML = text
+    banner.appendChild(b_text)
+    document.body.appendChild(banner)
+    setTimeout(function () {
+        if (banner) {
+            banner.parentNode.removeChild(banner)
+        }
+    }, 5000)
+}
+
+
+/**
+ * @function &lt;a name="addSpinner">addSpinner&lt;/a>
+ * @description Creates loading spinner
+ * @param type {string} Part of id.
+ * @param id {string} Part of id.
+ * @memberof module:form
+ */
+export function addSpinner(type, id) {
+    let opts = {
+        lines: 13, // The number of lines to draw
+        length: 38, // The length of each line
+        width: 10, // The line thickness
+        radius: 20, // The radius of the inner circle
+        scale: .5, // Scales overall size of the spinner
+        corners: 0.9, // Corner roundness (0..1)
+        color: '#bb4545', // CSS color or array of colors
+        fadeColor: 'transparent', // CSS color or array of colors
+        speed: 1.0, // Rounds per second
+        rotate: 0, // The rotation offset
+        animation: 'spinner-line-fade-more', // The CSS animation name for the lines
+        direction: 1, // 1: clockwise, -1: counterclockwise
+        zIndex: 2e9, // The z-index (defaults to 2000000000)
+        className: 'spinner', // The CSS class to assign to the spinner
+        top: '50%', // Top position relative to parent
+        left: '50%', // Left position relative to parent
+        shadow: '0 0 1px transparent', // Box-shadow for the lines
+        position: 'absolute' // Element positioning
+    };
+
+    let target = document.getElementById('loading_' + type + '_' + id);
+    let spinner = new Spinner(opts).spin(target);
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Aircraft.html">Aircraft</a></li><li><a href="module-comms.html">comms</a></li><li><a href="module-eventFunctions.html">eventFunctions</a></li><li><a href="module-eventFunctionsTraffic.html">eventFunctionsTraffic</a></li><li><a href="module-flyByFile.html">flyByFile</a></li><li><a href="module-form.html">form</a></li><li><a href="module-GeoFence.html">GeoFence</a></li><li><a href="module-geofenceEvents.html">geofenceEvents</a></li><li><a href="module-icSettings.html">icSettings</a></li><li><a href="module-mode.html">mode</a></li><li><a href="module-playback.html">playback</a></li><li><a href="module-saveFile.html">saveFile</a></li><li><a href="module-traffic.html">traffic</a></li><li><a href="module-updateUser.html">updateUser</a></li></ul><h3>Classes</h3><ul><li><a href="module-Aircraft_Aircraft.html">Aircraft</a></li><li><a href="module-Aircraft_Waypoint.html">Waypoint</a></li><li><a href="module-GeoFence_Fence.html">Fence</a></li><li><a href="module-icSettings_icApp.html">icApp</a></li><li><a href="module-icSettings_icAppSettings.html">icAppSettings</a></li><li><a href="module-mode_GCSmode.html">GCSmode</a></li><li><a href="module-traffic_Aircraft.html">Aircraft</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri May 24 2019 13:46:40 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

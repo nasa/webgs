@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: FlyByFile/saveFile.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: FlyByFile/saveFile.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *
+ * @module saveFile
+ * @version 1.0.0
+ * @description &lt;b> Library of save file functions. &lt;/b>
+ * Save documents to the server in Examples folder.
+ * @example none
+ * @author Andrew Peters
+ * @date May 2019
+ * @copyright
+ * there will be one
+ *
+ *
+ *
+ *
+ */
+
+
+import * as comms from '../MainJS/comms.js';
+import * as Aircraft from '../MainJS/aircraft.js';
+
+
+/**
+ * @function &lt;a name="save_parameters">save_parameters&lt;/a>
+ * @description Saves parameter files to Examples/Parameters.
+ * @param ac {Object} Aircraft object
+ * @param filename {string} name of file
+ * @memberof module:saveFile
+ */
+export function save_parameters(ac, filename) {
+    filename = '/Examples/Parameters/' + filename
+    let data = JSON.stringify(ac.parameters)
+    let msg = 'AIRCRAFT ' + ac.id + ' SAVE PARAM ' + filename + ' ' + data
+    comms.sendFullMessage(msg)
+}
+
+/**
+ * @function &lt;a name="save_waypoints">save_waypoints&lt;/a>
+ * @description Saves waypoint files to Examples/FlightPlans.
+ * @param ac {Object} Aircraft object
+ * @param filename {string} name of file
+ * @memberof module:saveFile
+ */
+export function save_waypoints(ac, filename) {
+    filename = '/Examples/FlightPlans/' + filename
+    let wp_string = Aircraft.flightplanToString(ac)
+    let data = 'VEL ' + ac.u_vel + ' WP' + wp_string
+    let msg = 'AIRCRAFT ' + ac.id + ' SAVE WAYPOINTS ' + filename + ' ' + data
+    comms.sendFullMessage(msg)
+}
+
+/**
+ * @function &lt;a name="save_traffic">save_traffic&lt;/a>
+ * @description Saves Traffic files to Examples/Traffic.
+ * @param ac {Object} Aircraft object
+ * @param lat {string}
+ * @param lng {string}
+ * @param alt {string}
+ * @param vel {string}
+ * @param hdg {string}
+ * @param emit {string}
+ * @param filename {string} name of file
+ * @memberof module:saveFile
+ */
+export function save_traffic(ac, lat, lng, alt, vel, hdg, emit, filename) {
+    filename = '/Examples/Traffic/' + filename
+    let data = lat + ' ' + lng + ' ' + alt + ' ' + vel + ' ' + hdg + ' ' + emit
+    let msg = 'AIRCRAFT ' + ac.id + ' SAVE TRAFFIC ' + filename + ' ' + data
+    comms.sendFullMessage(msg)
+}
+
+/**
+ * @function &lt;a name="save_geofences">save_geofences&lt;/a>
+ * @description Saves geofence files to Examples/Geofences.
+ * @param ac {Object} Aircraft object
+ * @param filename {string} name of file
+ * @param data {Array} Array of geofence data.
+ * @memberof module:saveFile
+ */
+export function save_geofences(ac, filename, data) {
+    filename = '/Examples/GeoFences/' + filename
+    // id, type, num, floor, roof, pid, lat, lng, pid, lat, lng ...
+    let msg = 'AIRCRAFT ' + ac.id + ' SAVE GEOFENCE ' + filename + ' ' + data.join(' ')
+    comms.sendFullMessage(msg)
+}
+
+// // test scripts
+// export function save_script(ac, filename) {
+//     filename = '/Examples/TestScripts/' + filename
+//     let data = 1 // have to get data from the form
+//     let msg = 'AIRCRAFT ' + ac.id + ' SAVE SCRIPT ' + filename + ' ' + data
+//     comms.sendFullMessage(msg)
+// }</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Aircraft.html">Aircraft</a></li><li><a href="module-comms.html">comms</a></li><li><a href="module-eventFunctions.html">eventFunctions</a></li><li><a href="module-eventFunctionsTraffic.html">eventFunctionsTraffic</a></li><li><a href="module-flyByFile.html">flyByFile</a></li><li><a href="module-form.html">form</a></li><li><a href="module-GeoFence.html">GeoFence</a></li><li><a href="module-geofenceEvents.html">geofenceEvents</a></li><li><a href="module-icSettings.html">icSettings</a></li><li><a href="module-mode.html">mode</a></li><li><a href="module-playback.html">playback</a></li><li><a href="module-saveFile.html">saveFile</a></li><li><a href="module-traffic.html">traffic</a></li><li><a href="module-updateUser.html">updateUser</a></li></ul><h3>Classes</h3><ul><li><a href="module-Aircraft_Aircraft.html">Aircraft</a></li><li><a href="module-Aircraft_Waypoint.html">Waypoint</a></li><li><a href="module-GeoFence_Fence.html">Fence</a></li><li><a href="module-icSettings_icApp.html">icApp</a></li><li><a href="module-icSettings_icAppSettings.html">icAppSettings</a></li><li><a href="module-mode_GCSmode.html">GCSmode</a></li><li><a href="module-traffic_Aircraft.html">Aircraft</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri May 24 2019 13:46:40 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE HTML>
+<html style="background-color:white; transform-origin:left top;">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible">
+    <title></title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="./daa-displays-min/lib/bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./daa-displays-min/lib/font-awesome/5.6.1/css/all.min.css">
+    <link rel="stylesheet" href="./daa-displays-min/css/daa-displays.css">
+</head>
+
+<div id="daa-cockpit" style="position:absolute;">
+    <div id="daa-disp1" style="margin-left:50px;"></div>
+    <div id="daa-disp2" style="margin-left:50px; margin-top:1000px"></div>
+</div>
+<div id="simulation-controls" style="position:absolute; margin-top:870px; left:30px; width: 94%;">
+    <div class="control-left" style="width:1000px; position:absolute; left:50px;">
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Compass (degs)</span>
+            </div>
+            <input type="number" class="form-control" id="test-compass-input" value="0" aria-label="Compass">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-compass">Submit</button>
+        </div>
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Resolution bug (degs)</span>
+            </div>
+            <input type="number" class="form-control" id="test-resolution-bug-input" value="0"
+                aria-label="Resolution Bug">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-resolution-bug">Submit</button>
+        </div>
+
+        <br>
+
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Location (city)</span>
+            </div>
+            <input type="text" class="form-control" id="test-location-input" value="Hampton" aria-label="Location">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-location">Submit</button>
+        </div>
+        <!-- <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Heading (deg)</span>
+                </div>
+                <input type="number" class="form-control" id="test-heading-input" value="0" aria-label="Heading">
+                <button type="button" class="btn btn-sm btn-secondary" id="test-heading">Submit</button>
+            </div> -->
+        <!-- <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Heading of traffic alert (deg)</span>
+                </div>
+                <input type="number" class="form-control" id="test-heading-1-input" value="20" aria-label="Heading-1">
+                <button type="button" class="btn btn-sm btn-secondary" id="test-heading-1">Submit</button>
+            </div> -->
+
+        <br>
+    </div>
+    <div class="control-right" style="width:1000px; position:absolute; left:1230px;">
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Air Speed (knots) [ 0, 300 ]</span>
+            </div>
+            <input type="number" class="form-control" id="test-airspeed-input" value="100" aria-label="Airspeed">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-airspeed">Submit</button>
+        </div>
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Air Speed Step (knots)</span>
+            </div>
+            <input type="number" class="form-control" id="test-airspeed-step-input" value="20"
+                aria-label="Airspeed Step">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-airspeed-step">Submit</button>
+        </div>
+
+        <br>
+
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Altitude (feet) [ -200, 60000 ]</span>
+            </div>
+            <input type="number" class="form-control" id="test-altitude-input" value="4000" aria-label="Altitude">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-altitude">Submit</button>
+        </div>
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Altitude Step (feet)</span>
+            </div>
+            <input type="number" class="form-control" id="test-altitude-step-input" value="100"
+                aria-label="Altitude Step">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-altitude-step">Submit</button>
+        </div>
+
+        <br>
+
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Vertical Speed (100 feet per minute)</span>
+            </div>
+            <input type="number" class="form-control" id="test-vspeed-input" value="1" aria-label="Vertical Speed">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-vspeed">Submit</button>
+        </div>
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Vertical Speed Step (100 feet per minute)</span>
+            </div>
+            <input type="number" class="form-control" id="test-vspeed-step-input" value="0.5"
+                aria-label="Vertical Speed Step">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-vspeed-step">Submit</button>
+        </div>
+
+        <br>
+
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Roll (degs)</span>
+            </div>
+            <input type="number" class="form-control" id="test-roll-input" value="10" aria-label="Roll">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-roll">Submit</button>
+        </div>
+        <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Pitch (degs)</span>
+            </div>
+            <input type="number" class="form-control" id="test-pitch-input" value="2" aria-label="Pitch">
+            <button type="button" class="btn btn-sm btn-secondary" id="test-pitch">Submit</button>
+        </div>
+
+    </div>
+</div>
+
+<script src="./daa-displays-min/lib/underscore/underscore.js"></script>
+<script src="./daa-displays-min/lib/jquery/jquery-3.3.1.slim.min.js"></script>
+<script src="./daa-displays-min/lib/popper/popper-1.14.3.min.js"></script>
+<script src="./daa-displays-min/lib/bootstrap/4.1.3/bootstrap.min.js"></script>
+<script src="./daa-displays-min/lib/handlebars/handlebars-v4.0.12.js"></script>
+<script src="./playground.js"></script>
+<script src="./daa-displays-min/lib/requireJS/require.js" data-main="index.js"></script>
+
+</html>

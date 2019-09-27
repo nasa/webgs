@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: MainJS/comms.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: MainJS/comms.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *
+ * @module comms
+ * @version 1.0.0
+ * @description &lt;b> Communications Module &lt;/b>
+ *
+ *
+ * @example none
+ * @author Andrew Peters
+ * @date May 2019
+ * @copyright
+ * there will be one
+ *
+ *
+ *
+ *
+ */
+
+
+import * as form from './form.js'
+import * as map from './map.js'
+import * as Aircraft from './aircraft.js'
+import * as E from './eventFunctions.js'
+import * as I from '../Indicators/indicators.js'
+import * as IC from './icSettings.js'
+import * as user from './updateUser.js'
+import * as P from './playback.js'
+
+import * as Traffic from '../Traffic/traffic.js'
+import * as F from '../Geofence/geofence.js'
+import * as FE from '../Geofence/geofenceEvents.js'
+
+
+
+let aircraft_list = [];
+let comms_timeout = 10
+export let ip_used = '0.0.0.0'
+export let port_used = 8000
+
+/**
+ * @function &lt;a name="getAircraftList">getAircraftList&lt;/a>
+ * @description get the aircraft list.
+ * @todo Export the list instead.
+ * @memberof module:comms
+ */
+export function getAircraftList() {
+    return aircraft_list;
+}
+
+/**
+ * @function &lt;a name="removeFromAircraftList">removeFromAircraftList&lt;/a>
+ * @description Remove an aircraft from the aircraft list.
+ * @param ac {Object} Aircraft Object.
+ * @memberof module:comms
+ */
+export function removeFromAircraftList(ac) {
+    aircraft_list = aircraft_list.filter(el => {
+        return el.id != ac.id
+    })
+}
+
+/**
+ * @function &lt;a name="pushToAircraftList">pushToAircraftList&lt;/a>
+ * @description Push an aircraft to the aircraft list.
+ * @param ac {Object} Aircraft Object.
+ * @memberof module:comms
+ */
+export function pushToAircraftList(ac) {
+    aircraft_list.push(ac);
+}
+
+/**
+ * @function &lt;a name="createNewConnection">createNewConnection&lt;/a>
+ * @description Create a new websocket connection.
+ * @param none
+ * @memberof module:comms
+ */
+export function createNewConnection() {
+    let ip = document.getElementById('new_ip__input').value
+    let port = document.getElementById('new_port__input').value
+    if (window.connection.readyState == 1) {
+        window.connection.close(1000, 'Changing Connection')
+    }
+    // set ip and port in mode
+    createConnection(ip, port)
+}
+
+/**
+ * @function &lt;a name="createConnection">createConnection&lt;/a>
+ * @description Create a websocket connection.
+ * @param ip {string} Ip Address.
+ * @param port {string} Port number.
+ * @listens connection.onopen
+ * @listens connection.onclose
+ * @listens connection.onmessage
+ * @memberof module:comms
+ */
+export function createConnection(ip, port) {
+    // Connection Setup
+    window.connection = new WebSocket('ws://' + ip + ':' + port);
+
+    connection.onopen = function (event) {
+        // update user settings
+        user.readSettings()
+        console.log('Connection Established: ws://' + ip + ':' + port)
+        form.alertBannerGreen('Connection Established: ws://' + ip + ':' + port)
+        ip_used = ip
+        port_used = port
+        let MODE = E.getMode()
+        MODE.con_status = 'Connection Status: Connected'
+        form.updateSettingsPanel()
+
+        connection.send('Connection Established');
+
+        setInterval(periodicEvents, 5000);
+        window.addEventListener('unload', function () {
+            window.connection.close(1000, 'Closing or Refreshing')
+        })
+
+        MODE.ipAddress = ip_used
+        MODE.port = port_used
+    };
+
+    connection.onclose = function (event) {
+        console.log('Closing Connection: ws://' + ip + ':' + port)
+        if (event.code == 1006) {
+
+            let MODE = E.getMode()
+            MODE.observeonly = true
+            MODE.con_status = 'Connection Status: Disconnected'
+            form.updateSettingsPanel()
+
+            form.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.')
+        } else {
+            let MODE = E.getMode()
+            MODE.observeonly = true
+            MODE.con_status = 'Connection Status: Disconnected'
+            form.updateSettingsPanel()
+            form.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.', event.code)
+        }
+    }
+
+    // receiving data from server
+    connection.onmessage = function (event) {
+        let m
+        try {
+            // console.log(JSON.parse(event.data))
+            m = JSON.parse(event.data)
+        } catch (e) {
+            console.log(event.data)
+            console.log(e)
+            return
+        }
+
+        let MODE = E.getMode()
+
+        if (m.name == 'HITL') {
+            if (m.INFO == 'CONNECTION_FAILED') {
+                form.alertBannerRed('Connection Failed. Please check the settings, and try again.')
+            }
+            console.log(m)
+            return
+
+        } else if (m.TYPE == 'CONNECTING') {
+            form.alertBannerRed('Waiting for Heartbeat')
+            return
+
+        } else if (m.name == 'SHUT_DOWN') {
+            // handles multi-user ac shutdown
+            // check for ac in list
+            let ac = Aircraft.getAircraftById(m.AIRCRAFT)
+            if (ac != 'Aircraft Not Found') {
+                // shutdown ac
+                Aircraft.acShutdown(ac)
+            } else if (m.AIRCRAFT == 'PLAYBACK') {
+                for (let ac of aircraft_list) {
+                    Aircraft.acShutdown(ac)
+                }
+            }
+            return
+
+        } else if (m.name == 'USER_SETTINGS') {
+            user.updateModeFromFile(m)
+            return
+
+        } else if (m.name == 'USER_SETTINGS_RESET') {
+            console.log(m)
+            user.updateModeFromFile(m)
+            form.alertBannerGreen('Settings Reset to Default')
+            return
+
+        } else if (m.name == 'USER_SETTINGS_SAVED') {
+            console.log(m.INFO)
+            form.alertBannerGreen(m.INFO)
+            return
+
+        } else if (m.name == 'IC_PLAYBACK') {
+            E.sendStopPlayback()
+            form.alertBannerRed(m.INFO)
+            return
+
+        } else if (m.name == 'LOGPLAYER') {
+            P.updatePlaybackMenu(m.CURRENT, m.TOTAL, m.PERCENT)
+            return
+
+        } else if (m.name == 'ICAROUS_APPS') {
+            if (m.INFO == 'FILE_WRITE_SUCCESS') {
+                form.alertBannerGreen('FILE_WRITE_SUCCESS')
+                return
+
+            } else if (m.INFO == 'FILE_WRITE_FAIL') {
+                form.alertBannerRed('FILE_WRITE_FAIL')
+                return
+
+            } else {
+                // remove the loading panel
+                let pan = document.getElementsByClassName('active loading ic')
+                for (let item of pan) {
+                    item.parentNode.removeChild(item)
+                }
+
+                // add apps to MODE.icSettings
+                MODE.icSettings = IC.getIcApps()
+                MODE.icSettings.clearList()
+                for (let i of m.INFO) {
+                    let name = i.NAME
+                    let active = function () {
+                        if (i.ACTIVE == 'True') {
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
+                    MODE.icSettings.addApp(name, active())
+                    // check which sim is active and update MODE
+                    if (name == 'RotorSim' &amp;&amp; active()) {
+                        MODE.sim_type = 'RotorSim'
+                    }
+                    if (name == 'ARDUPILOT' &amp;&amp; active()) {
+                        MODE.sim_type = 'ARDUPILOT'
+                    }
+                }
+                // create the ic settings sub panel if needed
+                let icsub = document.getElementById("ic_settings_pan")
+                if (!icsub) {
+                    IC.createIcSettingsPanel()
+                }
+
+                // update the sub panel
+                IC.updateIcSettingsPanel()
+
+                // make the sub panel active
+                MODE.activeSubPanels = []
+                MODE.activeSubPanels.push('ic_settings_pan')
+                form.makePanelActive('settings')
+                return
+            }
+
+        } else if (m.name == 'SAVE') {
+            if (MODE.alert) {
+                if (m.INFO == 'FAIL') {
+                    form.alertBannerRed('Save Failed: ' + m.MSG)
+                } else if (m.INFO == 'SUCCESS') {
+                    form.alertBannerGreen('Save Succeded: ' + m.MSG)
+                }
+            }
+            return
+        } else if (m.name == 'LOAD') {
+            if (MODE.alert) {
+                if (m.INFO == 'FAIL') {
+                    form.alertBannerRed('Load Failed: ' + m.MSG)
+                } else if (m.INFO == 'SUCCESS') {
+                    form.alertBannerGreen('Load Succeded: ' + m.MSG)
+                }
+            }
+            return
+        }
+
+
+        // check that the ac exists if not create it
+        let id = m.AIRCRAFT;
+        let ac = Aircraft.getAircraftById(id)
+
+        // if it is a new ac wait for heartbeat before creating new ac
+        if (ac == 'Aircraft Not Found' &amp;&amp; m.TYPE == 'HEARTBEAT') {
+            let MODE = E.getMode()
+            if (!MODE.flybyfile) {
+                let flightmode = m.type
+                ac = createAircraft(id, flightmode)
+            }
+        } else if (ac == 'Aircraft Not Found') {
+            return
+        }
+
+        // sort through message types and take appropriate action
+        if (m.TYPE == 'GLOBAL_POSITION_INT') {
+            ac.hasComms = true;
+            ac.commsLast = Date.now() / 1000
+
+            // update ac info
+            ac.lat = m.lat / 10000000;
+            ac.lng = m.lon / 10000000;
+            ac.alt = m.alt / 1000;
+            ac.rel_alt = m.relative_alt / 1000;
+            ac.vx = m.vx / 100;
+            ac.vy = m.vy / 100;
+            ac.vz = m.vz / 100;
+            ac.hdg = m.hdg / 100;
+            ac.gps_status = true
+
+            // update icon position
+            map.UpdatePosition(ac, ac.lat, ac.lng);
+
+            // update indicators
+            I.updateIndicators(ac);
+
+            // Update ic bands (if active)
+            if (ac.ic_control === true) {
+                map.updateIcBands(ac);
+            }
+
+        } else if (m.TYPE == 'ATTITUDE') {
+
+            let degrees = function (rad) {
+                return rad * 180 / Math.PI;
+            }
+
+            ac.roll = degrees(m.roll)
+            ac.pitch = degrees(m.pitch)
+            ac.yaw = degrees(m.yaw)
+            ac.rollSpeed = degrees(m.rollspeed)
+            ac.pitchSpeed = degrees(m.pitchspeed)
+            ac.yawSpeed = degrees(m.yawspeed)
+
+            if (ac.status == 1) {
+                form.setPanelInfo(ac, 'pre_flight_info_div_')
+            } else if (ac.status == 2) {
+                form.setPanelInfo(ac, 'flight_info_div_')
+            }
+            I.updateIndicators(ac);
+
+        } else if (m.TYPE == 'BATTERY_STATUS') {
+
+            // update aircraft
+            ac.voltage = parseFloat(m.voltages.slice(0, 2) + '.' + m.voltages.slice(2))
+            ac.current = m.current_battery
+            let remaining = m.battery_remaining
+
+            // this only works with ardupilot
+            if (remaining >= 50) {
+                let bat = document.getElementById('battery')
+                bat.setAttribute('class', 'green')
+            } else if (remaining >= 20) {
+                let bat = document.getElementById('battery')
+                bat.setAttribute('class', 'yellow')
+            } else {
+                let bat = document.getElementById('battery')
+                bat.setAttribute('class', 'red')
+            }
+
+            // update panel if in flight
+            if (ac.status == 1) {
+                form.setPanelInfo(ac, 'pre_flight_info_div_')
+            } else if (ac.status == 2) {
+                form.setPanelInfo(ac, 'flight_info_div_')
+            }
+
+        } else if (m.TYPE == 'HEARTBEAT') {
+            let flightmode = m.base_mode
+
+            // only works with ardupilot, rotorsim always returns '18'
+            if (ac != 'Aircraft Not Found') {
+                ac.hasComms = true;
+                ac.commsLast = Date.now() / 1000
+                if (flightmode == '1') {
+                    ac.flightmode = 'PRE-FLIGHT';
+
+                } else if (flightmode == 81) {
+                    ac.flightmode = 'STABILIZE DISARMED';
+                } else if (flightmode == 209) {
+                    ac.flightmode = 'STABILIZE ARMED';
+
+                } else if (flightmode == 89) {
+                    ac.flightmode = 'GUIDED DISARMED';
+                } else if (flightmode == 217) {
+                    ac.mode = 'GUIDED ARMED';
+
+                } else if (flightmode == 93) {
+                    ac.flightmode = 'AUTO DISARMED';
+                } else if (flightmode == 221) {
+                    ac.flightmode = 'AUTO ARMED';
+                }
+
+                //  TODO: Make sure this is the only place we do this
+                if (ac.parameters.length == 0) {
+                    let msg = 'AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST'
+                    sendFullMessage(msg)
+                }
+            }
+
+
+        } else if (m.TYPE == 'COMMAND_ACK') {
+            // [AIRCRAFT, 1, COMMAND_ACK, command, 11, result, 0]
+            if (m.result != 0) {
+                console.log('Last Command Sent Failed')
+            }
+
+        } else if (m.TYPE == 'TRAFFIC') {
+            // check mode settings
+            let MODE = E.getMode()
+
+            if (MODE.sim &amp;&amp; (m.emitter_type == 255)) {
+                Traffic.UpdateTraffic(m.callsign, 'SIM', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 255, m.AIRCRAFT)
+                Traffic.updateTrafficSummaryPanel()
+            }
+            if (MODE.sim &amp;&amp; (m.emitter_type == 254)) {
+                Traffic.UpdateTraffic(m.callsign, 'MULTI', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 254, m.AIRCRAFT)
+                Traffic.updateTrafficSummaryPanel()
+                // check for multi ac traffic and add it to other ac
+                Traffic.checkForMultiAcTraffic(ac)
+            }
+            if (MODE.adsb &amp;&amp; (m.emitter_type == 0)) {
+                Traffic.UpdateTraffic(m.callsign, 'ADSB', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 0, m.AIRCRAFT)
+                Traffic.updateTrafficSummaryPanel()
+            }
+            if (MODE.sensor &amp;&amp; (m.emitter_type == 100)) {
+                Traffic.UpdateTraffic(m.callsign, 'SENSOR', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 100, m.AIRCRAFT)
+                Traffic.updateTrafficSummaryPanel()
+            }
+
+
+        } else if (m.TYPE == 'ICAROUS_KINEMATIC_BANDS') {
+            ac.ic_control = true;
+            ac.ic_last = Date.now()
+            let num_bands = m.numBands
+            let min = [];
+            let max = [];
+            let count = 0;
+            // find the danger area or areas
+            for (let i = 1; i &lt;= num_bands; i++) {
+                if (m['type' + i] === 3) {
+                    min[count] = m['min' + i]
+                    max[count] = m['max' + i]
+                    count++;
+                }
+            }
+            ac.bands = [min, max]
+            map.drawBands(ac)
+
+        } else if (m.TYPE == 'STATUSTEXT') {
+            // TODO: create a real gps signal quality indicator, toggle this off when not in sim. will not work after refresh and in hitl
+            // this only works with ardupilot
+            if (m.text === 'EKF2 IMU1 is using GPS') {
+                this.gps_status = true;
+                let gps = document.getElementById('gps')
+                gps.setAttribute('class', 'green')
+            }
+            console.log(m)
+
+        } else if (m.TYPE == 'WP') {
+            // clear the rows from the table
+            let table = document.getElementById('ac_fp_table_' + ac.id)
+            let rows = document.getElementsByClassName('fp_row')
+            let rcl;
+            for (let i = rows.length - 1; i >= 0; i--) {
+                rcl = rows[i].id.split('_')
+                if (rcl[2] == ac.id.toString()) {
+                    rows[i].parentNode.removeChild(rows[i])
+                }
+            }
+            rows = document.getElementsByClassName('fp_rows')
+
+            // handle wp loaded from file
+            let file = false
+            if (m.FILE == 'true') {
+                file = true
+            }
+
+            // remove markers from the map
+            for (let item of ac.flightplan) {
+                map.removeMarkerFromLayer(ac.id, item.wpMarker)
+            }
+
+            ac.flightplan = []
+            let newLatLng;
+            let wp;
+            let count = 0
+            let v
+            let vel = m.VEL
+            // update ac and display
+            ac.u_vel = vel
+
+            // update the input box
+            try {
+                v = document.getElementById('VEL_Velocity: m/s _' + ac.id)
+                v.value = vel
+            } catch (e) {
+                console.log(e)
+            }
+
+            for (let item of m.LIST) {
+                if (item.LAT != 0 || item.LNG != 0) {
+                    // define wp
+                    newLatLng = new L.LatLng(item.LAT, item.LNG)
+                    wp = new Aircraft.Waypoint(newLatLng, item.ALT);
+
+                    // add a marker
+                    wp.wpMarker = map.defineWPMarker(newLatLng, ac.id);
+                    map.addMarkerToLayer(ac.id, wp.wpMarker)
+
+                    // update the flight plan
+                    ac.flightplan[count] = wp;
+                    if (ac.status &lt; 2) {
+                        // add new row for wp
+                        form.updateTable(table, ac.id, 'fp', count, E.clickAddRowButton, E.clickRemoveRowButton)
+
+                        // update row values
+                        map.setRowValue(ac.id, 'fp', count, item.LAT, item.LNG, item.ALT)
+                    }
+                    count += 1
+                }
+            }
+            // check the ac status, wp's loaded from file are not on the ac yet
+            if (ac.status &lt; 2) {
+                if (file) {
+                    ac.status = 0
+                } else {
+                    ac.status = 1
+                }
+            }
+            // make the correct panel active
+            form.makePanelActive('ac_pan_' + ac.id)
+
+            // Re draw the flight plan
+            map.DrawFlightPlan();
+
+        } else if (m.TYPE == 'PARAM_VALUE') {
+            if (ac != 'Aircraft Not Found') {
+                // stat runtime updates constantly and is annoying
+                let annoying = ["STAT_RUNTIME", "STAT_FLTTIME"]
+                if (!annoying.includes(m.param_id)) {
+
+                    let new_param = {
+                        'name': m.param_id,
+                        'value': m.param_value,
+                        'type': m.param_type,
+                        'index': m.param_index
+                    }
+                    // update the ac
+                    ac.parameters[m.param_index] = new_param;
+
+                    // update the well clear volume
+                    if (new_param['name'] == 'DET_1_WCV_DTHR') {
+                        ac.icRad = new_param['value'] / 3 // adjust for change from metric to dirty units
+                        map.UpdatePosition(ac, ac.lat, ac.lng)
+                    }
+                }
+            }
+
+        } else if (m.TYPE == 'WAYPOINTLOAD') {
+            // add messages to loading div
+            let msg = document.createElement('P')
+            msg.innerHTML = m.INFO
+            try {
+                document.getElementById('loading_sendwaypoints_' + ac.id).appendChild(msg)
+            } catch {
+                console.log('Loading Panel Not Found. (This must not be my ac)')
+            }
+            if (m.INFO == 'LOAD FAILED TIMEOUT REACHED') {
+                form.alertBannerRed('Load Failed: Timout Reached')
+                // go back to planning page
+                form.makePanelActive('ac_pan_' + ac.id)
+            } else if (m.INFO == 'SUCCESS') {
+                sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id)
+                // go to info page
+                form.makePanelActive('ac_info_pan_' + ac.id)
+            }
+
+        } else if (m.TYPE == 'STARTFLIGHT') {
+            // add messages to loading div
+            let msg = document.createElement('P')
+            msg.innerHTML = m.INFO
+            try {
+                document.getElementById('loading_startflight_' + ac.id).appendChild(msg)
+            } catch {
+                console.log('Loading Panel Not Found. (This must not be my ac)')
+            }
+            if (m.INFO == 'FAIL') {
+                form.alertBannerRed('Start Flight Failed')
+                // go back to info
+                form.makePanelActive('ac_info_pan_' + ac.id)
+
+            } else if (m.INFO == 'SUCCESS') {
+                // go to inFlight page
+                form.makePanelActive('ac_inFlight_pan_' + ac.id)
+            }
+
+            // GEOFENCE MESSAGES
+        } else if (m.TYPE == 'GEOFENCELOAD') {
+            let msg = document.createElement('p')
+            msg.innerHTML = m.INFO
+            document.getElementById('sendgeofence').appendChild(msg)
+            if (m.INFO == 'FAIL') {
+                form.alertBannerRed('Load Failed: Timeout Reached')
+            } else if (m.INFO == 'SUCCESS') {
+                // remove the loading panel
+                let pan = document.getElementsByClassName('active loading geofence')
+                for (let item of pan) {
+                    item.parentNode.removeChild(item)
+                }
+                // update the ac
+                ac.activeSubPanels.splice(ac.activeSubPanels.indexOf('loading_ac_sendgeofence'))
+                ac.activeSubPanels.push('ac_geofence_summary')
+                form.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+            }
+
+        } else if (m.TYPE == 'GF') {
+
+            // remove active fence, this might need to change
+            let fence = F.getActiveFence(ac)
+            let pan = document.getElementById('ac_geofence_pan_' + ac.id + '_' + fence.id)
+            if (pan != null) {
+                FE.removeGf(ac, fence, pan)
+            }
+
+            // create new fence and point objects
+            let n
+            let f
+            let center
+            let row
+            for (let i of m.LIST) {
+                id = i.id
+                // create plan panel
+
+                FE.addGF(ac, i.Vertices[0])
+                f = ac.gf_list[ac.gf_list.length - 1]
+                f.type = i.type
+                n = i.numV
+                f.floor = i.floor
+                f.roof = i.roof
+
+                // add the verticies
+                for (let x = 0; x &lt; n; x++) {
+                    center = i.Vertices[x]
+                    row = 'row_geofence_' + ac.id + '_' + f.id + '_' + x
+
+                    FE.addRow(ac, center, null, row)
+                }
+                if (m.FILE == 'False') {
+                    f.submitted = true
+                    // should not have planning panel
+                    let pan1 = document.getElementById('ac_geofence_pan_' + f.id + '_' + ac.id)
+                    if (pan1) {
+                        pan1.parentNode.removeChild(pan1)
+                    }
+                    F.clearSubpanelsFromList(ac)
+
+                } else {
+                    // make sure floor and roof inputs are updated
+                    let floor = document.getElementById('gf_floor_GF Floor_' + f.id + '_' + ac.id)
+                    let roof = document.getElementById('gf_roof_GF Roof_' + f.id + '_' + ac.id)
+                    floor.value = f.floor
+                    roof.value = f.roof
+                }
+            }
+
+            // update the map with lines
+            F.drawGeofences()
+            F.updateFenceSummaryPanel()
+            // make the correct panel active
+            form.makePanelActive('ac_pan_' + ac.id)
+            // Re draw the flight plan
+            map.DrawFlightPlan();
+
+        } else {
+            console.log('Unknown Message Received: ');
+            console.log(m);
+        }
+
+    }
+}
+
+
+/**
+ * @function &lt;a name="sendMessage">sendMessage&lt;/a>
+ * @description Send message to server. Auto prefixed by active aircraft id.
+ * @param out_message {string} Message to be send.
+ * @memberof module:comms
+ */
+export function sendMessage(out_message) {
+    let MODE = E.getMode()
+    if (MODE.observeonly) {
+        return
+    }
+    let ac = Aircraft.getActiveAc()
+    let id;
+    if (ac == null) {
+        id = 'None'
+    } else {
+        id = ac.id
+    }
+    connection.send('AIRCRAFT ' + id + ' ' + out_message);
+    // console.log('Sent Message: ' + 'AIRCRAFT ' + id + ' ' + out_message);
+    // console.trace()
+}
+
+/**
+ * @function &lt;a name="sendFullMessage">sendFullMessage&lt;/a>
+ * @description Send message to server. No prefix added.
+ * @param out_message {string} Message to be send.
+ * @memberof module:comms
+ */
+export function sendFullMessage(out_message) {
+    let MODE = E.getMode()
+    if (MODE.observeonly) {
+        return
+    }
+    connection.send(out_message)
+    // console.log('Send Full Message: ' + out_message)
+    // console.trace()
+}
+
+
+/**
+ * @function &lt;a name="periodicEvents">periodicEvents&lt;/a>
+ * @description Run every 5 sec. Checks for lost comms and loading status.
+ * @param none
+ * @memberof module:comms
+ */
+function periodicEvents() {
+    // No need for loading panels in playback
+    let MODE = E.getMode()
+    if (MODE.mode == 'Playback') {
+        return
+    }
+
+    // TODO: will error if ac shutdown before loading finishes
+    getAircraftList().forEach(function (el) {
+        // check start up loading status
+        let loading = document.getElementById('loading_startup_' + el.id)
+        let x = false;
+
+        if (loading != null) {
+            loading.classList.forEach(function (ele) {
+                if (ele == 'active') {
+                    x = true;
+                }
+            })
+        }
+
+        if (el.hasComms &amp;&amp; x) {
+            form.makePanelActive('ac_pan_' + el.id)
+        }
+
+        // Move to loading page if lost comms with ac
+        if (Date.now() / 1000 - el.commsLast >= comms_timeout) {
+            el.hasComms = false;
+            form.makePanelActive('loading_startup_' + el.id)
+            el.gps_status = false
+        }
+    })
+}
+
+/**
+ * @function &lt;a name="createAircraft">createAircraft&lt;/a>
+ * @description Creates new Aircraft, adds panels, and adds icons to map
+ * @param id {string} Aircraft Id
+ * @param mode {string} Recieved flight mode
+ * @memberof module:comms
+ */
+function createAircraft(id, mode) {
+    let fp = [];
+    let ac = new Aircraft.Aircraft(id, aircraft_list, fp);
+    let center = map.getCenter()
+    ac.lat = center[0]
+    ac.lng = center[1]
+    ac.status = 0;
+    ac.hasComms = true;
+    ac.commsLast = Date.now() / 1000
+    let MODE = E.getMode()
+    ac.mode = MODE.mode
+
+    // only works for ardupilot
+    if (mode == '1') {
+        ac.flightmode = 'PRE-FLIGHT';
+        ac.status = 0;
+    } else if (mode == '81') {
+        ac.flightmode = 'STABILIZE DISARMED';
+        ac.status = 0;
+    } else if (mode == '209') {
+        ac.flightmode = 'STABILIZE ARMED';
+        ac.status = 2;
+
+    } else if (mode == '89') {
+        ac.flightmode = 'GUIDED DISARMED';
+        ac.status = 0;
+    } else if (mode == '217') {
+        ac.flightmode = 'GUIDED ARMED';
+        ac.status = 2;
+
+    } else if (mode == '93') {
+        ac.flightmode = 'AUTO DISARMED';
+        ac.status = 0;
+    } else if (mode == '221') {
+        ac.flightmode = 'AUTO ARMED';
+        ac.status = 2;
+    } else {
+        ac.flightmode = 'UNKNOWN';
+    }
+
+
+    // add it to the list
+    aircraft_list.push(ac);
+    // add to drop down list
+    form.updateAcInMenu()
+    // create panels
+    form.createFlightPlanPanel(ac);
+    form.createLoadingPanel('startup', ac)
+    form.makePanelActive('ac_pan_' + ac.id)
+
+    // check for loaded wp's
+    sendMessage('REQUEST_WAYPOINTS ' + ac.id);
+    sendMessage('REQUEST_FENCE ' + ac.id)
+
+    // draw the marker - keep this after request wp's
+    // has issues auto drawing all of the flight plans
+    // will hide any created after the initial ac sometimes
+    map.addNewLayerGroup(ac);
+
+    console.log('created ac ' + ac.id, ac)
+    return ac
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Aircraft.html">Aircraft</a></li><li><a href="module-comms.html">comms</a></li><li><a href="module-eventFunctions.html">eventFunctions</a></li><li><a href="module-eventFunctionsTraffic.html">eventFunctionsTraffic</a></li><li><a href="module-flyByFile.html">flyByFile</a></li><li><a href="module-form.html">form</a></li><li><a href="module-GeoFence.html">GeoFence</a></li><li><a href="module-geofenceEvents.html">geofenceEvents</a></li><li><a href="module-icSettings.html">icSettings</a></li><li><a href="module-mode.html">mode</a></li><li><a href="module-playback.html">playback</a></li><li><a href="module-saveFile.html">saveFile</a></li><li><a href="module-traffic.html">traffic</a></li><li><a href="module-updateUser.html">updateUser</a></li></ul><h3>Classes</h3><ul><li><a href="module-Aircraft_Aircraft.html">Aircraft</a></li><li><a href="module-Aircraft_Waypoint.html">Waypoint</a></li><li><a href="module-GeoFence_Fence.html">Fence</a></li><li><a href="module-icSettings_icApp.html">icApp</a></li><li><a href="module-icSettings_icAppSettings.html">icAppSettings</a></li><li><a href="module-mode_GCSmode.html">GCSmode</a></li><li><a href="module-traffic_Aircraft.html">Aircraft</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri May 24 2019 13:46:40 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

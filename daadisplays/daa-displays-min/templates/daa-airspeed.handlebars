@@ -1,0 +1,43 @@
+<div id="{{id}}-inner" style="position:absolute; height: 649px; top:{{top}}px; left:{{left}}px; opacity:0.8;">
+    <div style="position:absolute; overflow:hidden; width:92px; height:650px;">
+        <div id="{{id}}-spinner" style="transform:translateY(0px)">
+            <div class="{{id}}-rule" style="position:absolute; background-color:#333333;width:85px;height:1400px;">
+                <div id="{{id}}-tick-values" style="position:absolute; color:white; font-size:28px; line-height:108px; padding-top:26px; width:55px; text-align:right;">
+                    500 480 460 440 420 400 380 360 340 320 300 280 260 240 220 200 180 160 140 120 100 80 60 40 20 10 00
+                </div>
+                <div id="{{id}}-ticks" style="position:absolute;width:12px;left:72px;top:24px;">
+                    <div style="position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:56px;"></div>
+                    <div style="top:110px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:218px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:326px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:434px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:542px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:650px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:756px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:864px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:972px; position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                    <div style="top:1080px;position:absolute; width:100%; border-top:2px solid white; border-bottom:2px solid white;height:54px;"></div>
+                </div>
+            </div>
+            <div id="{{id}}-bands" style="position:absolute;top:24px;">
+                <!-- example bands
+                <div id="airspeed-band-1" style="position:absolute; width:8px; height:54px; top:2700px; left:0px; background-color:#ffbf00;"></div>
+                <div id="airspeed-band-2" style="position:absolute; width:8px; height:81px; top:64557px; left:0px; background-color:red;"></div>
+                <div id="airspeed-band-3" style="position:absolute; width:8px; height:81px; top:64476px; left:0px; background-color:green;"></div> 
+                -->
+            </div>
+            <!-- <div class="band-airspeed airspeed-rule" style="position:absolute; width:8px; height:1400px; left:84px; background-color:#ffbf00;"></div> -->
+        </div>
+    </div>
+    <div class="tape-left-indicator">
+        <div class="tape-left-indicator-box" style="overflow: hidden; position:absolute; background-color:black; border: 2px solid white; width:72px; height: 86px; top:281px; left:-13px;">
+            <div id="{{id}}-indicator-still-digits" style="position:absolute; left: 5px; width:68%; height:100%; color:white; font-size:34px; text-align: center; line-height:85px; font-family:serif;">
+                11
+            </div>
+            <div id="{{id}}-indicator-spinner" style="transform:translateY(-0px); z-index:2; position:absolute; left:44px; width:32%; height:100%; color:white; float: right; font-size:34px; text-align: center; line-height:34px; font-family:serif;">
+                9 8 7 6 5 4 3 2 1 0
+            </div>
+        </div>
+        <div class="tape-left-indicator-pointer" style="position:absolute; background-color:black; border-bottom: 2px solid white; border-right: 2px solid white; transform-origin:center; transform:rotate(-45deg); width:20px; height: 20px; top:314px; left:48.5px;"></div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+.indicators {
+    grid-column: 15/16;
+    grid-row: 2/20;
+    z-index: 2;
+}
+
+#gps_status {
+    width: 90%;
+    height: 90%;
+    margin: 5%;
+}
+
+.indicator_icons {
+    width: 45%;
+    padding: 0%;
+    margin: 0%;
+}
+
+#gps {
+    width: 90%;
+    padding-left: 3%;
+    height: auto;
+}
+
+#battery {
+    width: 90%;
+    padding-left: 3%;
+    height: auto;
+}
+
+#radio {
+    width: 90%;
+    padding-left: 3%;
+    margin-top: 5%;
+    height: auto;
+}
+
+.t_highlight {
+    background-color: var(--main-highlight-color);
+}

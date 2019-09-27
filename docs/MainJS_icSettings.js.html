@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: MainJS/icSettings.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: MainJS/icSettings.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *
+ * @module icSettings
+ * @version 1.0.0
+ * @description &lt;b> icSettings module &lt;/b>
+ *
+ *
+ * @example none
+ * @author Andrew Peters
+ * @date May 2019
+ * @copyright
+ * there will be one
+ *
+ *
+ *
+ *
+ */
+
+import * as comms from './comms.js';
+import * as E from '../MainJS/eventFunctions.js';
+import * as form from '../MainJS/form.js';
+
+
+class icAppSettings {
+    /**
+     * @function &lt;a name="icAppSettings">icAppSettings&lt;/a>
+     * @description Constructor.
+     * @param none
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    constructor() {
+        this.ic_toggle = true;
+        this.app_list = [];
+    }
+
+    /**
+     * @function &lt;a name="getApps">getApps&lt;/a>
+     * @description Sends Icarous get apps message.
+     * @param none
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    getApps() {
+        let MODE = E.getMode()
+        comms.sendMessage('ICAROUS_STARTUP GET_NAMES ' + MODE.path);
+    }
+
+    /**
+     * @function &lt;a name="switchApps">switchApps&lt;/a>
+     * @description Sends two app names that need to be swapped
+     * @param app1 {string} app1 name.
+     * @param app2 {string} app2 name.
+     * @param status {Boolean} optional default=true, True=Active, False=Disabled
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    switchApps(app1, app2, status = true) {
+        let MODE = E.getMode()
+        comms.sendMessage('ICAROUS_STARTUP CHANGE_APPS ' + MODE.path + app1 + ' ' + app2 + ' ' + status);
+
+        // update the app list
+        this.getApps()
+    }
+
+    /**
+     * @function &lt;a name="addApp">addApp&lt;/a>
+     * @description Adds app to app list.
+     * @param name {string} app name.
+     * @param status {Boolean} True=Active, False=Disabled
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    addApp(name, status) {
+        let app = new icApp(name, status)
+        this.app_list.push(app)
+    }
+
+    /**
+     * @function &lt;a name="clearList">clearList&lt;/a>
+     * @description Clears the current app list
+     * @param none
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    clearList() {
+        this.app_list = []
+    }
+
+    /**
+     * @function &lt;a name="submitList">submitList&lt;/a>
+     * @description Sends updated (based on user selection) app list to server.
+     * @param none
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    submitList() {
+        let MODE = E.getMode()
+        let msg = ''
+        for (let item of this.app_list) {
+            msg = msg + ' ' + item.name + ' ' + item.status
+        }
+        comms.sendMessage('ICAROUS_STARTUP ACTIVE ' + MODE.path + msg)
+    }
+}
+
+class icApp {
+    /**
+     * @function &lt;a name="icApp">icApp&lt;/a>
+     * @description Constructor.
+     * @param name {string} Name of app.
+     * @param status {Boolean} True=Active, False=Disabled
+     * @memberof module:icSettings
+     * @class icAppSettings
+     * @instance
+     */
+    constructor(name, status) {
+        this.name = name;
+        this.status = status;
+    }
+
+    /**
+     * @function &lt;a name="changeStatus">changeStatus&lt;/a>
+     * @description Changes an individual app's status.
+     * @param status {boolean} True=Active, False=Disabled
+     * @memberof module:icSettings
+     * @class icApp
+     * @instance
+     */
+    changeStatus(status) {
+        comms.sendMessage('ICAROUS_STARTUP ACTIVE ' + this.name + ' ' + status)
+    }
+
+}
+
+let ic_apps = new icAppSettings()
+
+/**
+ * @function &lt;a name="get_apps">get_apps&lt;/a>
+ * @description Get loaded apps.
+ * @param none
+ * @return {Object} icAppsSettings object.
+ * @memberof module:icSettings
+ */
+export function getIcApps() {
+    return ic_apps
+}
+
+/**
+ * @function &lt;a name="clickChangeIcSettings">clickChangeIcSettings&lt;/a>
+ * @description Creates and loads Ic apps subpanel.
+ * @param none
+ * @memberof module:icSettings
+ */
+export function clickChangeIcSettings() {
+    // update mode
+    let MODE = E.getMode()
+    MODE.icSettings = ic_apps
+
+    // get info from server
+    ic_apps.getApps()
+
+    //create the subpanel
+    createIcSettingsPanel()
+    createLoadingPanel('get_apps')
+
+    // make it active
+    makeIcPanelActive('loading_ic_get_apps')
+}
+
+/**
+ * @function &lt;a name="createIcSettingsPanel">createIcSettingsPanel&lt;/a>
+ * @description Creates Ic apps subpanel.
+ * @param none
+ * @memberof module:icSettings
+ */
+export function createIcSettingsPanel() {
+    let pan = document.getElementById('ic_settings_pan')
+    if (pan == null) {
+        let option_div = document.getElementById('option_div')
+        let pan_id = 'ic_settings_pan'
+        let pan = document.createElement('div')
+        pan.setAttribute('class', 'panel-body wrapper ic hide sub')
+        pan.setAttribute('id', pan_id)
+        option_div.appendChild(pan)
+    } else {
+        let MODE = E.getMode()
+        MODE.activeSubPanels.push('ic_settings_pan')
+        form.makePanelActive('settings')
+    }
+    updateIcSettingsPanel()
+}
+
+/**
+ * @function &lt;a name="updateIcSettingsPanel">updateIcSettingsPanel&lt;/a>
+ * @description Updates Ic apps subpanel after a change.
+ * @param none
+ * @memberof module:icSettings
+ */
+export function updateIcSettingsPanel() {
+    let pan = document.getElementById('ic_settings_pan')
+    // remove current info
+
+    if (pan != null) {
+        let MODE = E.getMode()
+        let children = pan.childNodes
+        for (let i = children.length - 1; i >= 0; i--) {
+            pan.removeChild(children[0])
+        }
+
+        // add new info
+        let title = document.createElement('h5')
+        title.innerHTML = 'Icarous Settings'
+        pan.appendChild(title)
+
+
+        // only show if Icarous is going to be turned on
+        if (MODE.icSettings.ic_toggle) {
+
+            // display the list of apps
+            let ul = document.createElement('ul')
+            ul.setAttribute('class', 'ic_settings_list')
+
+            let p1 = document.createElement('p')
+            p1.innerHTML = 'App Selection'
+            pan.appendChild(p1)
+            pan.appendChild(ul)
+
+            let li;
+            for (let item of MODE.icSettings.app_list) {
+                li = document.createElement('li')
+                let app_buttons = form.addButtonSwitch('app_toggle_' + item.name, item.name, function () {
+                    clickIcToggleButton('app_toggle_' + item.name);
+                })
+                li.appendChild(app_buttons)
+                ul.appendChild(li)
+
+                // highlight curent status
+                if (item.status) {
+                    document.getElementById('app_toggle_' + item.name + '_on').classList.add('highlight')
+                } else {
+                    document.getElementById('app_toggle_' + item.name + '_off').classList.add('highlight')
+                }
+            }
+
+            // create div for btns
+            let btn_div = document.createElement('div')
+            btn_div.setAttribute('class', 'ic_btndiv')
+            // submit btn
+            btn_div.appendChild(form.addBlockButton('ic_submit', 'ic_submit', 'Submit App Settings', clickIcSubmitAppSettings))
+
+            // cancel btn
+            btn_div.appendChild(form.addBlockButton('ic_cancel', 'ic_cancel', 'Cancel Changes', clickIcCancel))
+
+            pan.appendChild(btn_div)
+        }
+    }
+}
+
+
+/**
+ * @function &lt;a name="clickIcSubmitAppSettings">clickIcSubmitAppSettings&lt;/a>
+ * @description Sends message to server and updates the panel.
+ * @param none
+ * @memberof module:icSettings
+ */
+export function clickIcSubmitAppSettings() {
+    let MODE = E.getMode()
+    MODE.icSettings.submitList()
+    updateIcSettingsPanel()
+}
+
+/**
+ * @function &lt;a name="clickIcCancel">clickIcCancel&lt;/a>
+ * @description Cancels changes and removes the panel.
+ * @param none
+ * @memberof module:icSettings
+ */
+export function clickIcCancel() {
+    let MODE = E.getMode()
+    MODE.activeSubPanels = []
+    let el = document.getElementById('ic_settings_pan')
+    el.parentNode.removeChild(el)
+}
+
+/**
+ * @function &lt;a name="clickIcToggleButton">clickIcToggleButton&lt;/a>
+ * @description Listens for click and changes the app status.
+ * @param name {string} name of app to change status.
+ * @memberof module:icSettings
+ */
+export function clickIcToggleButton(name) {
+
+    let MODE = E.getMode()
+    let here_ = false;
+    let on = document.getElementById(name + '_on')
+    let off = document.getElementById(name + '_off')
+    let obj;
+    if (name == 'ic_toggle') {
+        // get the object
+        obj = MODE.icSettings.ic_toggle
+        // change the status
+        if (obj) {
+            MODE.icSettings.ic_toggle = false
+        } else {
+            MODE.icSettings.ic_toggle = true
+        }
+        updateIcSettingsPanel()
+    } else {
+        // get the object
+        obj = MODE.icSettings.app_list.filter((el, ind) => {
+            if ('app_toggle_' + el.name == name) {
+                return el
+            }
+        })
+        // change the status
+        if (obj[0].status) {
+            obj[0].status = false
+        } else {
+            obj[0].status = true
+        }
+    }
+
+    // change the highlight
+    on.classList.forEach(function (item) {
+        if (item == 'highlight') {
+            on.classList.remove('highlight');
+            off.classList.add('highlight');
+            here_ = true;
+        }
+    });
+
+    if (here_) {
+        return;
+    };
+
+    off.classList.forEach(function (item) {
+        if (item == 'highlight') {
+            off.classList.remove('highlight');
+            on.classList.add('highlight');
+        }
+    });
+}
+
+/**
+ * @function &lt;a name="makeIcPanelActive">makeIcPanelActive&lt;/a>
+ * @description Makes the subpanel active so it can be viewed.
+ * @param none
+ * @memberof module:icSettings
+ */
+export function makeIcPanelActive(pan_id) {
+    let MODE = E.getMode()
+    MODE.activeSubPanels.push(pan_id)
+    form.makePanelActive('settings')
+}
+
+
+/**
+ * @function &lt;a name="createLoadingPanel">createLoadingPanel&lt;/a>
+ * @description Creates loading subpanel.
+ * @param type {string} used inpan id
+ * @todo loading panel is not needed, loads fast enough. get rid of it.
+ * @memberof module:icSettings
+ */
+export function createLoadingPanel(type) {
+    let loading_div;
+    if (document.getElementById('type') == null) {
+        // create the panel
+        let option_div = document.getElementById('option_div')
+        let pan_id = 'loading_ic_' + type
+        let pan = document.createElement('div')
+        pan.setAttribute('class', 'panel-body wrapper loading ic hide sub')
+        pan.setAttribute('id', pan_id)
+        option_div.appendChild(pan)
+
+        // create a div
+        loading_div = document.createElement('div');
+        loading_div.setAttribute('id', 'loading_ic_' + type);
+        pan.appendChild(loading_div);
+
+    }
+
+    // add the info
+    addLoadingContent(type, loading_div)
+    form.addSpinner('ic_' + type)
+}
+
+/**
+ * @function &lt;a name="addLoadingContent">addLoadingContent&lt;/a>
+ * @description Adds content to the loading subpanel.
+ * @param type {string} used inpan id
+ * @param parent {Object} Div to append content to.
+ * @todo loading panel is not needed, loads fast enough. get rid of it.
+ * @memberof module:icSettings
+ */
+function addLoadingContent(type, parent) {
+    // remove all children from parent
+    for (let item of parent.childNodes) {
+        item.parentNode.removeChild(item)
+    }
+
+    // add a title
+    let h4 = document.createElement('H5');
+    h4.setAttribute('id', 'loading_p1');
+    h4.innerHTML = 'Loading... '
+    parent.appendChild(h4)
+
+    // add content
+    let p1;
+    if (type == 'get_apps') {
+        p1 = document.createElement('p')
+        p1.setAttribute('id', 'ic_settings')
+        p1.innerHTML = 'Gathering Icarous Settings.'
+        parent.appendChild(p1)
+    }
+
+    parent.appendChild(p1)
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Aircraft.html">Aircraft</a></li><li><a href="module-comms.html">comms</a></li><li><a href="module-eventFunctions.html">eventFunctions</a></li><li><a href="module-eventFunctionsTraffic.html">eventFunctionsTraffic</a></li><li><a href="module-flyByFile.html">flyByFile</a></li><li><a href="module-form.html">form</a></li><li><a href="module-GeoFence.html">GeoFence</a></li><li><a href="module-geofenceEvents.html">geofenceEvents</a></li><li><a href="module-icSettings.html">icSettings</a></li><li><a href="module-mode.html">mode</a></li><li><a href="module-playback.html">playback</a></li><li><a href="module-saveFile.html">saveFile</a></li><li><a href="module-traffic.html">traffic</a></li><li><a href="module-updateUser.html">updateUser</a></li></ul><h3>Classes</h3><ul><li><a href="module-Aircraft_Aircraft.html">Aircraft</a></li><li><a href="module-Aircraft_Waypoint.html">Waypoint</a></li><li><a href="module-GeoFence_Fence.html">Fence</a></li><li><a href="module-icSettings_icApp.html">icApp</a></li><li><a href="module-icSettings_icAppSettings.html">icAppSettings</a></li><li><a href="module-mode_GCSmode.html">GCSmode</a></li><li><a href="module-traffic_Aircraft.html">Aircraft</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Fri May 24 2019 13:46:40 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+.traffic {
+    background-color: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    padding: 5px;
+    margin: 5px;
+    height: 95%;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.traffic_plan {
+    max-height: 18vh;
+    min-height: 18vh;
+    overflow-y: auto;
+}
+
+.t_btndiv {
+    padding: inherit;
+    position: absolute;
+    width: 100%;
+    right: 0;
+    bottom: 0;
+}
+
+.traffic_display {
+    grid-column: 2;
+}
+
+.t_summary_list {
+    width: 95%;
+    max-height: 18vh;
+    min-height: 18vh;
+    overflow-y: auto;
+}
+
+.t_- {
+    width: 5%;
+    display: inline-block;
+}
+
+.t_p {
+    width: 90%;
+    display: inline-block;
+}

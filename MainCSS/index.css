@@ -1,0 +1,724 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+}
+
+:root {
+    --main-color: black;
+    --main-color2: white;
+    --main-background-Head: rgba(233, 220, 220, 0.0);
+    --main-background: rgba(233, 220, 220, 0.3);
+    --main-highlight-color: rgba(199, 184, 184, 0.781);
+    --main-background-input: rgba(233, 220, 220, 0.1);
+    --main-shadow:
+        -1px -1px 5px rgba(233, 220, 220, 0.6),
+        1px -1px 5px rgba(233, 220, 220, 0.6),
+        -1px 1px 5px rgba(233, 220, 220, 0.6),
+        1px 1px 5px rgba(233, 220, 220, 0.6);
+    --main-font-size: calc(.9 * calc(calc(calc(1vw) + calc(.4vh)) / 2));
+    --main-header-font-size: 2vw;
+
+}
+
+/* Style the body */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: 900;
+    font-size: var(--main-font-size);
+    background-color: black;
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(19, 5vh);
+
+}
+
+/* Style the header */
+
+header {
+    grid-column: 1/16;
+    grid-row: 1;
+    z-index: 3;
+    background-color: var(--main-background-Head);
+    padding-top: 5px;
+    width: 100%;
+    text-align: left;
+    font-size: var(--main-header-font-size);
+    display: grid;
+    grid-column: repeat(16, 1fr);
+}
+
+h2 {
+    margin: 0;
+}
+
+p {
+    margin: 0px;
+    padding: 3px;
+}
+
+option {
+    background-color: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+}
+
+#title {
+    grid-column: 1;
+    z-index: 2;
+    margin-left: 10px;
+}
+
+#modesec {
+    grid-column: 13;
+    padding-left: 10px;
+    /* margin: 3px; */
+}
+
+/* Style the map */
+#map_display {
+    background: var(--main-background);
+    color: var(--main-color2);
+    text-shadow: none;
+
+    grid-column: 1/15;
+    grid-row: 1/20;
+    z-index: 1;
+}
+
+#mapid {
+    height: 100vh;
+    width: 100vw;
+}
+
+.leaflet-contextmenu {
+    /* background-color: var(--main-background); */
+    color: var(--main-color);
+    /* text-shadow: var(--main-shadow); */
+}
+
+/* .leaflet-contextmenu-item {
+
+} */
+
+/* .leaflet-contextmenu-item.over {
+
+    background: var(--main-highlight-color);
+} */
+
+/* Moves the layer control box over*/
+.leaflet-right {
+    right: 27vw;
+}
+
+.leaflet-top {
+    top: 5vh;
+}
+
+/* .leaflet-bottom {
+    bottom: 6vh;
+} */
+
+/* Playback */
+.playback {
+    grid-column: 7/10;
+    grid-row: 18/20;
+    background: rgba(248, 248, 248, 0.123);
+    border-width: 3px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.589);
+    border-radius: 1em;
+    z-index: 3;
+    padding: 5px;
+    align-items: center;
+}
+
+.playbackButtons {
+
+    display: inline-block;
+    margin-left: 1%;
+    margin-right: 1%;
+    margin-top: 1%;
+    width: 17.5%;
+    height: 60%;
+    border-radius: 1.2em;
+}
+
+.playbackButtons:hover {
+    background-color: rgba(255, 251, 251, 0.151);
+}
+
+.prog_container {
+    height: 20%;
+    width: 100%;
+}
+
+.statusBar {
+    text-align: left;
+    display: inline-block;
+    position: relative;
+    /* float: left; */
+    height: 50%;
+    width: 80%;
+    margin-left: 5%;
+    background-color: rgba(0, 0, 0, 0.473);
+}
+
+.progBar {
+    text-align: right;
+    vertical-align: center;
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    width: 0%;
+    background-color: red;
+    padding-right: 1%;
+}
+
+.dot {
+    text-align: left;
+    display: inline-block;
+    position: relative;
+    height: 100%;
+    width: 10%;
+    /* background-color: blue; */
+    /* border-radius: 50%; */
+}
+
+.dot:hover {
+    background-color: rgba(255, 255, 255, 0.733);
+}
+
+.total_time {
+    text-align: right;
+    vertical-align: center;
+    display: inline-block;
+    position: relative;
+    z-index: 10;
+    width: 10%;
+    height: 100%;
+    margin-left: 1%;
+}
+
+
+/* Style the content */
+
+#panel {
+    grid-column: 12/15;
+    grid-row: 2/14;
+    background: none;
+    z-index: 2;
+    padding: 5px;
+    /* max-height: 50vh; */
+}
+
+#data-display {
+    /* overflow: hidden; */
+    height: 100%;
+    width: 100%;
+    background-color: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    z-index: 2;
+    padding: 1%;
+}
+
+.myform {
+    max-height: 35vh;
+    min-height: 35vh;
+    overflow-y: auto;
+    /* height: 60%; */
+}
+
+.flight_info {
+    max-height: 35vh;
+    min-height: 35vh;
+    overflow-y: auto;
+}
+
+.btndiv {
+    position: absolute;
+    /* height: 20%; */
+    width: 100%;
+    right: 0;
+    bottom: 0;
+}
+
+
+/* Panel Classes*/
+.summary {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.settings {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.plan {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.param {
+    line-height: .75;
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.param_save {
+    margin-bottom: 2%;
+}
+
+.param_list {
+    max-height: 75%;
+    overflow: auto;
+}
+
+.info {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.inFlight {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.radio_input_method {
+    width: 10%;
+    align-content: left;
+}
+
+.radio {
+    padding-right: 15%;
+}
+
+.option_display {
+    grid-column: 1/16;
+    grid-row: 14/20;
+    background-color: none;
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+}
+
+.option_sub_1 {
+    grid-column: 1/3;
+    grid-row: 1/11;
+    z-index: 2;
+}
+
+.option_sub_2 {
+    grid-column: 3/6;
+    grid-row: 1/11;
+    z-index: 2;
+}
+
+.option_sub_3 {
+    grid-column: 6/9;
+    grid-row: 1/11;
+    z-index: 2;
+}
+
+.option_sub_4 {
+    grid-column: 9/12;
+    grid-row: 1/11;
+    z-index: 2;
+}
+
+.option_sub_5 {
+    grid-column: 12/15;
+    grid-row: 1/11;
+    z-index: 2;
+}
+
+.option_sub_6 {
+    grid-column: 15/16;
+    grid-row: 1/11;
+    z-index: 2;
+}
+
+.ic {
+    background-color: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    padding: 5px;
+    margin: 5px;
+    height: 95%;
+    max-height: 30vh;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.ic_settings_list {
+    width: 95%;
+    max-height: 13vh;
+    min-height: 13vh;
+    overflow-y: auto;
+}
+
+.ic_btndiv {
+    padding: inherit;
+    position: absolute;
+    width: 100%;
+    right: 0;
+    bottom: 0;
+}
+
+.stats {
+    grid-column: 1;
+}
+
+.forwarding {
+    background-color: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    padding: 5px;
+    margin: 5px;
+    height: 95%;
+    /* overflow: auto; */
+    max-height: 30vh;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.loading {
+    position: relative;
+    height: 95%;
+    width: 95%;
+}
+
+/* Style the ul's */
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 5px;
+}
+
+table,
+th,
+tr,
+td {
+    border: none;
+}
+
+table {
+    margin-top: 5px;
+    width: 90%;
+}
+
+.table td {
+    padding: 1px;
+    border-top: none;
+    margin-bottom: 0%;
+}
+
+/* Button classes*/
+.btn-group {
+    background: var(--main-background-Head);
+    border: none;
+}
+
+.btn-table {
+    border: none;
+    width: 100%;
+    height: auto;
+    padding: 10%;
+}
+
+.btn {
+    background: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    font-size: var(--main-font-size);
+    line-height: 1.3vh;
+    border-radius: 5px;
+    border-color: gray;
+}
+
+.seq {
+    width: 10%;
+}
+
+.latlng {
+    width: 30%;
+}
+
+.alt {
+    width: 20%;
+}
+
+.btnpm {
+    width: 5%;
+}
+
+.btn:hover {
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    background: var(--main-highlight-color);
+}
+
+.btn-block {
+    margin: 0;
+    padding: 0;
+}
+
+#file_label {
+    margin-bottom: 0rem;
+    background: var(--main-background);
+    -webkit-appearance: none;
+}
+
+.fileplan {
+    padding: 5px;
+    width: 100%;
+    height: 50vh;
+    background-color: white;
+    overflow-x: auto;
+    overflow-y: auto;
+    outline: none;
+    font-size: 16px;
+}
+
+.lable:hover {
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    background: var(--main-highlight-color);
+}
+
+.dropdown-menu {
+    background-color: var(--main-color2);
+    color: var(--main-color2);
+    text-shadow: var(--main-shadow);
+    margin: 0;
+    padding: 0;
+
+}
+
+/* Input classes*/
+.input_class {
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    background: var(--main-background-input);
+    border: 1px solid gray;
+    border-radius: 3px;
+    width: 50%;
+    outline: antiquewhite;
+    margin-top: 5px;
+}
+
+.toggle_class {
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    background: var(--main-background-input);
+    border: 1px solid gray;
+    border-radius: 3px;
+    width: 25%;
+    outline: antiquewhite;
+    margin-top: 5px;
+}
+
+.input_row {
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    background: var(--main-background-input);
+    border: 1px solid gray;
+    border-radius: 3px;
+    width: 95%;
+    outline: antiquewhite;
+    margin-bottom: 5px;
+}
+
+.input_label {
+    width: 47%;
+    display: inline-block;
+}
+
+.red {
+    background: red;
+    width: 90%;
+}
+
+.green {
+    background: green;
+    width: 90%;
+}
+
+.yellow {
+    background: yellow;
+    width: 90%;
+}
+
+
+/* Highlight, show and hide*/
+.highlight {
+    background-color: var(--main-highlight-color);
+}
+
+.highlight_param {
+    background-color: var(--main-highlight-color);
+}
+
+.active {
+    display: Visible;
+}
+
+.show {
+    display: Visible;
+}
+
+.hide {
+    display: None;
+}
+
+
+/* fly by file banner */
+.b_overlay {
+    position: fixed;
+    width: 100%;
+    height: 5%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(197, 8, 8, 0.5);
+    z-index: 3;
+    cursor: pointer;
+}
+
+#b_text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    font-size: 30px;
+    color: white;
+    text-shadow: none;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+}
+
+/* alert banner */
+
+#banner_group {
+    grid-column: 1/6;
+    grid-row: 16/19;
+    z-index: 2;
+}
+
+
+.g_overlay {
+    /* grid-column: 1/7;
+    grid-row: 19; */
+    width: 100%;
+    height: 14%;
+    margin-left: 5px;
+    background-color: rgba(19, 233, 12, 0.5);
+    z-index: 3;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#g_text {
+    text-align: center;
+    /* padding: 5px 0; */
+    margin-left: 5px;
+    font-size: 14px;
+    color: black;
+    text-shadow: none;
+}
+
+.r_overlay {
+    /* grid-column: 1/7;
+    grid-row: 19; */
+    width: 100%;
+    height: 14%;
+    margin-left: 5px;
+    background-color: rgba(197, 8, 8, 0.5);
+    z-index: 3;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#r_text {
+    text-align: center;
+    /* padding: 5px 0; */
+    margin-left: 5px;
+    font-size: 14px;
+    color: black;
+    text-shadow: none;
+}
+
+.y_overlay {
+    /* grid-column: 1/7;
+    grid-row: 19; */
+    width: 100%;
+    height: 14%;
+    margin-left: 5px;
+    background-color: rgba(243, 247, 9, 0.5);
+    z-index: 3;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#y_text {
+    text-align: center;
+    /* padding: 5px 0; */
+    margin-left: 5px;
+    font-size: 14px;
+    color: black;
+    text-shadow: none;
+}
+
+.o_overlay {
+    /* grid-column: 1/7;
+    grid-row: 19; */
+    width: 100%;
+    height: 14%;
+    margin-left: 5px;
+    background-color: rgba(245, 170, 9, 0.5);
+    z-index: 3;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#o_text {
+    text-align: center;
+    /* padding: 5px 0; */
+    margin-left: 5px;
+    font-size: 14px;
+    color: black;
+    text-shadow: none;
+}
+
+/* other classes */
+
+@media screen and (max-width: 1075px) {
+    body {
+        font-size: 8px;
+    }
+}
+
+@media screen and (min-width: 2450px) {
+    body {
+        font-size: 16px;
+    }
+}

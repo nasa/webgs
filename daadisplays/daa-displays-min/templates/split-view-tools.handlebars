@@ -1,0 +1,36 @@
+<div id="split-view-tools" style="position:absolute;width:{{width}};margin-left:auto;margin-right:auto; font-size:.875rem;">
+
+    <div class="input-group input-group-sm mb-3" style="width:1900px;margin:auto; display:none;">
+        <div class="input-group-prepend" style="margin-left:694px;">
+            <div class="btn btn-sm" style="text-align:center; width:450px; background-color:#e9ecef; border:1px solid #ced4da;">
+                Current simulation step: <span id="curr-sim-step" style="margin-left:4px;"><b>0</b></span>
+            </div>
+            <div class="input-group mb-3" style="width: 240px; margin-left:20px; margin-right:30px;">
+                <div class="btn-group btn-group-toggle" role="group" aria-label="View">
+                    <button type="button" class="btn btn-sm btn-danger" id="{{id}}-pause" style="width:84px;">Pause</button>
+                    <button type="button" class="btn btn-sm btn-primary" id="{{id}}-play" style="width:84px;">Play</button>
+                    <button type="button" class="btn btn-sm btn-warning" id="{{id}}-restart" style="width:84px;">Restart</button>
+                </div>
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <button id="{{id}}-goto" type="button" class="btn btn-sm btn-secondary" style="width:84px;">GoTo</button>
+                <input id="{{id}}-goto-input" type="number" value="0" aria-label="goto" class="form-control">
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-left:auto; margin-right: auto; width: 1900px;">
+        {{#each attributes}}
+        <div class="input-group input-group-sm mb-3">
+            <pre id="{{id}}-left" style="text-align:center; height:3em;" aria-label="{{id}}" class="form-control"></pre>
+            <div class="input-group-prepend">
+                <div style="text-align:center; width:514px; background-color:#e9ecef; border:1px solid #ced4da; padding-top:2px;">
+                    {{label}} ({{units}})
+                </div>
+            </div>
+            <pre id="{{id}}-right" style="text-align:center;height:3em;" aria-label="{{id}}" class="form-control"></pre>
+            <!-- <button type="button" class="btn btn-sm btn-secondary" id="test-{{id}}">Submit</button> -->
+        </div>
+        {{/each}}
+    </div>
+</div>

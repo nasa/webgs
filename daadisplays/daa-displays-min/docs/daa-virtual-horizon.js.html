@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: daa-virtual-horizon.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: daa-virtual-horizon.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module VirtualHorizon
+ * @version 2018.12.01
+ * @description &lt;div style="display:flex;">&lt;div style="width:50%;">
+ *              &lt;b>Virtual Horizon Widget.&lt;/b>
+ *              &lt;p>This widget presents roll and pitch of the ownship relative
+ *              to the actual horizon. A linear tape indicates the pitch angle in degrees. The
+ *              tape scrolls vertically when the aircraft pitch changes. The tape can also rotate,
+ *              acting like a virtual gauge indicating the roll angle on a graduated arc. The
+ *              background is color coded (blue/brown) to facilitate the identification of pitch angles.&lt;/p>
+ *              &lt;p>This implementation requires the installation of the pvsio-web toolkit 
+ *              (&lt;a href="http://www.pvsioweb.org" target=_blank>www.pvsioweb.org&lt;/a>).&lt;/p>
+ *              &lt;p>Google Chrome is recommended for correct rendering of the simulation controls.&lt;/p>&lt;/div>
+ *              &lt;img src="images/daa-virtual-horizon.png" style="margin-left:8%; max-height:250px;" alt="DAA Virtual Horizon Widget">&lt;/div>
+ * @example
+// file index.js (to be stored in pvsio-web/examples/demos/daa-displays/)
+require.config({
+    paths: { 
+        widgets: "../../client/app/widgets",
+        text: "../../client/app/widgets/daa-displays/lib/text/text"
+    }
+});
+require(["widgets/daa-displays/daa-virtual-horizon"], function (VirtualHorizon) {
+    "use strict";
+    const virtualHorizon = new VirtualHorizon("virtual-horizon", {
+        top: 54, left: 108
+    });
+    virtualHorizon.setPitch(10);
+    virtualHorizon.setRoll(30);
+});
+
+// file index.html (to be stored in pvsio-web/examples/demos/daa-displays/)
+&lt;!DOCTYPE HTML>
+&lt;html>
+    &lt;head>
+        &lt;meta charset="utf-8">
+        &lt;meta http-equiv="X-UA-Compatible">
+        &lt;title>&lt;/title>
+        &lt;meta name="viewport" content="width=device-width">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/lib/bootstrap/4.1.3/css/bootstrap.min.css">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/lib/font-awesome/5.6.1/css/all.min.css">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/css/daa-displays.css">
+    &lt;/head>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/underscore/underscore.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/jquery/jquery-3.3.1.slim.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/popper/popper-1.14.3.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/bootstrap/4.1.3/bootstrap.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/handlebars/handlebars-v4.0.12.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/requireJS/require.js" data-main="index.js">&lt;/script>
+&lt;/html>
+
+ * @author Paolo Masci
+ * @date October 2018
+ * @copyright 
+ * Copyright 2016 United States Government as represented by the
+ * Administrator of the National Aeronautics and Space Administration. No
+ * copyright is claimed in the United States under Title 17, 
+ * U.S. Code. All Other Rights Reserved.
+ * &lt;br>
+ * Disclaimers
+ * &lt;br>
+ * No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY
+ * WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY,
+ * INCLUDING, BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE
+ * WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM
+ * INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE ERROR
+ * FREE, OR ANY WARRANTY THAT DOCUMENTATION, IF PROVIDED, WILL CONFORM TO
+ * THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN ANY MANNER,
+ * CONSTITUTE AN ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT
+ * OF ANY RESULTS, RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY
+ * OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT SOFTWARE.
+ * FURTHER, GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES
+ * REGARDING THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE,
+ * AND DISTRIBUTES IT "AS IS."
+ * &lt;br>
+ * Waiver and Indemnity: RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS
+ * AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND
+ * SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT.  IF RECIPIENT'S USE OF
+ * THE SUBJECT SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES,
+ * EXPENSES OR LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM
+ * PRODUCTS BASED ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT
+ * SOFTWARE, RECIPIENT SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED
+ * STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY
+ * PRIOR RECIPIENT, TO THE EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE
+ * REMEDY FOR ANY SUCH MATTER SHALL BE THE IMMEDIATE, UNILATERAL
+ * TERMINATION OF THIS AGREEMENT.
+ **/
+/*jslint esnext: true */
+define(function (require, exports, module) {
+    "use strict";
+    require("widgets/daa-displays/daa-utils");
+    const virtualHorizonTemplate = require("text!widgets/daa-displays/templates/daa-virtual-horizon.handlebars");
+    const virtualHorizonLevelsTemplate = require("text!widgets/daa-displays/templates/daa-virtual-horizon-levels.handlebars");
+
+    class VirtualHorizon {
+        /**
+         * @function &lt;a name="VirtualHorizon">VirtualHorizon&lt;/a>
+         * @description Constructor.
+         * @param id {String} Unique widget identifier.
+         * @param coords {Object} The four coordinates (top, left, width, height) of the widget, specifying
+         *        the left/top corners, and the width/height of the (rectangular) widget area.
+         *        Default is { top: 111, left: 209, width: 1050, height: 844 }.
+         *        FIXME: The current implementation support only a fixed size, 1050x844. 
+         * @param opt {Object} Style options defining the visual appearance of the widget.
+         *          &lt;li>parent (String): the HTML element where the widget will be appended (default is "body")&lt;/li>
+         * @memberof module:VirtualHorizon
+         * @instance
+         */
+        constructor (id, coords, opt) {
+            this.id = id;
+            opt = opt || {};
+            coords = coords || {};
+            this.top = coords.top || 0;
+            this.left = coords.left || 0;
+            this.div = createDiv(id, { parent: opt.parent });
+            let theHTML = Handlebars.compile(virtualHorizonTemplate)({
+                id: this.id,
+                top: this.top,
+                left: this.left,
+                baseUrl: baseUrl
+            });
+            $(this.div).html(theHTML);
+            let levels = [];
+            for (let i = 1; i &lt; 36; i++) {
+                levels.push({
+                    name: (i % 19) ? (i % 19) * 10 : "", // level 0 does not have a label
+                    top: (i &lt; 19) ? i * 111 : -(i - 19) * 111
+                });
+            }
+            theHTML = Handlebars.compile(virtualHorizonLevelsTemplate)({
+                levels: levels
+            });
+            $("#" + this.id + "-levels").html(theHTML);
+        }
+        /**
+         * @function &lt;a name="setPitch">setPitch&lt;/a>
+         * @description Sets the pitch value.
+         * @param deg {real} Pitch angle. Default units is degrees.
+         * @param opt {Object} Options:
+         *             &lt;li>units (String): "rad", indicates that the pitch angle is given in radians.
+         *                                 The widget will automatically convert the angle to degrees.&lt;/li>
+         * @memberof module:VirtualHorizon
+         * @instance
+         */
+        setPitch (deg, opt) {
+            opt = opt || {};
+            let angle = (opt.units === "rad") ? rad2deg(parseFloat(deg)) : parseFloat(deg);
+            angle = angle % 180;
+            let tickHeight = 110; // 110 px corresponds to 10 degrees on the linear tape, measure obtained by inspecting the DOM
+            let px = angle / 10 * tickHeight;
+            $("." + this.id + "-pitch").css("transition-duration", "1000ms").css("transform", "translateY(" + px + "px)");
+            return this;
+        }
+        /**
+         * @function &lt;a name="setRoll">setRoll&lt;/a>
+         * @description Sets the roll value.
+         * @param deg {real} Roll angle. Default units is degrees.
+         * @param opt {Object} Options:
+         *             &lt;li>units (String): "rad", indicates that the roll angle is given in radians.
+         *                                 The widget will automatically convert the angle to degrees.&lt;/li>
+         * @memberof module:VirtualHorizon
+         * @instance
+         */
+        setRoll (deg, opt) {
+            opt = opt || {};
+            let angle = (opt.units === "rad") ? rad2deg(parseFloat(deg)) : parseFloat(deg);
+            $("#" + this.id + "-angle").css("transition-duration", "1000ms").css("transform", "rotate(" + angle + "deg)");
+            return this;
+        }
+    }
+
+    module.exports = VirtualHorizon;
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AirspeedTape.html">AirspeedTape</a></li><li><a href="module-AltitudeTape.html">AltitudeTape</a></li><li><a href="module-Compass.html">Compass</a></li><li><a href="module-DAAPlaybackPlayer.html">DAAPlaybackPlayer</a></li><li><a href="module-DAASpectrogram.html">DAASpectrogram</a></li><li><a href="module-DAASplitView.html">DAASplitView</a></li><li><a href="module-InteractiveMap.html">InteractiveMap</a></li><li><a href="module-VerticalSpeedTape.html">VerticalSpeedTape</a></li><li><a href="module-VirtualHorizon.html">VirtualHorizon</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Mon Dec 31 2018 09:38:04 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

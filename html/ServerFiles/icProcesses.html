@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>ServerFiles.icProcesses API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ServerFiles.icProcesses</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">#!/usr/bin/env python3
+
+import os
+import sys
+import time
+import json
+import time
+import struct
+import logging
+
+from ServerFiles.traffic import Traffic as T
+from ServerFiles.trafficManager import TrafficManager
+import ServerFiles.consumerFunctions as CF
+import ServerFiles.mavlinkCommands as MF
+import ServerFiles.gfManager as GF
+import ServerFiles.readLogFile as RT
+import ServerFiles.playback as P
+
+from pymavlink import mavutil, mavwp, mavparm
+
+
+# Set HOST to local machine ip to be accessable to other devices
+HOST = &#39;0.0.0.0&#39;
+IP = &#39;169.254.1.12&#39;
+PORT = 8000
+UDP_PORT_1 = 14550
+UDP_PORT_2 = 14553
+RADIO = &#39;dev/ttyUSB0&#39;
+BAUD = 57600
+ac_pids = []
+da = int(time.time())
+da_formated = time.strftime(&#34;%Y-%m-%d_%H:%M:%S&#34;, time.localtime(da))
+logplayer = None
+wp_count = {}
+wp_list = {}
+v_count = {}
+gf_list = {}
+ac = &#39;NONE&#39;
+hitl = False
+has_heartbeat = False
+forwarding = None
+
+
+def data(q, m):
+    # Create a Trafic manager instance
+    TM = TrafficManager()
+    master = &#39;NONE&#39;
+    logger = logging.getLogger()
+
+    mlog = None
+    while True:
+        # get messages from ac
+        if master != &#39;NONE&#39; or master != &#39;END&#39;:
+            update_position(q, TM, master, mlog)
+
+        # execute commands from gs
+        if len(m) &gt; 0:
+            logger.info(&#39;IC {}: Message: {}&#39;.format(ac, str(m[0])))
+            if m[0][1] != &#39;-1&#39;:
+                master, mlog = completeCommands(q, m[0], TM, master, mlog)
+
+            if &#34;NEW_AIRCRAFT&#34; in m[0]:
+                logger.info(&#39;IC {}: Waiting for Icarous to load.&#39;.format(ac))
+                d = int(time.time())
+                d_formated = time.strftime(
+                    &#34;%Y-%m-%d_%H:%M:%S&#34;, time.localtime(d))
+                log = &#39;LogFiles/flight_log_ac_{0}_{1}.tlog&#39;.format(
+                    ac, d_formated)
+                with open(log, &#39;w&#39;) as f:
+                    f.write(&#39;&#39;)
+                mlog = mavutil.mavlink_connection(
+                    log, dialect=&#39;ardupilotmega&#39;, baud=BAUD, write=True, append=True)
+                mavutil.set_dialect(&#34;ardupilotmega&#34;)
+
+                time.sleep(12)
+
+                logger.info(&#39;IC {}: Loading parameters.&#39;.format(ac))
+
+                # remove this when icarous is updated
+                # m.append([&#39;AIRCRAFT&#39;, str(ac), &#39;LOAD_PARAM_FILE&#39;,
+                #           &#39;/Examples/Parameters/icarous_default.txt&#39;])
+
+            elif &#39;PLAYBACK&#39; in m[0]:
+                if &#39;START&#39; in m[0]:
+                    master = &#39;FILE&#39;
+                    log = m[0][4]
+
+                    # check file exists
+                    try:
+                        f = open(&#39;LogFiles/&#39;+log, &#39;r&#39;)
+                    except Exception as e:
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;IC_PLAYBACK&#34;, &#34;INFO&#34;: &#34;Playback error: File Not Found.&#39;+str(e)+&#39;&#34;, &#34;ecode&#34;:&#34;1&#34;}&#39;)
+                        return
+
+                    logger.info(&#39;IC Playback: Opening File: {}&#39;.format(log))
+                    # get file type, tlog or mlog
+                    if &#39;tlog&#39; in log[-4:]:
+                        global logplayer
+                        logplayer = P.LogPlayer(log, &#39;tlog&#39;)
+                        logger.info(
+                            &#39;IC Playback: Created Log Player {}&#39;.format(logplayer))
+                        logplayer.getMessages()
+                        logger.info(&#39;IC Playback : {} {}&#39;.format(
+                            log, logplayer.total_messages))
+
+                    elif &#39;mlog&#39; in log[-4:]:
+                        logplayer = P.LogPlayer(log, &#39;mlog&#39;)
+                        logger.info(
+                            &#39;IC Playback : Created Log Player {}&#39;.format(logplayer))
+                        logplayer.getMessages()
+
+                    else:
+                        logger.warning(
+                            &#39;IC Playback: Playback error: Unknown file type. {}&#39;.format(log[-4:]))
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;IC_PLAYBACK&#34;, &#34;INFO&#34;: &#34;Playback error: Unknown file type.&#34;, &#34;ecode&#34;:&#34;2&#34;}&#39;)
+                        quit()
+
+                elif &#39;PLAY&#39; in m[0]:
+                    logplayer.Play()
+
+                elif &#39;SHUTDOWN&#39; in m[0]:
+                    q.put(&#39;{&#34;AIRCRAFT&#34;:&#34;PLAYBACK&#34;, &#34;name&#34;:&#34;SHUT_DOWN&#34;}&#39;)
+                    logger.info(&#39;IC Playback: Shutdown recieved&#39;)
+                    logplayer = None
+                    q.close()
+                    master = &#39;END&#39;
+
+                elif &#39;REW&#39; in m[0]:
+                    logplayer.Rew()
+                elif &#39;FF&#39; in m[0]:
+                    logplayer.FF()
+                elif &#39;SKIP&#39; in m[0]:
+                    logplayer.SkipForward()
+
+            # Remove the completed command from the list
+            m.pop(0)
+            logger.info(&#39;IC {0}: List {0}: {1}&#39;.format(ac, str(m)))
+
+        # if shutdown recieved exit the process
+        if master == &#39;END&#39;:
+            logger.info(&#39;IC {}: calling quit&#39;.format(ac))
+            quit()
+
+
+# ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** * **
+#
+#  Messages from aircraft to frontend.
+#
+# ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** * **
+
+def update_position(q, TM, master, mlog):
+    global wp_count
+    global wp_list
+    global ac
+    global has_heartbeat
+    global hitl
+    global forwarding
+    logger = logging.getLogger()
+    res = TM.update_traffic()
+    if res == 1:
+        # send traffic position updates to front end
+        for item in TM.traffic_list:
+            t_update = &#39;{&#34;AIRCRAFT&#34;:&#39; + str(ac) \
+                + &#39;, &#34;TYPE&#34;:&#34;TRAFFIC&#34;&#39; \
+                + &#39;, &#34;callsign&#34;:&#39; + str(item.name) \
+                + &#39;, &#34;lat&#34;:&#39; + str(item.x) \
+                + &#39;, &#34;lon&#34;:&#39; + str(item.y) \
+                + &#39;, &#34;hor_velocity&#34;:&#39; + str(item.S) \
+                + &#39;, &#34;heading&#34;:&#39; + str(item.H) \
+                + &#39;, &#34;altitude&#34;:&#39; + str(item.z) \
+                + &#39;, &#34;emitter_type&#34;: &#39; + str(item.emiter)+&#39;}&#39;
+            q.put(t_update)
+            if master != &#39;FILE&#39;:
+                MF.recvAndLog(master, mlog, forwarding, traffic=item)
+
+    if has_heartbeat == False:
+        if (ac == &#39;NONE&#39;):
+            id = &#39;{&#34;AIRCRAFT&#34; : &#34;&#39; + str(ac) + &#39;&#34;, &#34;TYPE&#34; : &#34;CONNECTING&#34;}&#39;
+        else:
+            id = &#39;{&#34;AIRCRAFT&#34; : &#39; + str(ac) + &#39;, &#34;TYPE&#34; : &#34;CONNECTING&#34;}&#39;
+        time.sleep(.5)
+        q.put(id)
+
+    # Receive and filter messages from each aircraft
+    if master != &#39;NONE&#39;:
+        if master != &#39;FILE&#39;:
+            msg = MF.recvAndLog(master, mlog, forwarding)
+            write_to_file = True
+        else:
+            write_to_file = False
+            if logplayer is not None and not logplayer.paused:
+                message = logplayer.getNext()
+                stats = logplayer.getStats()
+
+                p_update = &#39;{ &#34;name&#34; : &#34;LOGPLAYER&#34;, &#34;CURRENT&#34; : &#39; + \
+                    str(stats[0])+&#39;, &#34;TOTAL&#34; : &#39;+str(stats[1]) + \
+                    &#39;, &#34;PERCENT&#34; : &#39;+str(stats[2])+&#39; }&#39;
+
+                q.put(p_update)
+                if len(message) &gt; 0:
+                    ac = str(message[0])
+                    msg = message[1]
+                else:
+                    return
+            else:
+                return
+
+        if write_to_file and msg is not None:
+            with open(&#39;LogFiles/msg_in_{0}_{1}.txt&#39;.format(da_formated, ac), &#39;a&#39;) as f:
+                f.write(&#39;Aircraft: &#39; + str(ac) + &#39;; &#39; + str(msg)+&#39;\n&#39;)
+
+        if msg is not None:
+            # print(msg)
+            if msg.name == &#34;MISSION_COUNT&#34;:
+                if msg.mission_type != 1:
+                    wp_count[ac] = msg.count
+                    if ac not in wp_list:
+                        wp_list[ac] = [None] * msg.count
+                    logger.info(&#39;Mission count:{}&#39;.format(msg.count))
+                    return
+                else:
+                    v_count[ac] = msg.count
+                    if ac not in gf_list:
+                        gf_list[ac] = [None] * msg.count
+                    logger.info(&#39;Vertex count:{}&#39;.format(msg.count))
+
+            elif msg.name == &#39;MISSION_ACK&#39;:
+                return
+
+            elif msg.name == &#39;MISSION_REQUEST&#39;:
+                return
+
+            elif msg.name == &#39;MISSION_ITEM_REACHED&#39;:
+                return
+
+            elif msg.name == &#34;MISSION_ITEM&#34; or msg.name == &#39;MISSION_ITEM_INT&#39;:
+                if logplayer is not None:
+                    if ac not in wp_count:
+                        return
+                    if msg.mission_type != 1:
+                        if wp_count[ac] &gt; 0:
+                            wp_list[ac][msg.seq] = msg
+                            if msg.seq == wp_count[ac]-1:
+                                if &#39;MISSION_ITEM_INT&#39; in str(msg):
+                                    msg = CF.sendWaypointsInt(wp_list, ac)
+                                else:
+                                    msg = CF.sendWaypoints(wp_list, ac)
+                                q.put(msg)
+                    else:
+                        if v_count[ac] &gt; 0:
+                            gf_list[ac][int(msg.param2)] = msg
+                            if int(msg.param2) == v_count[ac]-1:
+                                msg = CF.sendVert(gf_list, ac)
+                                q.put(msg)
+                return
+
+            elif msg.name == &#34;PARAM_VALUE&#34;:
+                if str(msg.param_id) == &#39;STAT_RUNTIME&#39;:
+                    return
+                else:
+                    msg.param_id = &#39;&#34;&#39;+msg.param_id+&#39;&#34;&#39;
+
+            elif msg.name == &#34;STATUSTEXT&#34;:
+                logger.info(&#39;IC {} : {}&#39;.format(ac, msg))
+                msg.text = &#39;&#34;&#39;+msg.text+&#39;&#34;&#39;
+
+            elif msg.name == &#34;ADSB_VEHICLE&#34;:
+                msg.name = &#34;TRAFFIC&#34;
+                msg.TRAFFIC = msg.ICAO_address
+                msg.TTYPE = &#39;ADSB&#39;
+                msg.LAT = msg.lat
+                msg.LNG = msg.lon
+                msg.VEL = msg.hor_velocity
+                msg.HDG = msg.heading
+                msg.ALT = msg.altitude
+                msg.AC = ac
+                msg.EMIT = msg.emitter_type
+
+            elif msg.name == &#39;HEARTBEAT&#39; or msg.name == &#39;GLOBAL_POSITION_INT&#39;:
+                has_heartbeat = True
+
+            # send the message to the front end
+            m = &#39;&#39;
+            for item in msg._fieldnames:
+                m = m + &#39;, &#34;{}&#34;:{}&#39;.format(item, msg.format_attr(item))
+
+            id = &#39;{&#34;AIRCRAFT&#34; : &#39; + str(ac) + &#39;, &#34;TYPE&#34; : &#34;&#39; + \
+                str(msg.name) + &#39;&#34;&#39; + m + &#39;}&#39;
+            # print(id)
+            q.put(id)
+
+
+# ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** * **
+#
+#  Messages from front end to aircraft.
+#
+# ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** * **
+
+def completeCommands(q, msg, TM, master, mlog):
+    global forwarding
+    logger = logging.getLogger()
+    if len(msg) &gt; 0:
+        # parse the message
+        message = msg
+
+        consumer_message = message[2:]
+
+        if &#39;NEW_AIRCRAFT&#39; in consumer_message:
+            global ac
+            ac = message[1]
+            master, pidI, pidA = CF.requestNewAircraft(
+                consumer_message, BAUD, UDP_PORT_2, HOST)
+            logger.info(&#39;IC {}: master: {} pidI: {} pidA: {}&#39;.format(
+                ac, master, pidI, pidA))
+            ac_pids.append(pidI)
+            ac_pids.append(pidA)
+
+        elif &#39;HITL&#39; in consumer_message:
+            IP = consumer_message[5]
+            PORT = consumer_message[7]
+            ac = consumer_message[1]
+
+            master = CF.connectToHardwareIP(consumer_message, IP, PORT)
+
+            d = int(time.time())
+            d_formated = time.strftime(
+                &#34;%Y-%m-%d_%H:%M:%S&#34;, time.localtime(d))
+            log = &#39;LogFiles/flight_log_ac_{0}_{1}.tlog&#39;.format(
+                ac, d_formated)
+            with open(log, &#39;w&#39;) as f:
+                f.write(&#39;&#39;)
+            mlog = mavutil.mavlink_connection(
+                log, dialect=&#39;ardupilotmega&#39;, baud=BAUD, write=True, append=True)
+            mavutil.set_dialect(&#34;ardupilotmega&#34;)
+
+            global hitl
+            hitl = True
+
+            if master != &#39;NONE&#39;:
+                logger.info(&#39;IC {}: master {}&#39;.format(ac, master))
+            else:
+                logger.info(&#39;IC {0}: Connection Failed&#39;.format(ac))
+                q.put(&#39;{&#34;name&#34;:&#34;HITL&#34;, &#34;INFO&#34;:&#34;CONNECTION_FAILED&#34;}&#39;)
+
+        elif &#39;HITL_DISCONNECT&#39; in consumer_message:
+            global has_heartbeat
+            has_heartbeat = True
+            master.close()
+            q.close()
+            q.cancel_join_thread()
+            master = &#39;END&#39;
+
+            logger.info(&#39;IC {0}: Disconnected&#39;.format(ac))
+
+        elif &#39;REQUEST_WAYPOINTS&#39; in consumer_message:
+            logger.info(&#39;&#39;)
+            logger.info(
+                &#39;**************************************************************&#39;)
+            msg_in = MF.requestCount(master, mlog, forwarding)
+
+            if str(msg_in) != &#39;NONE&#39;:
+                msg = CF.requestWaypoints(
+                    msg_in, consumer_message[1], master, mlog, forwarding)
+                q.put(str(msg))
+            else:
+                q.put(
+                    &#39;{&#34;name&#34;:&#34;WAYPOINT_REQUEST&#34;, &#34;INFO&#34;:&#34;FAIL. Message_Timeout_Reached&#34;}&#39;)
+                logger.info(
+                    &#39;WAYPOINT_REQUEST : FAIL : Message_Timeout_Reached&#39;)
+
+            logger.info(
+                &#39;**************************************************************&#39;)
+            logger.info(&#39;&#39;)
+
+        elif &#39;REQUEST_FENCE&#39; in consumer_message:
+            logger.info(&#39;&#39;)
+            logger.info(
+                &#39;**************************************************************&#39;)
+            msg_in = MF.requestCountF(master, mlog, forwarding)
+
+            if str(msg_in) != &#39;NONE&#39;:
+                msg = CF.requestVert(
+                    msg_in, consumer_message[1], master, mlog, forwarding)
+                q.put(str(msg))
+            else:
+                q.put(
+                    &#39;{&#34;name&#34;:&#34;VERT_REQUEST&#34;, &#34;INFO&#34;:&#34;FAIL. Message_Timeout_Reached&#34;}&#39;)
+                logger.info(
+                    &#39;VERT_REQUEST : FAIL : Message_Timeout_Reached&#39;)
+
+            logger.info(
+                &#39;**************************************************************&#39;)
+            logger.info(&#39;&#39;)
+
+        elif &#39;LOAD_FLIGHT_PLAN&#39; in consumer_message:
+            CF.loadFlightPlan(ac, consumer_message, q,
+                              master, mlog, forwarding)
+
+        elif &#39;FLIGHT_STARTED&#39; in consumer_message:
+            logger.info(&#39;IC {}: ConsumerMSG {}&#39;.format(ac, consumer_message))
+            aircraft = &#39;{&#34;AIRCRAFT&#34; : &#39;+consumer_message[-2]+&#39;, &#39;
+            icarous_flag = consumer_message[-1]
+            logger.info(&#39;IC {}: Icarous Flag: {}&#39;.format(ac, icarous_flag))
+            MF.startFlight(icarous_flag, master, mlog, forwarding)
+            logger.info(&#39;IC {}: Flight Started&#39;.format(ac))
+            q.put(aircraft + &#39;&#34;TYPE&#34;:&#34;STARTFLIGHT&#34;, &#34;INFO&#34;: &#34;SUCCESS&#34;}&#39;)
+
+        elif &#39;ADD_TRAFFIC&#39; in consumer_message:
+            message.append(master)
+            TM.add_traffic(message)
+
+        elif &#39;FILE_TRAFFIC&#39; in consumer_message:
+            t_id = consumer_message[1]
+
+            # open the file
+            dir = os.path.dirname(os.path.realpath(__file__))
+            filename = consumer_message[2]
+            path = dir + &#39;/..&#39; + filename
+
+            # get the data
+            with open(path) as f:
+                line = f.readline()
+                logger.info(&#39;IC {}: File Add Traffic {}&#39;.format(ac, line))
+                x = line.split(&#39; &#39;)
+                message = [&#39;AIRCRAFT&#39;, ac, &#39;ADD_TRAFFIC&#39;, t_id,
+                           x[0], x[1], 0, 0, x[2], x[3], x[4], 0, x[5], master]
+                TM.add_traffic(message)
+            f.close()
+
+        elif &#39;REMOVE_TRAFFIC&#39; in consumer_message:
+            TM.remove_traffic(consumer_message)
+
+        elif &#39;LOAD_GEOFENCE&#39; in consumer_message:
+            CF.loadGeoFence(ac, consumer_message, q, master, mlog, forwarding)
+
+        elif &#39;REMOVE_GEOFENCE&#39; in consumer_message:
+            #  Not really working, just replacing the fence with another fence with no points
+            index = consumer_message[6]
+            floor = 2
+            roof = 100
+            MF.removeGF(index, floor, roof, master)
+            logger.info(&#39;IC {}: Fence Removed&#39;.format(ac))
+
+        elif &#39;SHUTDOWN&#39; in consumer_message:
+            master.close()
+            q.close()
+            CF.shutdownProcesses(ac_pids)
+            master = &#39;END&#39;
+
+        elif &#39;UPDATE_PARAM_LIST&#39; in consumer_message:
+            MF.fetchParams(master)
+            logger.info(&#39;IC {}: trying to fetch params&#39;.format(ac))
+
+        elif &#39;CHANGE_PARAM&#39; in consumer_message:
+            logger.info(&#39;IC {}: trying to change params&#39;.format(ac))
+            MF.changeParamFloat(consumer_message, master, mlog, forwarding)
+            q.put(&#39;{&#34;name&#34;:&#34;CHANGE_PARAM&#34;, &#34;INFO&#34;: &#34;SUCCESS. &#39; +
+                  str(consumer_message)+&#39;&#34;}&#39;)
+            logger.info(&#39;IC {}: Change Params Success.&#39;.format(ac))
+
+        elif &#39;LOAD_WP_FILE&#39; in consumer_message:
+            CF.loadFlightPlanFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;LOAD_GF_FILE&#39; in consumer_message:
+            CF.loadGeoFenceFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;LOAD_PARAM_FILE&#39; in consumer_message:
+            CF.loadParamFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;SAVE&#39; in consumer_message:
+            CF.saveFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;RADAR&#39; in consumer_message:
+            # [&#39;RADAR&#39;, &#39;1&#39;]
+            logger.info(&#39;IC {}: Sending Radar Command:&#39;.format(
+                ac), consumer_message)
+            MF.sendUser3(consumer_message[1], master)
+
+        elif &#39;FORWARD&#39; in consumer_message:
+            if consumer_message[1] == &#39;STOP&#39;:
+                forwarding.close()
+                forwarding = None
+            else:
+                device = &#39;udp:&#39; + consumer_message[1]+&#39;:&#39;+consumer_message[2]
+                baud = consumer_message[3]
+                print(device, baud)
+                forwarding = mavutil.mavlink_connection(
+                    device, baud=baud, input=False)
+
+    return master, mlog</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="ServerFiles.icProcesses.completeCommands"><code class="name flex">
+<span>def <span class="ident">completeCommands</span></span>(<span>q, msg, TM, master, mlog)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def completeCommands(q, msg, TM, master, mlog):
+    global forwarding
+    logger = logging.getLogger()
+    if len(msg) &gt; 0:
+        # parse the message
+        message = msg
+
+        consumer_message = message[2:]
+
+        if &#39;NEW_AIRCRAFT&#39; in consumer_message:
+            global ac
+            ac = message[1]
+            master, pidI, pidA = CF.requestNewAircraft(
+                consumer_message, BAUD, UDP_PORT_2, HOST)
+            logger.info(&#39;IC {}: master: {} pidI: {} pidA: {}&#39;.format(
+                ac, master, pidI, pidA))
+            ac_pids.append(pidI)
+            ac_pids.append(pidA)
+
+        elif &#39;HITL&#39; in consumer_message:
+            IP = consumer_message[5]
+            PORT = consumer_message[7]
+            ac = consumer_message[1]
+
+            master = CF.connectToHardwareIP(consumer_message, IP, PORT)
+
+            d = int(time.time())
+            d_formated = time.strftime(
+                &#34;%Y-%m-%d_%H:%M:%S&#34;, time.localtime(d))
+            log = &#39;LogFiles/flight_log_ac_{0}_{1}.tlog&#39;.format(
+                ac, d_formated)
+            with open(log, &#39;w&#39;) as f:
+                f.write(&#39;&#39;)
+            mlog = mavutil.mavlink_connection(
+                log, dialect=&#39;ardupilotmega&#39;, baud=BAUD, write=True, append=True)
+            mavutil.set_dialect(&#34;ardupilotmega&#34;)
+
+            global hitl
+            hitl = True
+
+            if master != &#39;NONE&#39;:
+                logger.info(&#39;IC {}: master {}&#39;.format(ac, master))
+            else:
+                logger.info(&#39;IC {0}: Connection Failed&#39;.format(ac))
+                q.put(&#39;{&#34;name&#34;:&#34;HITL&#34;, &#34;INFO&#34;:&#34;CONNECTION_FAILED&#34;}&#39;)
+
+        elif &#39;HITL_DISCONNECT&#39; in consumer_message:
+            global has_heartbeat
+            has_heartbeat = True
+            master.close()
+            q.close()
+            q.cancel_join_thread()
+            master = &#39;END&#39;
+
+            logger.info(&#39;IC {0}: Disconnected&#39;.format(ac))
+
+        elif &#39;REQUEST_WAYPOINTS&#39; in consumer_message:
+            logger.info(&#39;&#39;)
+            logger.info(
+                &#39;**************************************************************&#39;)
+            msg_in = MF.requestCount(master, mlog, forwarding)
+
+            if str(msg_in) != &#39;NONE&#39;:
+                msg = CF.requestWaypoints(
+                    msg_in, consumer_message[1], master, mlog, forwarding)
+                q.put(str(msg))
+            else:
+                q.put(
+                    &#39;{&#34;name&#34;:&#34;WAYPOINT_REQUEST&#34;, &#34;INFO&#34;:&#34;FAIL. Message_Timeout_Reached&#34;}&#39;)
+                logger.info(
+                    &#39;WAYPOINT_REQUEST : FAIL : Message_Timeout_Reached&#39;)
+
+            logger.info(
+                &#39;**************************************************************&#39;)
+            logger.info(&#39;&#39;)
+
+        elif &#39;REQUEST_FENCE&#39; in consumer_message:
+            logger.info(&#39;&#39;)
+            logger.info(
+                &#39;**************************************************************&#39;)
+            msg_in = MF.requestCountF(master, mlog, forwarding)
+
+            if str(msg_in) != &#39;NONE&#39;:
+                msg = CF.requestVert(
+                    msg_in, consumer_message[1], master, mlog, forwarding)
+                q.put(str(msg))
+            else:
+                q.put(
+                    &#39;{&#34;name&#34;:&#34;VERT_REQUEST&#34;, &#34;INFO&#34;:&#34;FAIL. Message_Timeout_Reached&#34;}&#39;)
+                logger.info(
+                    &#39;VERT_REQUEST : FAIL : Message_Timeout_Reached&#39;)
+
+            logger.info(
+                &#39;**************************************************************&#39;)
+            logger.info(&#39;&#39;)
+
+        elif &#39;LOAD_FLIGHT_PLAN&#39; in consumer_message:
+            CF.loadFlightPlan(ac, consumer_message, q,
+                              master, mlog, forwarding)
+
+        elif &#39;FLIGHT_STARTED&#39; in consumer_message:
+            logger.info(&#39;IC {}: ConsumerMSG {}&#39;.format(ac, consumer_message))
+            aircraft = &#39;{&#34;AIRCRAFT&#34; : &#39;+consumer_message[-2]+&#39;, &#39;
+            icarous_flag = consumer_message[-1]
+            logger.info(&#39;IC {}: Icarous Flag: {}&#39;.format(ac, icarous_flag))
+            MF.startFlight(icarous_flag, master, mlog, forwarding)
+            logger.info(&#39;IC {}: Flight Started&#39;.format(ac))
+            q.put(aircraft + &#39;&#34;TYPE&#34;:&#34;STARTFLIGHT&#34;, &#34;INFO&#34;: &#34;SUCCESS&#34;}&#39;)
+
+        elif &#39;ADD_TRAFFIC&#39; in consumer_message:
+            message.append(master)
+            TM.add_traffic(message)
+
+        elif &#39;FILE_TRAFFIC&#39; in consumer_message:
+            t_id = consumer_message[1]
+
+            # open the file
+            dir = os.path.dirname(os.path.realpath(__file__))
+            filename = consumer_message[2]
+            path = dir + &#39;/..&#39; + filename
+
+            # get the data
+            with open(path) as f:
+                line = f.readline()
+                logger.info(&#39;IC {}: File Add Traffic {}&#39;.format(ac, line))
+                x = line.split(&#39; &#39;)
+                message = [&#39;AIRCRAFT&#39;, ac, &#39;ADD_TRAFFIC&#39;, t_id,
+                           x[0], x[1], 0, 0, x[2], x[3], x[4], 0, x[5], master]
+                TM.add_traffic(message)
+            f.close()
+
+        elif &#39;REMOVE_TRAFFIC&#39; in consumer_message:
+            TM.remove_traffic(consumer_message)
+
+        elif &#39;LOAD_GEOFENCE&#39; in consumer_message:
+            CF.loadGeoFence(ac, consumer_message, q, master, mlog, forwarding)
+
+        elif &#39;REMOVE_GEOFENCE&#39; in consumer_message:
+            #  Not really working, just replacing the fence with another fence with no points
+            index = consumer_message[6]
+            floor = 2
+            roof = 100
+            MF.removeGF(index, floor, roof, master)
+            logger.info(&#39;IC {}: Fence Removed&#39;.format(ac))
+
+        elif &#39;SHUTDOWN&#39; in consumer_message:
+            master.close()
+            q.close()
+            CF.shutdownProcesses(ac_pids)
+            master = &#39;END&#39;
+
+        elif &#39;UPDATE_PARAM_LIST&#39; in consumer_message:
+            MF.fetchParams(master)
+            logger.info(&#39;IC {}: trying to fetch params&#39;.format(ac))
+
+        elif &#39;CHANGE_PARAM&#39; in consumer_message:
+            logger.info(&#39;IC {}: trying to change params&#39;.format(ac))
+            MF.changeParamFloat(consumer_message, master, mlog, forwarding)
+            q.put(&#39;{&#34;name&#34;:&#34;CHANGE_PARAM&#34;, &#34;INFO&#34;: &#34;SUCCESS. &#39; +
+                  str(consumer_message)+&#39;&#34;}&#39;)
+            logger.info(&#39;IC {}: Change Params Success.&#39;.format(ac))
+
+        elif &#39;LOAD_WP_FILE&#39; in consumer_message:
+            CF.loadFlightPlanFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;LOAD_GF_FILE&#39; in consumer_message:
+            CF.loadGeoFenceFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;LOAD_PARAM_FILE&#39; in consumer_message:
+            CF.loadParamFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;SAVE&#39; in consumer_message:
+            CF.saveFile(ac, consumer_message, q, master, mlog)
+
+        elif &#39;RADAR&#39; in consumer_message:
+            # [&#39;RADAR&#39;, &#39;1&#39;]
+            logger.info(&#39;IC {}: Sending Radar Command:&#39;.format(
+                ac), consumer_message)
+            MF.sendUser3(consumer_message[1], master)
+
+        elif &#39;FORWARD&#39; in consumer_message:
+            if consumer_message[1] == &#39;STOP&#39;:
+                forwarding.close()
+                forwarding = None
+            else:
+                device = &#39;udp:&#39; + consumer_message[1]+&#39;:&#39;+consumer_message[2]
+                baud = consumer_message[3]
+                print(device, baud)
+                forwarding = mavutil.mavlink_connection(
+                    device, baud=baud, input=False)
+
+    return master, mlog</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.icProcesses.data"><code class="name flex">
+<span>def <span class="ident">data</span></span>(<span>q, m)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def data(q, m):
+    # Create a Trafic manager instance
+    TM = TrafficManager()
+    master = &#39;NONE&#39;
+    logger = logging.getLogger()
+
+    mlog = None
+    while True:
+        # get messages from ac
+        if master != &#39;NONE&#39; or master != &#39;END&#39;:
+            update_position(q, TM, master, mlog)
+
+        # execute commands from gs
+        if len(m) &gt; 0:
+            logger.info(&#39;IC {}: Message: {}&#39;.format(ac, str(m[0])))
+            if m[0][1] != &#39;-1&#39;:
+                master, mlog = completeCommands(q, m[0], TM, master, mlog)
+
+            if &#34;NEW_AIRCRAFT&#34; in m[0]:
+                logger.info(&#39;IC {}: Waiting for Icarous to load.&#39;.format(ac))
+                d = int(time.time())
+                d_formated = time.strftime(
+                    &#34;%Y-%m-%d_%H:%M:%S&#34;, time.localtime(d))
+                log = &#39;LogFiles/flight_log_ac_{0}_{1}.tlog&#39;.format(
+                    ac, d_formated)
+                with open(log, &#39;w&#39;) as f:
+                    f.write(&#39;&#39;)
+                mlog = mavutil.mavlink_connection(
+                    log, dialect=&#39;ardupilotmega&#39;, baud=BAUD, write=True, append=True)
+                mavutil.set_dialect(&#34;ardupilotmega&#34;)
+
+                time.sleep(12)
+
+                logger.info(&#39;IC {}: Loading parameters.&#39;.format(ac))
+
+                # remove this when icarous is updated
+                # m.append([&#39;AIRCRAFT&#39;, str(ac), &#39;LOAD_PARAM_FILE&#39;,
+                #           &#39;/Examples/Parameters/icarous_default.txt&#39;])
+
+            elif &#39;PLAYBACK&#39; in m[0]:
+                if &#39;START&#39; in m[0]:
+                    master = &#39;FILE&#39;
+                    log = m[0][4]
+
+                    # check file exists
+                    try:
+                        f = open(&#39;LogFiles/&#39;+log, &#39;r&#39;)
+                    except Exception as e:
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;IC_PLAYBACK&#34;, &#34;INFO&#34;: &#34;Playback error: File Not Found.&#39;+str(e)+&#39;&#34;, &#34;ecode&#34;:&#34;1&#34;}&#39;)
+                        return
+
+                    logger.info(&#39;IC Playback: Opening File: {}&#39;.format(log))
+                    # get file type, tlog or mlog
+                    if &#39;tlog&#39; in log[-4:]:
+                        global logplayer
+                        logplayer = P.LogPlayer(log, &#39;tlog&#39;)
+                        logger.info(
+                            &#39;IC Playback: Created Log Player {}&#39;.format(logplayer))
+                        logplayer.getMessages()
+                        logger.info(&#39;IC Playback : {} {}&#39;.format(
+                            log, logplayer.total_messages))
+
+                    elif &#39;mlog&#39; in log[-4:]:
+                        logplayer = P.LogPlayer(log, &#39;mlog&#39;)
+                        logger.info(
+                            &#39;IC Playback : Created Log Player {}&#39;.format(logplayer))
+                        logplayer.getMessages()
+
+                    else:
+                        logger.warning(
+                            &#39;IC Playback: Playback error: Unknown file type. {}&#39;.format(log[-4:]))
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;IC_PLAYBACK&#34;, &#34;INFO&#34;: &#34;Playback error: Unknown file type.&#34;, &#34;ecode&#34;:&#34;2&#34;}&#39;)
+                        quit()
+
+                elif &#39;PLAY&#39; in m[0]:
+                    logplayer.Play()
+
+                elif &#39;SHUTDOWN&#39; in m[0]:
+                    q.put(&#39;{&#34;AIRCRAFT&#34;:&#34;PLAYBACK&#34;, &#34;name&#34;:&#34;SHUT_DOWN&#34;}&#39;)
+                    logger.info(&#39;IC Playback: Shutdown recieved&#39;)
+                    logplayer = None
+                    q.close()
+                    master = &#39;END&#39;
+
+                elif &#39;REW&#39; in m[0]:
+                    logplayer.Rew()
+                elif &#39;FF&#39; in m[0]:
+                    logplayer.FF()
+                elif &#39;SKIP&#39; in m[0]:
+                    logplayer.SkipForward()
+
+            # Remove the completed command from the list
+            m.pop(0)
+            logger.info(&#39;IC {0}: List {0}: {1}&#39;.format(ac, str(m)))
+
+        # if shutdown recieved exit the process
+        if master == &#39;END&#39;:
+            logger.info(&#39;IC {}: calling quit&#39;.format(ac))
+            quit()</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.icProcesses.update_position"><code class="name flex">
+<span>def <span class="ident">update_position</span></span>(<span>q, TM, master, mlog)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def update_position(q, TM, master, mlog):
+    global wp_count
+    global wp_list
+    global ac
+    global has_heartbeat
+    global hitl
+    global forwarding
+    logger = logging.getLogger()
+    res = TM.update_traffic()
+    if res == 1:
+        # send traffic position updates to front end
+        for item in TM.traffic_list:
+            t_update = &#39;{&#34;AIRCRAFT&#34;:&#39; + str(ac) \
+                + &#39;, &#34;TYPE&#34;:&#34;TRAFFIC&#34;&#39; \
+                + &#39;, &#34;callsign&#34;:&#39; + str(item.name) \
+                + &#39;, &#34;lat&#34;:&#39; + str(item.x) \
+                + &#39;, &#34;lon&#34;:&#39; + str(item.y) \
+                + &#39;, &#34;hor_velocity&#34;:&#39; + str(item.S) \
+                + &#39;, &#34;heading&#34;:&#39; + str(item.H) \
+                + &#39;, &#34;altitude&#34;:&#39; + str(item.z) \
+                + &#39;, &#34;emitter_type&#34;: &#39; + str(item.emiter)+&#39;}&#39;
+            q.put(t_update)
+            if master != &#39;FILE&#39;:
+                MF.recvAndLog(master, mlog, forwarding, traffic=item)
+
+    if has_heartbeat == False:
+        if (ac == &#39;NONE&#39;):
+            id = &#39;{&#34;AIRCRAFT&#34; : &#34;&#39; + str(ac) + &#39;&#34;, &#34;TYPE&#34; : &#34;CONNECTING&#34;}&#39;
+        else:
+            id = &#39;{&#34;AIRCRAFT&#34; : &#39; + str(ac) + &#39;, &#34;TYPE&#34; : &#34;CONNECTING&#34;}&#39;
+        time.sleep(.5)
+        q.put(id)
+
+    # Receive and filter messages from each aircraft
+    if master != &#39;NONE&#39;:
+        if master != &#39;FILE&#39;:
+            msg = MF.recvAndLog(master, mlog, forwarding)
+            write_to_file = True
+        else:
+            write_to_file = False
+            if logplayer is not None and not logplayer.paused:
+                message = logplayer.getNext()
+                stats = logplayer.getStats()
+
+                p_update = &#39;{ &#34;name&#34; : &#34;LOGPLAYER&#34;, &#34;CURRENT&#34; : &#39; + \
+                    str(stats[0])+&#39;, &#34;TOTAL&#34; : &#39;+str(stats[1]) + \
+                    &#39;, &#34;PERCENT&#34; : &#39;+str(stats[2])+&#39; }&#39;
+
+                q.put(p_update)
+                if len(message) &gt; 0:
+                    ac = str(message[0])
+                    msg = message[1]
+                else:
+                    return
+            else:
+                return
+
+        if write_to_file and msg is not None:
+            with open(&#39;LogFiles/msg_in_{0}_{1}.txt&#39;.format(da_formated, ac), &#39;a&#39;) as f:
+                f.write(&#39;Aircraft: &#39; + str(ac) + &#39;; &#39; + str(msg)+&#39;\n&#39;)
+
+        if msg is not None:
+            # print(msg)
+            if msg.name == &#34;MISSION_COUNT&#34;:
+                if msg.mission_type != 1:
+                    wp_count[ac] = msg.count
+                    if ac not in wp_list:
+                        wp_list[ac] = [None] * msg.count
+                    logger.info(&#39;Mission count:{}&#39;.format(msg.count))
+                    return
+                else:
+                    v_count[ac] = msg.count
+                    if ac not in gf_list:
+                        gf_list[ac] = [None] * msg.count
+                    logger.info(&#39;Vertex count:{}&#39;.format(msg.count))
+
+            elif msg.name == &#39;MISSION_ACK&#39;:
+                return
+
+            elif msg.name == &#39;MISSION_REQUEST&#39;:
+                return
+
+            elif msg.name == &#39;MISSION_ITEM_REACHED&#39;:
+                return
+
+            elif msg.name == &#34;MISSION_ITEM&#34; or msg.name == &#39;MISSION_ITEM_INT&#39;:
+                if logplayer is not None:
+                    if ac not in wp_count:
+                        return
+                    if msg.mission_type != 1:
+                        if wp_count[ac] &gt; 0:
+                            wp_list[ac][msg.seq] = msg
+                            if msg.seq == wp_count[ac]-1:
+                                if &#39;MISSION_ITEM_INT&#39; in str(msg):
+                                    msg = CF.sendWaypointsInt(wp_list, ac)
+                                else:
+                                    msg = CF.sendWaypoints(wp_list, ac)
+                                q.put(msg)
+                    else:
+                        if v_count[ac] &gt; 0:
+                            gf_list[ac][int(msg.param2)] = msg
+                            if int(msg.param2) == v_count[ac]-1:
+                                msg = CF.sendVert(gf_list, ac)
+                                q.put(msg)
+                return
+
+            elif msg.name == &#34;PARAM_VALUE&#34;:
+                if str(msg.param_id) == &#39;STAT_RUNTIME&#39;:
+                    return
+                else:
+                    msg.param_id = &#39;&#34;&#39;+msg.param_id+&#39;&#34;&#39;
+
+            elif msg.name == &#34;STATUSTEXT&#34;:
+                logger.info(&#39;IC {} : {}&#39;.format(ac, msg))
+                msg.text = &#39;&#34;&#39;+msg.text+&#39;&#34;&#39;
+
+            elif msg.name == &#34;ADSB_VEHICLE&#34;:
+                msg.name = &#34;TRAFFIC&#34;
+                msg.TRAFFIC = msg.ICAO_address
+                msg.TTYPE = &#39;ADSB&#39;
+                msg.LAT = msg.lat
+                msg.LNG = msg.lon
+                msg.VEL = msg.hor_velocity
+                msg.HDG = msg.heading
+                msg.ALT = msg.altitude
+                msg.AC = ac
+                msg.EMIT = msg.emitter_type
+
+            elif msg.name == &#39;HEARTBEAT&#39; or msg.name == &#39;GLOBAL_POSITION_INT&#39;:
+                has_heartbeat = True
+
+            # send the message to the front end
+            m = &#39;&#39;
+            for item in msg._fieldnames:
+                m = m + &#39;, &#34;{}&#34;:{}&#39;.format(item, msg.format_attr(item))
+
+            id = &#39;{&#34;AIRCRAFT&#34; : &#39; + str(ac) + &#39;, &#34;TYPE&#34; : &#34;&#39; + \
+                str(msg.name) + &#39;&#34;&#39; + m + &#39;}&#39;
+            # print(id)
+            q.put(id)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="ServerFiles.icProcesses.completeCommands" href="#ServerFiles.icProcesses.completeCommands">completeCommands</a></code></li>
+<li><code><a title="ServerFiles.icProcesses.data" href="#ServerFiles.icProcesses.data">data</a></code></li>
+<li><code><a title="ServerFiles.icProcesses.update_position" href="#ServerFiles.icProcesses.update_position">update_position</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+
+# Multi Aircraft Test
+
+# Example Script:
+
+repeat 4
+
+const x *2
+const z *2
+
+# setup ac 1
+start startAc(bob1, 1, 37.086699, -76.378911)
+adjust param file(bob1, Examples/Parameters/icarous_custom1.txt, x, bob1, Examples/Parameters/icarous_custom2.txt, z)
+
+# setup ac 2
+start startAc(bob2, 1, 37.086699, -76.378911)
+adjust param file(bob2, Examples/Parameters/icarous_custom1.txt, x, bob2, Examples/Parameters/icarous_custom2.txt, z)
+
+# setup ac 3
+start startAc(bob3, 1, 37.086699, -76.378911)
+adjust param file(bob3, Examples/Parameters/icarous_custom1.txt, x, bob3, Examples/Parameters/icarous_custom2.txt, z)
+
+# setup ac 4
+start startAc(bob4, 1, 37.086699, -76.378911)
+adjust param file(bob4, Examples/Parameters/icarous_custom1.txt, x, bob4, Examples/Parameters/icarous_custom2.txt, z)
+
+time wait(20)
+
+# load wp's
+adjust wp wpLoad(bob1, Examples/FlightPlans/test_flightplan1.txt, x, bob1, Examples/FlightPlans/test_flightplan2.txt, z)
+adjust wp wpLoad(bob2, Examples/FlightPlans/test_flightplan2.txt, x, bob2, Examples/FlightPlans/test_flightplan3.txt, z)
+adjust wp wpLoad(bob3, Examples/FlightPlans/test_flightplan3.txt, x, bob3, Examples/FlightPlans/test_flightplan4.txt, z)
+adjust wp wpLoad(bob4, Examples/FlightPlans/test_flightplan4.txt, x, bob4, Examples/FlightPlans/test_flightplan1.txt, z)
+
+time wait(2)
+
+# add geofence
+adjust geofence load(bob1, 1, Examples/GeoFences/test_geofence1.xml, x, bob1, 1, Examples/GeoFences/test_geofence2.xml, z)
+time wait(1)
+adjust geofence load(bob2, 1, Examples/GeoFences/test_geofence2.xml, x, bob2, 1, Examples/GeoFences/test_geofence3.xml, z)
+time wait(1)
+adjust geofence load(bob3, 1, Examples/GeoFences/test_geofence3.xml, x, bob3, 1, Examples/GeoFences/test_geofence4.xml, z)
+time wait(1)
+adjust geofence load(bob4, 1, Examples/GeoFences/test_geofence4.xml, x, bob4, 1, Examples/GeoFences/test_geofence1.xml, z)
+
+# time wait(1)
+
+# add traffic
+traffic file(bob1, 1000, Examples/Traffic/test_traffic1_1.txt)
+traffic file(bob2, 1000, Examples/Traffic/test_traffic2_1.txt)
+traffic file(bob3, 1000, Examples/Traffic/test_traffic3_1.txt)
+traffic file(bob4, 1000, Examples/Traffic/test_traffic4_1.txt)
+
+time wait(5)
+
+# Launch the flights
+long MISSION_START(bob1)
+long MISSION_START(bob2)
+long MISSION_START(bob3)
+long MISSION_START(bob4)
+
+
+# let the mission run
+time wait(90)
+
+
+# shutdown the aircraft
+stop bob1
+stop bob4
+stop bob2
+stop bob3
+

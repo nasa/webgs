@@ -1,0 +1,12 @@
+asyncio>=3.4.3
+future>=0.17.1
+iso8601>=0.1.12
+lxml>=4.3.3
+psutil>=5.6.1
+pymavlink>=2.3.4
+PyYAML>=5.1
+serial>=0.0.97
+virtualenv>=16.4.3
+websockets>=7.0
+
+

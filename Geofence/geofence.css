@@ -1,0 +1,48 @@
+.geofence {
+    background-color: var(--main-background);
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    padding: 5px;
+    margin: 5px;
+    height: 95%;
+    /* overflow: auto; */
+    max-height: 30vh;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.fence_plan {
+    max-height: 16vh;
+    min-height: 16vh;
+    overflow-y: auto;
+}
+
+.g_btndiv {
+    padding: inherit;
+    position: absolute;
+    width: 100%;
+    right: 0;
+    bottom: 0;
+}
+
+.f_summary_list {
+    width: 95%;
+    max-height: 12vh;
+    min-height: 12vh;
+    overflow-y: scroll;
+}
+
+.f_- {
+    width: 5%;
+    display: inline-block;
+}
+
+.f_p {
+    width: 90%;
+    display: inline-block;
+}
+
+.highlight_f {
+    background-color: var(--main-highlight-color);
+}

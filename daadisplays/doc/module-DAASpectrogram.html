@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Module: DAASpectrogram</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Module: DAASpectrogram</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+            
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><div style="display:flex;"><div style="width:50%;">
+             <b>DAA Spectrogram.</b>
+             <p>Graphics library for plotting resolution bands in a spectrogram.
+             The x axis of the spectrogram represents the time dimension.
+             The y axis represents the band type.</p></div>
+             <img src="images/daa-spectrogram.png" style="margin-left:8%; max-height:207px;" alt="DAA Spectrogram"></div></div>
+        
+
+        
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>2018.12.01</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Paolo Masci</li>
+        </ul>
+    </dd>
+    
+
+    
+    <dt class="tag-copyright">Copyright:</dt>
+    <dd class="tag-copyright"><ul class="dummy"><li>Copyright 2016 United States Government as represented by the
+Administrator of the National Aeronautics and Space Administration. No
+copyright is claimed in the United States under Title 17, 
+U.S. Code. All Other Rights Reserved.
+<br>
+Disclaimers
+<br>
+No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY
+WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY,
+INCLUDING, BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE
+WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM
+INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE ERROR
+FREE, OR ANY WARRANTY THAT DOCUMENTATION, IF PROVIDED, WILL CONFORM TO
+THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN ANY MANNER,
+CONSTITUTE AN ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT
+OF ANY RESULTS, RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY
+OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT SOFTWARE.
+FURTHER, GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES
+REGARDING THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE,
+AND DISTRIBUTES IT "AS IS."
+<br>
+Waiver and Indemnity: RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS
+AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND
+SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT.  IF RECIPIENT'S USE OF
+THE SUBJECT SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES,
+EXPENSES OR LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM
+PRODUCTS BASED ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT
+SOFTWARE, RECIPIENT SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED
+STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY
+PRIOR RECIPIENT, TO THE EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE
+REMEDY FOR ANY SUCH MATTER SHALL BE THE IMMEDIATE, UNILATERAL
+TERMINATION OF THIS AGREEMENT.</li></ul></dd>
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="daa-spectrogram.js.html">daa-spectrogram.js</a>, <a href="daa-spectrogram.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// file index.js (to be stored in pvsio-web/examples/demos/daa-displays/)
+require.config({
+    paths: { 
+        widgets: "../../client/app/widgets",
+        text: "../../client/app/widgets/daa-displays/lib/text/text"
+    }
+});
+require(["widgets/daa-displays/daa-sspectrogram"], function (DAASpectrogram) {
+    "use strict";
+    const spectrogram = new DAASpectrogram("track-bands");
+    spectrogram.plot({
+        ...
+    });
+});
+
+// file index.html (to be stored in pvsio-web/examples/demos/daa-displays/)
+&lt;!DOCTYPE HTML>
+&lt;html>
+    &lt;head>
+        &lt;meta charset="utf-8">
+        &lt;meta http-equiv="X-UA-Compatible">
+        &lt;title>&lt;/title>
+        &lt;meta name="viewport" content="width=device-width">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/lib/bootstrap/4.1.3/css/bootstrap.min.css">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/lib/font-awesome/5.6.1/css/all.min.css">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/css/daa-displays.css">
+    &lt;/head>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/underscore/underscore.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/jquery/jquery-3.3.1.slim.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/popper/popper-1.14.3.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/bootstrap/4.1.3/bootstrap.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/handlebars/handlebars-v4.0.12.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/requireJS/require.js" data-main="index.js">&lt;/script>
+&lt;/html></code></pre>
+
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="%3Caname=%22DAASpectrogram%22%3EDAASpectrogram%3C/a%3E"><span class="type-signature"></span><a name="DAASpectrogram">DAASpectrogram</a><span class="signature">(id, coords, opt)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Constructor.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Unique plot identifier.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>coords</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The four coordinates (top, left, width, height) of the plot, specifying
+       the left/top corners, and the width/height of the (rectangular) widget area.
+       Default is { top: 0, left: 0, width: 800, height: 80 }.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>opt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Style options defining the visual appearance of the plot.
+         <li>range (Object({ min: real, max: real })): range of values to be plotted.</li>
+         <li>length (nat): temporal length of the spectrogram, i.e., number of time instants represented in the spectrogram.</li>
+         <li>parent (String): the HTML element where the plot will be appended (default is "body")</li></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="daa-spectrogram.js.html">daa-spectrogram.js</a>, <a href="daa-spectrogram.js.html#line141">line 141</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="%3Caname=%22plot%22%3Eplot%3C/a%3E"><span class="type-signature"></span><a name="plot">plot</a><span class="signature">(data)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Plot function, for rendering resolution bands in the spectrogram.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object({ bands: Object, step: nat })</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Resolution bands data
+             <li>bands: Object in the form { b1: range1, b2: range2, ... }, where b1, b2, ... are band names (e.g,. NEAR, FAR, etc) and range1, range2, ... are range objects { from: nat, to: nat }</li>
+             <li>step: the temporal step to be plotted</li></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="daa-spectrogram.js.html">daa-spectrogram.js</a>, <a href="daa-spectrogram.js.html#line193">line 193</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="%3Caname=%22setLength%22%3EsetLength%3C/a%3E"><span class="type-signature"></span><a name="setLength">setLength</a><span class="signature">(length)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Defines the temporal length of the spectrogram, i.e., the number of time instants represented in the spectrogram.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">nat</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The length of the spectrogram.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="daa-spectrogram.js.html">daa-spectrogram.js</a>, <a href="daa-spectrogram.js.html#line178">line 178</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AirspeedTape.html">AirspeedTape</a></li><li><a href="module-AltitudeTape.html">AltitudeTape</a></li><li><a href="module-Compass.html">Compass</a></li><li><a href="module-DAAPlaybackPlayer.html">DAAPlaybackPlayer</a></li><li><a href="module-DAASpectrogram.html">DAASpectrogram</a></li><li><a href="module-DAASplitView.html">DAASplitView</a></li><li><a href="module-InteractiveMap.html">InteractiveMap</a></li><li><a href="module-VerticalSpeedTape.html">VerticalSpeedTape</a></li><li><a href="module-VirtualHorizon.html">VirtualHorizon</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Mon Dec 31 2018 09:38:04 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

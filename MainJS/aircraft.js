@@ -1,0 +1,379 @@
+/**
+ *
+ * @module Aircraft
+ * @version 1.0.0
+ * @description <b> Aircraft module </b>
+ *
+ *
+ * @example none
+ * @author Andrew Peters
+ * @date May 2019
+ * @copyright
+ * Notices:
+ * Copyright 2019 United States Government as represented by the Administrator of the National Aeronautics
+ * and Space Administration. All Rights Reserved.
+ *  
+ * Disclaimers
+ * No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY OF ANY
+ * KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY
+ * WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM
+ * INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE ERROR FREE, OR ANY
+ * WARRANTY THAT DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE.
+ * THIS AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN ENDORSEMENT BY GOVERNMENT
+ * AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS, RESULTING DESIGNS, HARDWARE,
+ * SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT
+ * SOFTWARE.  FURTHER, GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES
+ * REGARDING THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE, AND
+ * DISTRIBUTES IT "AS IS."
+ *  
+ * Waiver and Indemnity:  RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS AGAINST THE UNITED
+ * STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR
+ * RECIPIENT.  IF RECIPIENT'S USE OF THE SUBJECT SOFTWARE RESULTS IN ANY LIABILITIES,
+ * DEMANDS, DAMAGES, EXPENSES OR LOSSES ARISING FROM SUCH USE, INCLUDING ANY
+ * DAMAGES FROM PRODUCTS BASED ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT
+ * SOFTWARE, RECIPIENT SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED STATES
+ * GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT,
+ * TO THE EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER SHALL
+ * BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
+ *
+ */
+
+
+
+import * as comms from './comms.js'
+import * as m from './map.js'
+import * as I from '../Indicators/indicators.js'
+import * as form from './form.js'
+
+
+
+export class Aircraft {
+    /**
+     * @function <a name="Aircraft">Aircraft</a>
+     * @description Constructor.
+     * @param ac_id {string} aircraft id
+     * @param aircraft_list {Array} list of aircraft objects
+     * @param fp {Array} flight plan, list of waypoint objects
+     * @memberof module:Aircraft
+     * @class Aircraft
+     * @instance
+     */
+    constructor(ac_id, aircraft_list, fp) {
+        this.id = ac_id;
+        this.name = ac_id;
+        this.aircraft_list = aircraft_list;
+        this.flightplan = fp;
+        this.replan = []
+        this.rec_fp = [];
+        this.rec_fp_len = 0;
+        this.type = 'RotorSim';
+        this.parameters = []; // {name: name, value:value, type:type, index:index}
+
+        this.lat = 0;
+        this.lng = 0;
+        this.alt = 10;
+        this.vel = 3;
+        this.u_alt = 10;
+        this.u_vel = 3;
+
+        this.rel_alt = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.vz = 0;
+        this.hdg = 0;
+        this.roll = 0;
+        this.pitch = 0;
+        this.yaw = 0;
+        this.rollSpeed = 0;
+        this.pitchSpeed = 0;
+        this.yawSpeed = 0;
+        this.voltage = 0;
+        this.current = 0;
+        this.gps_status = false;
+        this.battery_remaining = 0
+        this.radio_percent = 0
+        this.radio_missing = 0
+        this.satellites_visible = 0
+
+        this.clicked = false;
+
+        this.status = 0; //  0 = planning, 1 = pre-flight, 2 = in-flight, 3 = post-flight
+        this.mode = '' // sitl, hitl, playback
+        this.flightmode = '' // stablized, guided,... armed/disarmed
+        this.stopCalled = false
+        this.hasComms = false;
+
+        this.flightplanLine = null;
+        this.replanLine = null
+        this.icon = 1;
+        this.acMarker = 1;
+        this.start = 'Unknown';
+        this.prev_pos = []; // stores the trailing dots
+        this.pos_update_counter = 0; // update the trailing dots
+
+        this.prev_panel = null; // inFlight_pan, info_pan, pan
+        this.activeView = false; // are the panels currently in view
+        this.activeSubPanels = []; // list of panels to make active if activeView == true
+
+        this.icarous = 1;
+        this.ic_control = false;
+        this.bands = [];
+        this.band_markers = [];
+        this.ic_radius = null;
+        this.icRad = 0;
+        this.ic_last = null
+        this.traffic_list = [];
+        this.gf_list = []
+        this.gf_submitted = []
+        this.showBands = true;
+        this.ditchSite = null
+        this.schedule_zone = 0
+        this.entry_radius = 0
+        this.coord_zone = 0
+        this.mission_current = 0
+        this.small = null
+        this.med = null
+        this.large = null
+
+        this.forwarding = false; // forwarding raw data to somewhere else
+        this.f_ip = '146.165.72.2'
+        this.f_port = '14550'
+        this.f_baud = '56700'
+
+    }
+
+    /**
+     * @function <a name="setAcIcon">setAcIcon</a>
+     * @description Set's the aircraft icon image, size.
+     * @param acId {string} aircraft id
+     * @memberof module:Aircraft
+     * @instance
+     */
+    setAcIcon(acId) {
+        let mymap = m.getMap()
+        let acIcon
+        for (let item of Object.keys(mymap._layers)) {
+            acIcon = L.icon({
+                iconUrl: acIconList[parseInt(acId) - 1],
+                // shadowUrl: 'images/drone-svgrepo-com-green.svg',
+                iconSize: [40, 40], // size of the icon
+                // shadowSize: [36, 36], // size of the shadow
+                // shadowAnchor: [17, 16], // the same for the shadow
+                popupAnchor: [4, 62] // point from which the popup should open relative to the iconAnchor
+            })
+
+        }
+        return acIcon
+    }
+
+    /**
+     * @function <a name="setAcIconWithShadow">setAcIconWithShadow</a>
+     * @description Sets the aircraft icon with a red outline to denote active aircraft.
+     * @param acId {string} aircraft id
+     * @memberof module:Aircraft
+     * @instance
+     */
+    setAcIconWithShadow(acId) {
+        let mymap = m.getMap()
+        let acIcon
+        for (let item of Object.keys(mymap._layers)) {
+            acIcon = L.icon({
+                iconUrl: acIconList[parseInt(acId) - 1],
+                shadowUrl: 'images/drone-svgrepo-com-red.svg',
+                iconSize: [40, 40], // size of the icon
+                shadowSize: [36, 36], // size of the shadow
+                shadowAnchor: [17, 16], // the same for the shadow
+                popupAnchor: [4, 62] // point from which the popup should open relative to the iconAnchor
+            })
+        }
+        return acIcon
+    }
+}
+
+/**
+ * @function <a name="acShutdown">acShutdown</a>
+ * @description Shuts down an aircraft, removes it from map and removes the panels.
+ * @param ac {Object} Aircraft object.
+ * @memberof module:Aircraft
+ */
+export function acShutdown(ac, originator = true) {
+    setTimeout(console.log('Waiting for the queue to clear.'), 3000)
+
+    let ac_list = comms.getAircraftList()
+    if (originator) {
+        if (ac.mode == 'SITL' && ac_list.length > 0) {
+            let message = 'AIRCRAFT ' + ac.id + ' SHUTDOWN ' + ac.id;
+            comms.sendFullMessage(message);
+        } else if (ac.mode == 'HITL' && ac_list.length > 0) {
+            let message = 'AIRCRAFT ' + ac.id + ' HITL_DISCONNECT ' + ac.id;
+            comms.sendFullMessage(message);
+        } // playback - message already sent
+    }
+    // remove ac from menu
+    let menu_li = document.getElementsByClassName('menu_li');
+    for (let i = menu_li.length - 1; i >= 0; i--) {
+        let id = menu_li[i].childNodes[0].childNodes[0].id.split('_')
+        id = id[id.length - 1]
+        if (id == ac.id) {
+            menu_li[i].parentNode.removeChild(menu_li[i])
+        }
+    }
+
+    // remove all markers and icons from map
+    m.removeACShutdown(ac)
+
+    // remove all indicators
+    I.removeIndicators()
+
+    // remove all panels associated with that ac
+    let panels = document.getElementsByClassName('panel-body');
+    for (let i = panels.length - 1; i >= 0; i--) {
+        let id = panels[i].id.split('_');
+        id = id[id.length - 1]
+        if (id == ac.id) {
+            panels[i].parentNode.removeChild(panels[i]);
+        }
+    }
+
+    // remove ac from ac list
+    comms.removeFromAircraftList(ac)
+
+    // make settings panel active
+    form.makePanelActive('settings');
+}
+
+
+let acIconList = [
+    'images/quad_red.svg',
+    'images/quad_blue.svg',
+    'images/quad_green.svg',
+    'images/quad_yellow.svg',
+    'images/quad_purple.svg',
+]
+
+
+let red_marker = L.icon({
+    iconUrl: 'images/red_marker.svg',
+    shadowUrl: '',
+    iconSize: [20, 20], // size of the icon
+    iconAnchor: [10, 20],
+    shadowSize: [50, 64], // size of the shadow
+    shadowAnchor: [4, 62], // the same for the shadow
+    popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+});
+
+/**
+ * @function <a name="getAcIcon">getAcIcon</a>
+ * @description Get aircraft icon.
+ * @return {object} aircraft icon
+ * @memberof module:Aircraft
+ */
+export function getAcIcon() {
+    return acIcon;
+}
+
+/**
+ * @function <a name="getRedMarker">getRedMarker</a>
+ * @description Get red marker.
+ * @return {object} red marker
+ * @memberof module:Aircraft
+ */
+export function getRedMarker() {
+    return red_marker;
+}
+
+/**
+ * @function <a name="getBlackMarker">getBlackMarker</a>
+ * @description Get black marker.
+ * @return {object} black marker
+ * @memberof module:Aircraft
+ */
+export function getBlackMarker() {
+    return black_marker;
+}
+
+/**
+ * @function <a name="getAircraftById">getAircraftById</a>
+ * @description Get aircraft object.
+ * @return {Object} Aircraft object
+ * @memberof module:Aircraft
+ */
+export function getAircraftById(id) {
+    let aircraft_list = comms.getAircraftList();
+    let ac = 'Aircraft Not Found'
+    for (let item of aircraft_list) {
+        if (item.id == id) {
+            ac = item;
+        }
+    }
+    return ac
+}
+
+/**
+ * @function <a name="getAircraftByName">getAircraftByName</a>
+ * @description Get aircraft object.
+ * @return {Object} aircraft object.
+ * @memberof module:Aircraft
+ */
+export function getAircraftByName(name) {
+    let aircraft_list = comms.getAircraftList();
+    let ac = 'Aircraft Not Found'
+    for (let item of aircraft_list) {
+        if (item.name == name) {
+            ac = item;
+        }
+    }
+    return ac
+}
+
+/**
+ * @function <a name="getActiveAircraft">getActiveAircraft</a>
+ * @description Get aircraft object.
+ * @return {Object} aircraft object.
+ * @memberof module:Aircraft
+ */
+export function getActiveAc() {
+    let ac_list = comms.getAircraftList()
+    for (let ac of ac_list) {
+        if (ac.activeView == true) {
+            return ac
+        }
+    }
+    return null
+}
+
+/**
+ * @function <a name="flightplanToString">flightplanToString</a>
+ * @description Converts list of wp objects to string for sending to server.
+ * @param ac {Object} Aircraft object.
+ * @return {string} wp string
+ * @memberof module:Aircraft
+ */
+export function flightplanToString(ac) {
+    // let out = ' ' + ac.flightplan[0].latlng.lat.toString() + ' ' + ac.flightplan[0].latlng.lng.toString() + ' ' + ac.flightplan[0].alt.toString() + ' '
+    let out = ' '
+    for (let item of ac.flightplan) {
+        out = out + item.latlng.lat.toString() + ' ' + item.latlng.lng.toString() + ' ' + item.alt.toString() + ' '
+    }
+    return out
+}
+
+
+export class Waypoint {
+    /**
+     * @function <a name="Waypoint">Waypoint</a>
+     * @description Constructor
+     * @param latlng {Object} leaflet latlng object
+     * @param alt {real} altitude
+     * @memberof module:Aircraft
+     * @class Waypoint
+     * @instance
+     */
+    constructor(latlng, alt) {
+        this.latlng = latlng;
+        this.alt = alt
+        this.wpMarker = 1;
+        this.clicked = false;
+    }
+}

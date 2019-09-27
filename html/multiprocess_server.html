@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>multiprocess_server API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>multiprocess_server</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">#!/usr/bin/env python3
+
+from multiprocessing import Process, Queue, Manager
+import multiprocessing
+import asyncio
+import websockets
+import os
+import time
+import logging
+
+import ServerFiles.icProcesses as ICP
+import ServerFiles.userControl as UC
+import ServerFiles.userManager as UM
+import ServerFiles.cFSstartup as CS
+
+
+q = Queue()
+playback = False
+
+
+def to_ic(q, m):
+    # all of the icarous stuff
+    ICP.data(q, m)
+
+
+def addProcess(target, args):
+    p = Process(target=target, args=(args))
+    return p
+
+
+async def consumer_handler(websocket, path):
+    global q
+    global playback
+    logger = logging.getLogger()
+
+    while True:
+        message = await websocket.recv()
+        logger.info(&#39;SERVER: Input Message: &#39; + str(message))
+        # parse the message
+        message = message.split(&#39; &#39;)
+        print(message)
+        # look for message to start new instance of icaorus
+        if &#39;NEW_AIRCRAFT&#39; in message:
+            ac = int(message[3])
+            user = um.getUser(websocket)
+            user.addUserAircraft(ac)
+            m = manager.list([message])
+            p = addProcess(to_ic, (q, m))
+            m_lists.append([ac, m])
+            processes.append([ac, p])
+            p.start()
+            logger.info(&#39;SERVER: Starting New Aircraft {}&#39;.format(processes))
+
+        elif &#39;SHUTDOWN&#39; in message:
+
+            logger.info(&#39;SERVER: Active children: {}&#39;.format(
+                        multiprocessing.active_children()))
+            if playback:
+                playback = False
+            # get the ac
+            ac = int(message[3])
+            print(&#39;SHUT_DOWN function&#39;, message)
+            q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+str(ac)+&#39;, &#34;name&#34;:&#34;SHUT_DOWN&#34;}&#39;)
+            # get the list to add it to
+            m = [x[1] for x in m_lists if x[0] == ac]
+            try:
+                m_lists.remove([x for x in m_lists if x[0] == ac][0])
+            except IndexError:
+                logger.error(
+                    &#39;SERVER: AC not found in list. Unable to shut down.&#39;, exc_info=True)
+                pass
+
+            m1 = m[0]
+            m1.append(message)
+            # find the process
+            p = [x for x in processes if x[0] == ac]
+            processes.remove(p[0])
+            p = p[0][1]
+            # join it
+            p.join(timeout=5)
+            logger.info(&#39;SERVER: Process exit code:{}&#39;.format(p.exitcode))
+            if p.exitcode == None:
+                p.terminate()
+                q.close()
+                q.join_thread()
+                q = Queue()
+
+            # remove the list
+            del m
+            logger.info(&#39;SERVER: Active children: {}&#39;.format(
+                        multiprocessing.active_children()))
+
+        elif &#39;AIRCRAFT&#39; in message:
+            if message[1] != &#39;None&#39; and not playback:
+
+                if &#39;HITL_DISCONNECT&#39; in message:
+
+                    ac = int(message[3])
+                    print(&#39;HITL_DISCONNECT function&#39;, message)
+                    q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+message[3]+&#39;, &#34;name&#34;:&#34;SHUT_DOWN&#34;}&#39;)
+                    # get the list to add it to
+                    m = [x[1] for x in m_lists if x[0] == ac]
+                    try:
+                        m_lists.remove([x for x in m_lists if x[0] == ac][0])
+                    except IndexError:
+                        logger.error(
+                            &#39;SERVER: AC not found in list. Unable to shut down.&#39;, exc_info=True)
+                        pass
+                    m1 = m[0]
+                    m1.append(message)
+                    # find the process and remove it
+                    p = [x for x in processes if x[0] == ac]
+                    processes.remove(p[0])
+                    p = p[0][1]
+
+                    # give icarous time to shut down
+                    time.sleep(2)
+                    p.join(timeout=5)
+                    logger.info(
+                        &#39;SERVER: Process exit code:{}&#39;.format(p.exitcode))
+                    if p.exitcode == None:
+                        p.terminate()
+                        q.close()
+                        q.join_thread()
+                        q = Queue()
+                    del m
+                    logger.info(&#39;SERVER: Active children: {}&#39;.format(
+                                multiprocessing.active_children()))
+
+                else:
+                    ac = int(message[1])
+                    # get the list to add it to
+                    m = [x[1] for x in m_lists if x[0] == ac]
+                    try:
+                        m = m[0]
+                        m.append(message)
+                    except Exception as e:
+                        print(&#39;could not append message&#39;, e)
+                        print(&#39;playback&#39;, playback)
+
+            elif &#39;HITL&#39; in message:
+                ac = int(message[3])
+                # setup the new process
+                user = um.getUser(websocket)
+                user.addUserAircraft(ac)
+                m = manager.list([message])
+                p = addProcess(to_ic, (q, m))
+                m_lists.append([ac, m])
+                print(&#39;m lists&#39;, m_lists)
+                processes.append([ac, p])
+                print(&#39;processes&#39;, processes)
+                p.start()
+                logger.info(&#39;SERVER: Starting HITL {}&#39;.format(processes))
+
+            elif &#39;ICAROUS_STARTUP&#39; in message:
+                logger.info(&#39;SERVER: {}&#39;.format(message))
+                P = message[4]
+                P = P[1:]+&#39;/&#39;
+                F = &#39;cFS/bin/cpu1/cf/cfe_es_startup.scr&#39;
+
+                if message[3] == &#39;GET_NAMES&#39;:
+                    x = CS.readFile(P, F)
+                    names = CS.showAppNames()
+                    CS.printCurrentStatus()
+                    q.put(
+                        &#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#39; + names + &#39;}&#39;)
+                    logger.info(&#39;ICAROUS_APPS : APPS : {}&#39;.format(names))
+
+                elif message[3] == &#39;ACTIVE&#39;:
+                    CS.changeAppStatus(message[3:])
+                    x = CS.writeFile(P, F)
+                    CS.printCurrentStatus()
+
+                    if x == 0:
+                        names = CS.showAppNames()
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#39; + names + &#39;}&#39;)
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#34;FILE_WRITE_SUCCESS&#34;}&#39;)
+                        logger.info(
+                            &#39;SERVER: ICAROUS_APPS : FILE_WRITE_SUCCESS&#39;)
+                    else:
+                        q.put(&#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#34;FILE_WRITE_FAIL&#34;}&#39;)
+                        logger.info(&#39;SERVER: ICAROUS_APPS : FILE_WRITE_FAIL&#39;)
+
+            elif &#39;READ_USER_SETTINGS&#39; in message:
+                settings = UM.readUserSettings()
+                q.put(&#39;{&#34;name&#34;:&#34;USER_SETTINGS&#34;&#39; + settings+&#39;}&#39;)
+                logger.info(&#39;SERVER: Read User Settings {}&#39;.format(settings))
+
+            elif &#39;SAVE_USER_SETTINGS&#39; in message:
+                msg = UM.saveUserSettings(message)
+                q.put(&#39;{&#34;name&#34;:&#34;USER_SETTINGS_SAVED&#34;, &#34;INFO&#34;:&#34;&#39;+msg+&#39;&#34;}&#39;)
+                logger.info(&#39;SERVER: Saved User Settings {}&#39;.format(message))
+
+            elif &#39;RESET_USER_SETTINGS&#39; in message:
+                settings = UM.readUserSettings(0)
+                q.put(&#39;{&#34;name&#34;:&#34;USER_SETTINGS_RESET&#34;&#39; + settings+&#39;}&#39;)
+                logger.info(&#39;SERVER: Reset User Settings {}&#39;.format(settings))
+
+            elif &#39;PLAYBACK&#39; in message:
+
+                if &#39;START&#39; in message:
+                    playback = True
+                    # setup the new process
+                    user = um.getUser(websocket)
+                    user.addUserAircraft(-1)
+                    m = manager.list([message])
+                    p = addProcess(to_ic, (q, m))
+                    m_lists.append([-1, m])
+                    processes.append([-1, p])
+                    p.start()
+                    logger.info(
+                        &#39;SERVER: Starting Playback {}&#39;.format(processes))
+
+                else:
+                    #  pass the message
+                    m.append(message)
+
+            else:
+                logger.info(
+                    &#39;SERVER: Ignoring unassigned aircraft messages for now. {}&#39;.format(message))
+
+        else:
+            logger.info(&#39;SERVER: Undefined Input Message: {}&#39;.format(message))
+
+        # await um.notifyUsers(str(message))
+
+
+async def producer_handler(websocket, path):
+    while True:
+        if not q.empty():
+            # get the next message
+            x = q.get(block=False)
+            # send message over web socket
+            await um.notifyUsers(str(x))
+        await asyncio.sleep(.001)
+
+
+# allows duplex communication
+async def handler(websocket, path):
+    await um.register(websocket)
+
+    consumer_task = asyncio.ensure_future(
+        consumer_handler(websocket, path))
+    producer_task = asyncio.ensure_future(
+        producer_handler(websocket, path))
+    done, pending = await asyncio.wait(
+        [consumer_task, producer_task],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+    for task in pending:
+        task.cancel()
+
+    await um.unregister(websocket)
+
+
+# needed for multiprocessing
+if __name__ == &#34;__main__&#34;:
+    # Set HOST to local machine ip to be accessable to other devices
+    HOST = &#39;0.0.0.0&#39;
+    # HOST = &#39;127.0.0.1&#39;
+    # HOST = &#39;169.254.1.12&#39;
+    PORT = 8000
+    um = UM.UserManager()
+
+    logging.basicConfig(filename=&#39;LogFiles/server_log_{}.log&#39;.format(time.strftime(&#34;%Y-%m-%d_%H:%M:%S&#34;,
+                                                                                   time.localtime(time.time()))), filemode=&#39;w&#39;, format=&#39;%(asctime)s - %(message)s&#39;,  level=logging.INFO)
+
+    logging.info(&#39;MAIN: Starting Logger&#39;)
+    m_lists = []
+    q = Queue()
+    processes = []
+
+    with Manager() as manager:
+
+        # Open the front end websocket
+        start_server = websockets.serve(handler, HOST, PORT)
+        asyncio.get_event_loop().run_until_complete(start_server)
+        # keeps the socket open forever
+        asyncio.get_event_loop().run_forever()</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="multiprocess_server.addProcess"><code class="name flex">
+<span>def <span class="ident">addProcess</span></span>(<span>target, args)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def addProcess(target, args):
+    p = Process(target=target, args=(args))
+    return p</code></pre>
+</details>
+</dd>
+<dt id="multiprocess_server.consumer_handler"><code class="name flex">
+<span>async def <span class="ident">consumer_handler</span></span>(<span>websocket, path)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">async def consumer_handler(websocket, path):
+    global q
+    global playback
+    logger = logging.getLogger()
+
+    while True:
+        message = await websocket.recv()
+        logger.info(&#39;SERVER: Input Message: &#39; + str(message))
+        # parse the message
+        message = message.split(&#39; &#39;)
+        print(message)
+        # look for message to start new instance of icaorus
+        if &#39;NEW_AIRCRAFT&#39; in message:
+            ac = int(message[3])
+            user = um.getUser(websocket)
+            user.addUserAircraft(ac)
+            m = manager.list([message])
+            p = addProcess(to_ic, (q, m))
+            m_lists.append([ac, m])
+            processes.append([ac, p])
+            p.start()
+            logger.info(&#39;SERVER: Starting New Aircraft {}&#39;.format(processes))
+
+        elif &#39;SHUTDOWN&#39; in message:
+
+            logger.info(&#39;SERVER: Active children: {}&#39;.format(
+                        multiprocessing.active_children()))
+            if playback:
+                playback = False
+            # get the ac
+            ac = int(message[3])
+            print(&#39;SHUT_DOWN function&#39;, message)
+            q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+str(ac)+&#39;, &#34;name&#34;:&#34;SHUT_DOWN&#34;}&#39;)
+            # get the list to add it to
+            m = [x[1] for x in m_lists if x[0] == ac]
+            try:
+                m_lists.remove([x for x in m_lists if x[0] == ac][0])
+            except IndexError:
+                logger.error(
+                    &#39;SERVER: AC not found in list. Unable to shut down.&#39;, exc_info=True)
+                pass
+
+            m1 = m[0]
+            m1.append(message)
+            # find the process
+            p = [x for x in processes if x[0] == ac]
+            processes.remove(p[0])
+            p = p[0][1]
+            # join it
+            p.join(timeout=5)
+            logger.info(&#39;SERVER: Process exit code:{}&#39;.format(p.exitcode))
+            if p.exitcode == None:
+                p.terminate()
+                q.close()
+                q.join_thread()
+                q = Queue()
+
+            # remove the list
+            del m
+            logger.info(&#39;SERVER: Active children: {}&#39;.format(
+                        multiprocessing.active_children()))
+
+        elif &#39;AIRCRAFT&#39; in message:
+            if message[1] != &#39;None&#39; and not playback:
+
+                if &#39;HITL_DISCONNECT&#39; in message:
+
+                    ac = int(message[3])
+                    print(&#39;HITL_DISCONNECT function&#39;, message)
+                    q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+message[3]+&#39;, &#34;name&#34;:&#34;SHUT_DOWN&#34;}&#39;)
+                    # get the list to add it to
+                    m = [x[1] for x in m_lists if x[0] == ac]
+                    try:
+                        m_lists.remove([x for x in m_lists if x[0] == ac][0])
+                    except IndexError:
+                        logger.error(
+                            &#39;SERVER: AC not found in list. Unable to shut down.&#39;, exc_info=True)
+                        pass
+                    m1 = m[0]
+                    m1.append(message)
+                    # find the process and remove it
+                    p = [x for x in processes if x[0] == ac]
+                    processes.remove(p[0])
+                    p = p[0][1]
+
+                    # give icarous time to shut down
+                    time.sleep(2)
+                    p.join(timeout=5)
+                    logger.info(
+                        &#39;SERVER: Process exit code:{}&#39;.format(p.exitcode))
+                    if p.exitcode == None:
+                        p.terminate()
+                        q.close()
+                        q.join_thread()
+                        q = Queue()
+                    del m
+                    logger.info(&#39;SERVER: Active children: {}&#39;.format(
+                                multiprocessing.active_children()))
+
+                else:
+                    ac = int(message[1])
+                    # get the list to add it to
+                    m = [x[1] for x in m_lists if x[0] == ac]
+                    try:
+                        m = m[0]
+                        m.append(message)
+                    except Exception as e:
+                        print(&#39;could not append message&#39;, e)
+                        print(&#39;playback&#39;, playback)
+
+            elif &#39;HITL&#39; in message:
+                ac = int(message[3])
+                # setup the new process
+                user = um.getUser(websocket)
+                user.addUserAircraft(ac)
+                m = manager.list([message])
+                p = addProcess(to_ic, (q, m))
+                m_lists.append([ac, m])
+                print(&#39;m lists&#39;, m_lists)
+                processes.append([ac, p])
+                print(&#39;processes&#39;, processes)
+                p.start()
+                logger.info(&#39;SERVER: Starting HITL {}&#39;.format(processes))
+
+            elif &#39;ICAROUS_STARTUP&#39; in message:
+                logger.info(&#39;SERVER: {}&#39;.format(message))
+                P = message[4]
+                P = P[1:]+&#39;/&#39;
+                F = &#39;cFS/bin/cpu1/cf/cfe_es_startup.scr&#39;
+
+                if message[3] == &#39;GET_NAMES&#39;:
+                    x = CS.readFile(P, F)
+                    names = CS.showAppNames()
+                    CS.printCurrentStatus()
+                    q.put(
+                        &#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#39; + names + &#39;}&#39;)
+                    logger.info(&#39;ICAROUS_APPS : APPS : {}&#39;.format(names))
+
+                elif message[3] == &#39;ACTIVE&#39;:
+                    CS.changeAppStatus(message[3:])
+                    x = CS.writeFile(P, F)
+                    CS.printCurrentStatus()
+
+                    if x == 0:
+                        names = CS.showAppNames()
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#39; + names + &#39;}&#39;)
+                        q.put(
+                            &#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#34;FILE_WRITE_SUCCESS&#34;}&#39;)
+                        logger.info(
+                            &#39;SERVER: ICAROUS_APPS : FILE_WRITE_SUCCESS&#39;)
+                    else:
+                        q.put(&#39;{&#34;name&#34;:&#34;ICAROUS_APPS&#34;, &#34;INFO&#34;: &#34;FILE_WRITE_FAIL&#34;}&#39;)
+                        logger.info(&#39;SERVER: ICAROUS_APPS : FILE_WRITE_FAIL&#39;)
+
+            elif &#39;READ_USER_SETTINGS&#39; in message:
+                settings = UM.readUserSettings()
+                q.put(&#39;{&#34;name&#34;:&#34;USER_SETTINGS&#34;&#39; + settings+&#39;}&#39;)
+                logger.info(&#39;SERVER: Read User Settings {}&#39;.format(settings))
+
+            elif &#39;SAVE_USER_SETTINGS&#39; in message:
+                msg = UM.saveUserSettings(message)
+                q.put(&#39;{&#34;name&#34;:&#34;USER_SETTINGS_SAVED&#34;, &#34;INFO&#34;:&#34;&#39;+msg+&#39;&#34;}&#39;)
+                logger.info(&#39;SERVER: Saved User Settings {}&#39;.format(message))
+
+            elif &#39;RESET_USER_SETTINGS&#39; in message:
+                settings = UM.readUserSettings(0)
+                q.put(&#39;{&#34;name&#34;:&#34;USER_SETTINGS_RESET&#34;&#39; + settings+&#39;}&#39;)
+                logger.info(&#39;SERVER: Reset User Settings {}&#39;.format(settings))
+
+            elif &#39;PLAYBACK&#39; in message:
+
+                if &#39;START&#39; in message:
+                    playback = True
+                    # setup the new process
+                    user = um.getUser(websocket)
+                    user.addUserAircraft(-1)
+                    m = manager.list([message])
+                    p = addProcess(to_ic, (q, m))
+                    m_lists.append([-1, m])
+                    processes.append([-1, p])
+                    p.start()
+                    logger.info(
+                        &#39;SERVER: Starting Playback {}&#39;.format(processes))
+
+                else:
+                    #  pass the message
+                    m.append(message)
+
+            else:
+                logger.info(
+                    &#39;SERVER: Ignoring unassigned aircraft messages for now. {}&#39;.format(message))
+
+        else:
+            logger.info(&#39;SERVER: Undefined Input Message: {}&#39;.format(message))</code></pre>
+</details>
+</dd>
+<dt id="multiprocess_server.handler"><code class="name flex">
+<span>async def <span class="ident">handler</span></span>(<span>websocket, path)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">async def handler(websocket, path):
+    await um.register(websocket)
+
+    consumer_task = asyncio.ensure_future(
+        consumer_handler(websocket, path))
+    producer_task = asyncio.ensure_future(
+        producer_handler(websocket, path))
+    done, pending = await asyncio.wait(
+        [consumer_task, producer_task],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+    for task in pending:
+        task.cancel()
+
+    await um.unregister(websocket)</code></pre>
+</details>
+</dd>
+<dt id="multiprocess_server.producer_handler"><code class="name flex">
+<span>async def <span class="ident">producer_handler</span></span>(<span>websocket, path)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">async def producer_handler(websocket, path):
+    while True:
+        if not q.empty():
+            # get the next message
+            x = q.get(block=False)
+            # send message over web socket
+            await um.notifyUsers(str(x))
+        await asyncio.sleep(.001)</code></pre>
+</details>
+</dd>
+<dt id="multiprocess_server.to_ic"><code class="name flex">
+<span>def <span class="ident">to_ic</span></span>(<span>q, m)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def to_ic(q, m):
+    # all of the icarous stuff
+    ICP.data(q, m)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="multiprocess_server.addProcess" href="#multiprocess_server.addProcess">addProcess</a></code></li>
+<li><code><a title="multiprocess_server.consumer_handler" href="#multiprocess_server.consumer_handler">consumer_handler</a></code></li>
+<li><code><a title="multiprocess_server.handler" href="#multiprocess_server.handler">handler</a></code></li>
+<li><code><a title="multiprocess_server.producer_handler" href="#multiprocess_server.producer_handler">producer_handler</a></code></li>
+<li><code><a title="multiprocess_server.to_ic" href="#multiprocess_server.to_ic">to_ic</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

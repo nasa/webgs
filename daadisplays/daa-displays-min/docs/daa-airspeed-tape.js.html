@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: daa-airspeed-tape.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: daa-airspeed-tape.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module AirspeedTape
+ * @version 2018.12.01
+ * @description &lt;div style="display:flex;">&lt;div style="width:50%;">
+ *              &lt;b>Airspeed tape widget.&lt;/b>
+ *              &lt;p>The tape display consists of a graduated linear string that
+ *              scrolls vertically when the display value changes and an indicator pointing at
+ *              the current value. A framed box placed next to the indicator embeds a digital
+ *              display showing the current value in numeric form. A small graduated linear
+ *              string is used for the least significant digit of the digital display.
+ *              The tape unit is 20 knot.&lt;/p>
+ *              &lt;p>This implementation requires the installation of the pvsio-web toolkit 
+ *              (&lt;a href="http://www.pvsioweb.org" target=_blank>www.pvsioweb.org&lt;/a>).&lt;/p>
+ *              &lt;p>Google Chrome is recommended for correct rendering of the widget.&lt;/p>&lt;/div>
+ *              &lt;img src="images/daa-airspeed-tape.png" style="margin-left:8%; max-height:250px;" alt="DAA Airspeed Tape Widget">&lt;/div>
+ * @example
+// file index.js (to be stored in pvsio-web/examples/demos/daa-displays/)
+require.config({
+    paths: { 
+        widgets: "../../client/app/widgets",
+        text: "../../client/app/widgets/daa-displays/lib/text/text"
+    }
+});
+require(["widgets/daa-displays/daa-airspeed-tape"], function (AirspeedTape) {
+    "use strict";
+    const airSpeedTape = new AirspeedTape("airspeed", {
+        top: 100, left: 100
+    });
+    airSpeedTape.setAirSpeed(300);
+    airSpeedTape.setBands({
+        RECOVERY: [ { from: 0, to: 300 } ], 
+        NEAR: [ { from: 300, to: 600 } ] 
+    });
+});
+
+// file index.html (to be stored in pvsio-web/examples/demos/daa-displays/)
+&lt;!DOCTYPE HTML>
+&lt;html>
+    &lt;head>
+        &lt;meta charset="utf-8">
+        &lt;meta http-equiv="X-UA-Compatible">
+        &lt;title>&lt;/title>
+        &lt;meta name="viewport" content="width=device-width">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/lib/bootstrap/4.1.3/css/bootstrap.min.css">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/lib/font-awesome/5.6.1/css/all.min.css">
+        &lt;link rel="stylesheet" href="../../client/app/widgets/daa-displays/css/daa-displays.css">
+    &lt;/head>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/underscore/underscore.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/jquery/jquery-3.3.1.slim.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/popper/popper-1.14.3.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/bootstrap/4.1.3/bootstrap.min.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/handlebars/handlebars-v4.0.12.js">&lt;/script>
+    &lt;script src="../../client/app/widgets/daa-displays/lib/requireJS/require.js" data-main="index.js">&lt;/script>
+&lt;/html>
+
+ * @author Paolo Masci
+ * @date October 2018
+ * @copyright 
+ * Copyright 2016 United States Government as represented by the
+ * Administrator of the National Aeronautics and Space Administration. No
+ * copyright is claimed in the United States under Title 17, 
+ * U.S. Code. All Other Rights Reserved.
+ * &lt;br>
+ * Disclaimers
+ * &lt;br>
+ * No Warranty: THE SUBJECT SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY
+ * WARRANTY OF ANY KIND, EITHER EXPRESSED, IMPLIED, OR STATUTORY,
+ * INCLUDING, BUT NOT LIMITED TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE
+ * WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR FREEDOM FROM
+ * INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE ERROR
+ * FREE, OR ANY WARRANTY THAT DOCUMENTATION, IF PROVIDED, WILL CONFORM TO
+ * THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN ANY MANNER,
+ * CONSTITUTE AN ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT
+ * OF ANY RESULTS, RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY
+ * OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT SOFTWARE.
+ * FURTHER, GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES
+ * REGARDING THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE,
+ * AND DISTRIBUTES IT "AS IS."
+ * &lt;br>
+ * Waiver and Indemnity: RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS
+ * AGAINST THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND
+ * SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT.  IF RECIPIENT'S USE OF
+ * THE SUBJECT SOFTWARE RESULTS IN ANY LIABILITIES, DEMANDS, DAMAGES,
+ * EXPENSES OR LOSSES ARISING FROM SUCH USE, INCLUDING ANY DAMAGES FROM
+ * PRODUCTS BASED ON, OR RESULTING FROM, RECIPIENT'S USE OF THE SUBJECT
+ * SOFTWARE, RECIPIENT SHALL INDEMNIFY AND HOLD HARMLESS THE UNITED
+ * STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY
+ * PRIOR RECIPIENT, TO THE EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE
+ * REMEDY FOR ANY SUCH MATTER SHALL BE THE IMMEDIATE, UNILATERAL
+ * TERMINATION OF THIS AGREEMENT.
+ **/
+/*jslint esnext: true */
+/*global _, bandColors, createDiv, msec2knots, rad2deg, fixed3 */
+define(function (require, exports, module) {
+    "use strict";
+    require("widgets/daa-displays/daa-utils");
+    const airspeedTemplate = require("text!widgets/daa-displays/templates/daa-airspeed.handlebars");
+    const airspeedTicksTemplate = require("text!widgets/daa-displays/templates/daa-airspeed-ticks-template.handlebars");
+    const airspeedBandsTemplate = require("text!widgets/daa-displays/templates/daa-linear-bands-template.handlebars");
+
+    // utility function for creating airspeed tick marks
+    function _create_airspeed_ticks (_this) {
+        let ticks = [];
+        let tickValues = [];
+        let n = _this.nAirspeedTicks + _this.trailerTicks;
+        let maxAirspeedValue = (_this.nAirspeedTicks - 1) * 2 * _this.airspeedStep;
+        for (let i = 0; i &lt; n; i++) {
+            ticks.push({ top: _this.tickHeight * 2 * i });
+            if (i &lt; _this.nAirspeedTicks) {
+                let val = maxAirspeedValue - i * 2 * _this.airspeedStep;
+                if (val === 0) {
+                    tickValues.push("00");
+                } else {
+                    tickValues.push(val);
+                }
+            }
+        }
+        let airspeedTicks = Handlebars.compile(airspeedTicksTemplate)({
+            ticks: ticks,
+            id: _this.id
+        });
+        let airspeedValues = tickValues.join(" ");
+        $("#" + _this.id + "-ticks").html(airspeedTicks);
+        $("#" + _this.id + "-tick-values").html(airspeedValues);
+        $("." + _this.id + "-rule").each(function () {
+            $(this).css("height", (n * _this.tickHeight * 2) + "px");
+        });
+    }
+    // utility function for creating airspeed spinner
+    function _create_airspeed_spinner (_this) {
+        const base = ["9", "8", "7", "6", "5", "4", "3", "2", "1", "0"];
+        let maxAirspeedValue = (_this.nAirspeedTicks - 1) * _this.airspeedStep;
+        let reps = maxAirspeedValue / 10;
+        let spinner = base.join(" ");
+        for (let i = 0; i &lt; reps; i++) {
+            spinner += " " + base.join(" ");
+        }
+        $("#" + _this.id + "-indicator-spinner").html(spinner);
+    }
+    // utility function for drawing resolution bands
+    function _draw_bands(_this) {
+        let theHTML = "";
+        _.each(_this.bands, function (segments, alert) {
+            // console.log(segments);
+            let segs = [];
+            for (let i = 0; i &lt; segments.length; i++) {
+                // compute the hight of the segment
+                let height = (segments[i].to - segments[i].from) / _this.airspeedStep * _this.tickHeight;
+                // place the segment in the right place on the tape
+                segs.push({
+                    top: (_this.tapeLength - _this.tickHeight) - (segments[i].from / _this.airspeedStep * _this.tickHeight) - height,
+                    left: 84,
+                    from: segments[i].from,
+                    to: segments[i].to,
+                    height: height,
+                    id: _this.id + "-band-" + alert + "-" + i
+                });
+            }
+            // console.log(segs);
+            theHTML += Handlebars.compile(airspeedBandsTemplate)({
+                segments: segs,
+                color: bandColors[alert].color,
+                dash: bandColors[alert].style === "dash"
+            });
+            // console.log(theHTML);
+        });
+        $("#" + _this.id + "-bands").html(theHTML);
+    }
+    // utility function for updating ground speed display (if any is rendered)
+    function _updateGroundSpeed(_this) {
+        // ground speed is obtained from airspeed and windspeed (groundspeed = currentAirspeed + windspeed)
+        let gs = fixed3(Math.trunc(_this.currentAirspeed + _this.windSpeed)); // the indicator can render only integer numbers, and they have always 3 digits
+        $("#" + _this.id + "-ground-speed").html(gs);
+    }
+    // utility function for updating true airspeed display (if any is rendered)
+    function _updateTAS(_this) {
+        let tas = fixed3(Math.trunc(_this.currentAirspeed + _this.windSpeed)); // FIXME: what is the formula???
+        $("#" + _this.id + "-tas").html(tas);
+    }
+    // utility function for updating wind speed and direction (if any is rendered)
+    function _updateWind(_this) {
+        $("#" + _this.id + "-wind-direction").html(_this.windDirection);
+        $("#" + _this.id + "-wind-speed").html(_this.windSpeed);
+    }
+
+    class AirspeedTape {
+        /**
+         * @function &lt;a name="AirspeedTape">AirspeedTape&lt;/a>
+         * @description Constructor.
+         * @param id {String} Unique widget identifier.
+         * @param coords {Object} The four coordinates (top, left, width, height) of the widget, specifying
+         *        the left/top corners, and the width/height of the (rectangular) widget area.
+         *        Default is { top: 103, left: 74, width: 92, height: 650 }.
+         *        FIXME: The current implementation support only a fixed size, 92x650. 
+         * @param opt {Object} Style options defining the visual appearance of the widget.
+         *          &lt;li>airspeedStep (real): the airspeed step (default is 20 knots)&lt;/li>
+         *          &lt;li>parent (String): the HTML element where the widget will be appended (default is "body")&lt;/li>
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        constructor(id, coords, opt) {
+            opt = opt || {};
+            this.id = id || "daa-airspeed-tape";
+
+            coords = coords || {};
+            this.top = (isNaN(+coords.top)) ? 103 : +coords.top;
+            this.left = (isNaN(+coords.left)) ? 74 : +coords.left;
+
+            // airspeedStep is a parameter that can be specified using the options of the constructor
+            this.airspeedStep = opt.airspeedStep || 20;
+
+            // the following are constants, should not be modified (unless you know what you're doing!)
+            this.nAirspeedTicks = 26;
+            this.trailerTicks = 8;
+            this.tickHeight = 54; //px
+            this.tapeLength = 2808; //px, derived by inspecting the DOM for 400 ticks + 8 trailer ticks 81px height
+            this.zero = -2454; // px, number of pixels necessary to reach value 0 in the spinner; this number was obtained by manually inspecting the DOM
+
+            // create structure for storing resolution bands
+            this.bands = { NONE: [], FAR: [], MID: [], NEAR: [], RECOVERY: [], UNKNOWN: [] };
+
+            // initialise airspeed and windspeed
+            this.currentAirspeed = 0; // knots
+            this.windSpeed = 0;
+            // NOTE: groundspeed can be derived from airspeed and windspeed: groundSpeed = currentAirspeed + windspeed 
+            this.windDirection = 0;
+            this.trueAirspeed = 0;
+
+            // create DOM elements
+            this.div = createDiv(id, { parent: opt.parent, zIndex: 2 });
+            let theHTML = Handlebars.compile(airspeedTemplate)({
+                id: this.id,
+                zIndex: 2,
+                top: this.top,
+                left: this.left
+            });
+            $(this.div).html(theHTML);
+            _create_airspeed_ticks(this);
+            _create_airspeed_spinner(this);
+        }
+        /**
+         * @function &lt;a name="setBands">setBands&lt;/a>
+         * @description Renders airspeed resolution bands.
+         *              Six types of resolution bands are supported:
+         *              &lt;li>FAR (dash yellow)&lt;/li>
+         *              &lt;li>MID (yellow)&lt;/li>
+         *              &lt;li>NEAR (red)&lt;/li>
+         *              &lt;li>RECOVERY (dash green)&lt;/li>
+         *              &lt;li>UNKNOWN (grey)&lt;/li>
+         *              &lt;li>NONE (transparent)&lt;/li>
+         *              Band colors are defined in daa-utils.js
+         * @param bands {Object} Bands to be rendered. This parameter is an object in the form { bandName: ranges },
+         *                       where bandName is one of FAR, MID, NEAR, RECOVERY, UNKNOWN, NONE
+         *                       and ranges is an Array of objects in the { from: real, to: real }.
+         *                       Band range is given in knots.
+         *                       Example bands: { RECOVERY: [ { from: 0, to: 300 } ], { NEAR: [ { from: 300, to: 600 } ] } 
+         * @param opt {Object} Options:
+         *             &lt;li>units (String): "msec", indicates that resolution bands are given in meters per seconds. 
+         *                                 The widget will automatically convert the bands to knots.&lt;/li>
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        setBands(bands, opt) {
+            opt = opt || {};
+            function normaliseAirspeedBand(b) {
+                if (b &amp;&amp; b.length > 0) {
+                    return b.map(function (range) {
+                        if (opt.units === "msec") {
+                            // if bands are given in metres per second, we need to convert in knots
+                            return { from: msec2knots(range.from), to: msec2knots(range.to) };
+                        }
+                        return { from: range.from, to: range.to };
+                    });
+                }
+                return [];
+            }
+            this.bands.NONE = normaliseAirspeedBand(bands.NONE);
+            this.bands.FAR = normaliseAirspeedBand(bands.FAR);
+            this.bands.MID = normaliseAirspeedBand(bands.MID);
+            this.bands.NEAR = normaliseAirspeedBand(bands.NEAR);
+            this.bands.RECOVERY = normaliseAirspeedBand(bands.RECOVERY);
+            this.bands.UNKNOWN = normaliseAirspeedBand(bands.UNKNOWN);
+            // console.log(this.id + "-airspeed-bands", this.bands);
+            _draw_bands(this);
+            return this;
+        }
+        /**
+         * @function &lt;a name="setAirSpeed">setAirSpeed&lt;/a>
+         * @description Sets the airspeed indicator to a given airspeed value.
+         * @param val {real} Airspeed value. Default units is knots.
+         * @param opt {Object} Options:
+         *             &lt;li>units (String): "msec", indicates that airspeed value is given in meters per seconds. 
+         *                                 The widget will automatically convert the value to knots.&lt;/li>
+         *             &lt;li>transitionDuration (string): duration of the scrolling animation of the display (default: 1000ms)&lt;/li>
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        setAirSpeed(val, opt) {
+            opt = opt || {};
+            // val = limit(0, 300, "airspeed")(val); // the display range is 0..300
+            this.currentAirspeed = (opt.units === "msec") ? msec2knots(parseFloat(val)) : parseFloat(val);
+
+            let transitionDuration = opt.transitionDuration || "1000ms";
+            let spinValueTranslation = this.zero + val * this.tickHeight / this.airspeedStep;
+            spinValueTranslation = (spinValueTranslation > 0) ? 0 : spinValueTranslation;
+            // FIXME: the spinner position drifts at when changing zoom level --- need to understand why and fix it!
+            $("#" + this.id + "-spinner").css({ "transition-duration": transitionDuration, "transform": "translateY(" + spinValueTranslation + "px)"});
+            
+            let stillDigits = Math.trunc(this.currentAirspeed / 10);
+            stillDigits = (stillDigits &lt; 10) ? "0" + stillDigits : stillDigits.toString();
+            $("#" + this.id + "-indicator-still-digits").html(stillDigits);
+            // with 26 ticks, max airspeed that can be displayed is 440
+            let ratio = 34; // px, obtained by inspecting the DOM
+            let spinIndicatorValue = this.currentAirspeed % 10;
+            let spinGroup = Math.trunc(this.currentAirspeed / 10);
+            let spinIndicatorTranslation = -17280 + (spinGroup * ratio * 10) + spinIndicatorValue * ratio; // -17280 is the number of pixels necessary to reach value 0 in the spinner; this number was obtained by manually inspecting the DOM
+            $("#" + this.id + "-indicator-spinner").css({ "transition-duration": "1000ms", "transform": "translateY(" + spinIndicatorTranslation + "px)"});
+            
+            // ground speed and true airspeed need to be updated every time we set air speed
+            _updateGroundSpeed(this);
+            _updateTAS(this);
+            return this;
+        }
+        /**
+         * @function &lt;a name="getAirSpeed">getAirSpeed&lt;/a>
+         * @description Returns the current airspeed value.
+         * @return {real} The current airspeed value, in knots.
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        getAirSpeed() {
+            return this.currentAirspeed;
+        }
+        /**
+         * @function &lt;a name="setWindDirection">setWindDirection&lt;/a>
+         * @description Sets the wind direction.
+         * @param deg {real} Wind direction. Default units is degrees.
+         * @param opt {Object} Options:
+         *             &lt;li>units (String): "rad", indicates that wind direction is given in radians. 
+         *                                 The widget will automatically convert the value to degrees&lt;/li>
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        setWindDirection(deg, opt) {
+            opt = opt || {};
+            this.windDirection = (opt.units === "rad") ? rad2deg(parseFloat(deg)) : parseFloat(deg);
+            _updateWind(this);
+            // do we need to update airspeed??
+            // return this.setAirSpeed(this.ground_speed - ???);
+            return this;
+        }
+        /**
+         * @function &lt;a name="setWindSpeed">setWindSpeed&lt;/a>
+         * @description Sets the wind speed value.
+         * @param val {real} Wind speed. Default units is knots.
+         * @param opt {Object} Options:
+         *             &lt;li>units (String): "msec", indicates that wind direction is given in meters per second. 
+         *                                 The widget will automatically convert the value to knots&lt;/li>
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        setWindSpeed(val, opt) {
+            opt = opt || {};
+            this.windSpeed = (opt.units === "msec") ? msec2knots(parseFloat(val)) : parseFloat(val);
+            _updateWind(this);
+            // ground speed and true airspeed need to be updated every time wind speed changes
+            _updateGroundSpeed(this);
+            _updateTAS(this);
+            return this;
+        }
+        /**
+         * @function &lt;a name="setStep">setStep&lt;/a>
+         * @description Sets the step value for the tape display.
+         * @param val {real} Step size. Default units is knots. Default step size is 20 knots.
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        setStep(val) {
+            if (isNaN(parseFloat(val))) {
+                console.error("Warning: trying to set an invalid airspeed step", val);
+                return this;
+            }
+            this.airspeedStep = parseFloat(val);
+            _create_airspeed_ticks(this);
+            _draw_bands(this);
+            return this.setAirSpeed(this.currentAirspeed, { transitionDuration: "0ms" });
+        }
+        /**
+         * @function &lt;a name="getStep">getStep&lt;/a>
+         * @description Returns the current step size.
+         * @return {real} The current step size, in knots.
+         * @memberof module:AirspeedTape
+         * @instance
+         */
+        getStep() {
+            return this.airspeedStep;
+        }
+    }
+    module.exports = AirspeedTape;
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AirspeedTape.html">AirspeedTape</a></li><li><a href="module-AltitudeTape.html">AltitudeTape</a></li><li><a href="module-Compass.html">Compass</a></li><li><a href="module-DAAPlaybackPlayer.html">DAAPlaybackPlayer</a></li><li><a href="module-DAASpectrogram.html">DAASpectrogram</a></li><li><a href="module-DAASplitView.html">DAASplitView</a></li><li><a href="module-InteractiveMap.html">InteractiveMap</a></li><li><a href="module-VerticalSpeedTape.html">VerticalSpeedTape</a></li><li><a href="module-VirtualHorizon.html">VirtualHorizon</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.0-dev</a> on Mon Dec 31 2018 09:38:04 GMT-0500 (EST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

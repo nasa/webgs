@@ -1,0 +1,1568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.6.2" />
+<title>ServerFiles.consumerFunctions API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase;cursor:pointer}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ServerFiles.consumerFunctions</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">#!/usr/bin/env python3
+
+import subprocess
+import psutil
+import signal
+import os
+import sys
+import logging
+import json
+
+from pymavlink import mavutil, mavwp, mavparm
+from multiprocessing import Process
+import ServerFiles.mavlinkCommands as MF
+import ServerFiles.gfManager as GF
+
+
+def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
+    logger = logging.getLogger()
+    v = &#39;ArduCopter&#39;  # this can be added later
+    l = &#39;&#39;.join([x+&#39;,&#39; for x in msg[2:6]])[0:-1]
+    s = &#39;1&#39;
+    i = str(int(msg[1]) - 1)
+    icarous_flag = msg[7]
+    sim_type = msg[8]
+    p = msg[9]
+    a = msg[10]
+    if icarous_flag == &#39;0&#39;:
+        UDP_PORT_2 = UDP_PORT_2 - 3
+    m = HOST + &#39;:&#39;+str(UDP_PORT_2 + 10 * (int(i)))
+
+    pidA = 0
+    if sim_type == &#39;ARDUPILOT&#39;:
+        # sim_vehicle.py -v ArduCopter -l 37.0866,-76.3789,5.000000,0 -S 1 -I 0
+        logger.info(&#34;StartAutopilot.sh -v  {} -l {} -s {} -i {} -m {}&#34;.format(v,l,s,i,m))
+        pidA = subprocess.Popen([&#34;Scripts/StartAutopilot.sh&#34;,
+                                 &#34;-v&#34;, v, &#34;-l&#34;, l, &#34;-s&#34;, s, &#34;-i&#34;, i, &#34;-m&#34;, m, &#39;-p&#39;, a]).pid
+        logger.info(&#39;Ardupilot running on pid: {}&#39;.format(pidA))
+
+    # start icarous
+    pidI = 0
+    if icarous_flag == &#39;1&#39;:
+        c = msg[1]
+        logger.info(&#39;Start Icarous: Scripts/StartIcarous.sh -C {} -I {}&#39;.format(c,i))
+        pidI = subprocess.Popen([&#34;Scripts/StartIcarous.sh&#34;,
+                                 &#39;-C&#39;, c, &#39;-I&#39;, i, &#39;-P&#39;, p]).pid
+        logger.info(&#39;Icarous running on pid: {}&#39;.format(pidI))
+
+    # Open a mavlink UDP port
+    try:
+        mas = mavutil.mavlink_connection(&#34;udp:&#34; + HOST + &#34;:&#34; + str(
+            UDP_PORT_2 + 10 * int(i)), dialect=&#39;ardupilotmega&#39;, baud=BAUD, append=True)
+
+        MF.requestDataStream(BAUD, mas)
+        logger.info(&#39;Connected on port: {}&#39;.format(str(UDP_PORT_2 + 10 * int(i))))
+
+    except Exception:
+        logger.exception(&#34;Error opening mavlink connection&#34;, exc_info=True)
+        mas = None
+
+    return mas, pidI, pidA
+
+
+
+def connectToHardwareIP(msg, IP, PORT):
+    logger = logging.getLogger()
+    ac = msg[1]
+    try:
+        if msg[4] == &#39;IP&#39;:
+            m = mavutil.mavlink_connection(
+                &#34;udp:&#34; + IP + &#34;:&#34; + str(PORT), dialect=&#39;ardupilotmega&#39;, force_connected=True)
+            logger.info(&#39;IC {}: {} {}&#39;.format(ac, int(msg[3]), m))
+        else:
+            m = mavutil.mavlink_connection(
+                IP + &#34;,&#34; + msg[3], dialect=&#39;ardupilotmega&#39;)
+            logger.info(&#39;{} {}&#39;.format(int(msg[3]), m))
+        MF.requestDataStream(int(msg[3]), m)
+        logger.info(&#39;IC {}: Connected on: {}&#39;.format(ac, IP+&#39;:&#39;+str(PORT)))
+
+    except Exception as ecpt:
+        print(ecpt)
+        logger.exception(&#34;IC {0}: Error opening mavlink connection&#34;.format(ac), exc_info=True)
+        logger.info(ecpt)
+        m = &#39;NONE&#39;
+
+    return m
+
+
+def shutdownProcesses(pid_list):
+    logger = logging.getLogger()
+    # pid_list = [icarous start script pid, ardupilot start script pid]
+    if pid_list[1] != 0:
+        logger.info(&#39;Killing mavproxy&#39;)
+        subprocess.Popen([&#39;pkill&#39;, &#39;-f&#39;, &#39;python sim_vehicle.py&#39;]).wait(5)
+        subprocess.Popen(
+            [&#39;pkill&#39;, &#39;-f&#39;, &#39;/usr/bin/python /usr/local/bin/mavproxy.py&#39;]).wait(5)
+        subprocess.Popen([&#39;pkill&#39;, &#39;-15&#39;, &#39;mavproxy.py&#39;]).wait(5)
+
+        logger.info(&#39;Killing Xterm&#39;)
+        subprocess.Popen([&#34;pkill&#34;, &#39;-15&#39;, &#34;xterm&#34;]).wait(5)
+
+        subprocess.Popen(
+            [&#39;pkill&#39;, &#39;-f&#39;, &#39;Scripts/StartAutopilot.sh&#39;]).wait(5)
+
+    if pid_list[0] != 0:
+        logger.info(&#39;Killing Icarous on pid: {}&#39;.format(pid_list[0]))
+
+        try:
+            logger.info(&#39;Pid List: {}&#39;.format(pid_list))
+            parent = psutil.Process(pid_list[0])
+            logger.info(&#39;Parent: {}&#39;.format(parent))
+        except psutil.NoSuchProcess:
+            logger.info(&#39;Process not found.&#39;)
+            return
+
+        children = parent.children(recursive=True)
+
+        for child in children:
+            child.send_signal(signal.SIGINT)
+            logger.info(&#39;Cleaning up /dev/mqueue. pid {0}&#39;.format(child.pid))
+            subprocess.Popen(
+                [&#39;./Scripts/clearMqueue.sh&#39;, &#39;-P&#39;, str(child.pid)])
+
+    logger.info(&#39;Shutdown complete.&#39;)
+
+
+def requestWaypoints(msg_in, ac, m, mlog, forwarding):
+    logger = logging.getLogger()
+    logger.info(&#39;IC {}: Mission Count {}&#39;.format(ac, msg_in.count))
+    has_next = False
+    if msg_in is None:
+        return
+    if int(msg_in.count) &gt; 0:
+        has_next = True
+    i = 0
+    msg_list = []
+    vel = 0
+    while has_next:
+        msg_item = MF.requestWaypoints(i, m, mlog, forwarding)
+
+        if msg_item.seq == i:
+            logger.info(&#39;IC {}: {}&#39;.format(ac, msg_item))
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(msg_item.seq) + \
+                &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+            if msg_item.command == 178:
+                vel = msg_item.param2
+
+            msg_list.append(msg_part)
+            i += 1
+            if i &gt;= msg_in.count:
+                has_next = False
+        else:
+            logger.info(&#39;mission item {} {}&#39;.format(i, msg_item))
+
+    msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+    msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;false&#34;}&#39;
+
+    return msg
+
+
+def requestVert(msg_in, ac, m, mlog, forwarding):
+    # msg_item
+    # seq = fence number (zero based)
+    # frame = type (in or ex)
+    # param 1 = numV
+    # param 2 = current vert (zero based)
+    # param 3 = floor
+    # param 4 = roof
+    # x = lat
+    # y = lng
+
+    # out for each fence
+    # Geofence = {&#34;id&#34;: id, &#34;type&#34;: t, &#34;numV&#34;: numV, &#34;floor&#34;: floor,
+    #                     &#34;roof&#34;: roof, &#34;Vertices&#34;: Vertices}
+
+
+    logger = logging.getLogger()
+    logger.info(&#39;IC {}: Mission Count {}&#39;.format(ac, msg_in.count))
+    has_next = False
+    if msg_in is None:
+        return
+    if int(msg_in.count) &gt; 0:
+        has_next = True
+    i = 0
+    v_list =[]
+    f_list = []
+    id = 0
+    f_id = 0
+    while has_next:
+        msg_item = MF.requestVert(i, m, mlog, forwarding)
+        if msg_item.param2 == id:
+            if f_id == msg_item.seq:
+                logger.info(&#39;IC {}: {}&#39;.format(ac, msg_item))
+                v_list.append((msg_item.x, msg_item.y))
+                fence = {&#34;id&#34;: msg_item.seq +1,
+                         &#34;type&#34;:  msg_item.frame,
+                         &#34;numV&#34;:  msg_item.param1,
+                         &#34;floor&#34;:  msg_item.param3,
+                         &#34;roof&#34;:  msg_item.param4,
+                         &#34;Vertices&#34;:  v_list}
+                id +=1
+
+            i += 1
+
+            if i &gt;= msg_in.count:
+                f_list.append(fence)
+                has_next = False
+        else:
+            f_id +=1
+            id = 0
+            f_list.append(fence)
+            fence = []
+            v_list = []
+            logger.info(&#39;mission item {} {}&#39;.format(i, msg_item))
+
+    logger.info(&#39;IC {}: Fence List: {}&#39;.format(ac, f_list))
+
+    msg = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#34;TYPE&#34;:&#34;GF&#34;, &#34;LIST&#34;:[&#39;
+    for item in f_list:
+        m = json.dumps(item)
+        msg = msg + m +&#39;,&#39;
+
+    msg = msg[:-1] + &#39;], &#34;FILE&#34; : &#34;False&#34;}&#39;
+    return msg
+
+
+def sendVert(msg_in, ac):
+    i = 0
+    v_list =[]
+    f_list = []
+    id = 0
+    f_id = 0
+    for msg_item in msg_in[ac]:
+        if msg_item.param2 == id:
+            if f_id == msg_item.seq:
+                v_list.append((msg_item.x, msg_item.y))
+                fence = {&#34;id&#34;: msg_item.seq +1,
+                         &#34;type&#34;:  msg_item.frame,
+                         &#34;numV&#34;:  msg_item.param1,
+                         &#34;floor&#34;:  msg_item.param3,
+                         &#34;roof&#34;:  msg_item.param4,
+                         &#34;Vertices&#34;:  v_list}
+                id +=1
+            i += 1
+            if i &gt;= len(msg_in[ac]):
+                f_list.append(fence)
+        else:
+            f_id +=1
+            id = 0
+            f_list.append(fence)
+            fence = []
+            v_list = []
+
+    msg = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#34;TYPE&#34;:&#34;GF&#34;, &#34;LIST&#34;:[&#39;
+    for item in f_list:
+        m = json.dumps(item)
+        msg = msg + m +&#39;,&#39;
+
+    msg = msg[:-1] + &#39;], &#34;FILE&#34; : &#34;False&#34;}&#39;
+    return msg
+
+def sendWaypointsInt(wp_list, ac):
+    logger = logging.getLogger()
+    msg_list = []
+    vel = 0
+
+    count = 0
+    for msg_item in wp_list[ac]:
+
+        logger.info(&#39;IC {}: {}&#39;.format(ac, msg_item))
+
+        if msg_item.command == 16:
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(count) + \
+                &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x/1e7) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y/1e7) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 178:
+            # do change vel
+            vel = msg_item.param2
+        if msg_item.command == 177:
+            # do jump (repeat mission items, no need to send to front end for now)
+            logger.info(&#39;Ignore do jump command.&#39;)
+            # get repeat seq num
+            num = int(msg_item.param1)
+            # add this one back in as last wp to close the loop
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + count + \
+                &#39;, &#34;LAT&#34;:&#39; + wp_list[ac][num].x/1e7 + \
+                &#39;, &#34;LNG&#34;:&#39; + wp_list[ac][num].y/1e7 + \
+                &#39;, &#34;ALT&#34;:&#39; + wp_list[ac][num].z + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 20:
+            # return to home pos after complete, after a do jump
+            logger.info(&#39;Ignore return to home after do jump.&#39;)
+    msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+    msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;false&#34;}&#39;
+
+    return msg
+
+
+def sendWaypoints(wp_list, ac):
+    logger = logging.getLogger()
+    msg_list = []
+    vel = 0
+    count = 0
+    for msg_item in wp_list[ac]:
+        logger.info(&#39;IC {}: {}&#39;.format(ac, str(msg_item)))
+
+        if msg_item.command == 16:
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(count) + \
+                &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 178:
+            # do change vel
+            vel = msg_item.param2
+        if msg_item.command == 177:
+            # do jump (repeat mission items, no need to send to front end for now)
+            logger.info(&#39;Ignore do jump command.&#39;)
+            # get repeat seq num
+            num = int(msg_item.param1)
+            # add this one back in as last wp to draw
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + count + \
+                &#39;, &#34;LAT&#34;:&#39; + str(wp_list[ac][num].x) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(wp_list[ac][num].y) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(wp_list[ac][num].z) + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 20:
+            # return to home pos after complete, after a do jump
+            logger.info(&#39;Ignore return to home after do jump.&#39;)
+
+    msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+    msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;false&#34;}&#39;
+
+    return msg
+
+
+
+
+def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
+    logger = logging.getLogger()
+    logger.info(&#39;&#39;)
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;IC {}: {}&#39;.format(ac, consumer_message))
+
+    aircraft = &#39;{&#34;AIRCRAFT&#34;: &#39; + consumer_message[2]+&#39;, &#39;
+    q.put(aircraft + &#39;&#34;TYPE&#34;:&#34;WAYPOINTLOAD&#34;, &#34;INFO&#34;:&#34;START&#34;}&#39;)
+
+    # Format the message
+    consumer_message = consumer_message[:-1]
+    wp_list = [(x, consumer_message[consumer_message.index(x) + 1], consumer_message[consumer_message.index(x) + 2])
+               for x in consumer_message[6::3]]
+    # Let the system know how many wp&#39;s to expect
+    msg_in = MF.sendMissionCount(wp_list, master, mlog, forwarding)
+    logger.info(&#39;IC {}: send mission count&#39;.format(ac))
+    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;SEND MISSION COUNT&#34;}&#39;)
+
+    # Send the wp&#39;s
+    radius = 10
+    seq = 0
+
+    if msg_in is&#39;NONE&#39;:
+        logger.info(
+            &#39;IC {}: Timeout Reached. Waypoint Load Failed&#39;.format(ac))
+        q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;LOAD FAILED TIMEOUT REACHED&#34;}&#39;)
+
+    else:
+        logger.info(&#39;IC {}: message in {}&#39;.format(ac, msg_in))
+        # Send the Takeoff command
+        msg_in = MF.sendTakeoff(
+            wp_list[0], radius, seq, master, mlog, forwarding)
+        logger.info(&#39;IC {}: Takeoff point sent: {}&#39;.format(
+            ac, wp_list[0]))
+        logger.info(&#39;IC {}: Message In: {}&#39;.format(ac, msg_in))
+
+        msg_in = MF.sendVelocity(
+            float(consumer_message[4]), master, mlog, forwarding)
+        logger.info(&#39;IC {}: Velocity sent: {}&#39;.format(
+            ac, consumer_message[6]))
+        logger.info(&#39;IC {}: Message In: {}&#39;.format(ac, msg_in))
+
+        # Send the Waypoints
+        while True:
+            if msg_in is&#39;NONE&#39;:
+                logger.info(
+                    &#39;IC {}: Timeout Reached. Waypoint Load Failed&#39;.format(ac))
+                break
+            elif str(msg_in).find(&#39;MISSION_ACK&#39;) == 0:
+                logger.info(&#39;IC {}: message in {}&#39;.format(ac, msg_in))
+                if int(msg_in.type) != 0:
+                    logger.info(
+                        &#39;IC {}: End load wp. Mission Load Failed&#39;.format(ac))
+                    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;}&#39;)
+                else:
+                    logger.info(&#39;IC {}: End load wp.&#39;.format(ac))
+                    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;}&#39;)
+                break
+            else:
+
+                seq = int(msg_in.seq)
+                item = wp_list[seq-1]
+                logger.info(&#39;IC {0}: Sending waypoint {1}, {2}&#39;.format(ac, item, [
+                    float(item[0]),
+                    float(item[1]),
+                    float(item[2]),
+                    mavutil.mavlink.MAV_MISSION_TYPE_ALL,
+                    master]))
+
+                msg_in = MF.sendWaypoint(
+                    wp_list[seq-1], radius, seq, master, mlog, forwarding)
+                logger.info(&#39;IC {}: Point sent: {}&#39;.format(
+                    ac, wp_list[seq-1]))
+
+                q.put(
+                    aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;SENT WAYPOINT &#39;+str(seq)+&#39;&#34;}&#39;)
+
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;&#39;)
+
+
+def loadFlightPlanFile(ac, consumer_message, q, master, mlog):
+    try:
+        logger = logging.getLogger()
+        wpload = mavwp.MAVWPLoader(
+            master.target_system, master.target_component)
+        dir = os.path.dirname(os.path.realpath(__file__))
+        num = wpload.load(
+            dir + &#39;/../Examples/FlightPlans/&#39;+consumer_message[1])
+        msg_list = []
+        vel = 0
+        for i in range(0, num):
+            msg_item = wpload.wp(i)
+            if msg_item.command == 16 or msg_item.command == 22:
+                msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(msg_item.seq) + \
+                    &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x) + \
+                    &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y) + \
+                    &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+                msg_list.append(msg_part)
+            elif msg_item.command == 178:
+                vel = msg_item.param2
+
+        msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+        msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;true&#34;}&#39;
+
+
+        q.put(msg)
+        q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+ac+&#39;, &#34;name&#34;:&#34;LOAD&#34; , &#34;INFO&#34;:&#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;LOAD WP FILE&#34;}&#39;)
+    except Exception as e:
+        q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+ac+&#39;, &#34;name&#34;:&#34;LOAD&#34; , &#34;INFO&#34;:&#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39;+str(e)+&#39;&#34;}&#39;)
+
+def loadGeoFence(ac, consumer_message, q, master, mlog, forwarding):
+    logger = logging.getLogger()
+    logger.info(&#39;&#39;)
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;IC {}: ConsumerMSG {}&#39;.format(ac, consumer_message))
+
+    aircraft = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#39;
+    # Format the message
+    wp_list = [(x, consumer_message[consumer_message.index(x) + 1])
+               for x in consumer_message[11::2]]
+
+    # this matters, if you don&#39;t start at zero icarous will crash
+    index = int(consumer_message[4]) - 1
+    floor = int(consumer_message[8])
+    roof = int(consumer_message[10])
+    total = len(wp_list)
+    f_type = consumer_message[6]
+
+    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;GEOFENCELOAD&#34;, &#34;INFO&#34; : &#34;START&#34;}&#39;)
+    msg_in = MF.sendGFEnable(index, f_type, total,
+                             floor, roof, master, mlog, forwarding)
+
+    # send points
+    while True:
+        logger.info(&#39;IC {}: message in {}&#39;.format(ac, str(msg_in)))
+        if msg_in is&#39;NONE&#39;:
+            logger.info(&#39;Timeout Reached. Point Load Failed&#39;)
+            q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;GEOFENCELOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;}&#39;)
+            break
+
+        elif str(msg_in).find(&#39;COMMAND_ACK&#39;) == 0:
+            logger.info(&#39;IC {}: message in {}&#39;.format(ac, msg_in))
+            logger.info(&#39;IC {}: End load Geofence.&#39;.format(ac))
+            q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;GEOFENCELOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;}&#39;)
+            break
+
+        else:
+            seq = int(msg_in.idx)
+            logger.info(&#39;IC {}: message in, idx {}&#39;.format(ac, msg_in.idx))
+            item = wp_list[seq]
+            # Send the point
+            logger.info(&#39;IC {0}: Sending point {1}, {2}&#39;.format(ac, item, [master.target_system,
+                                                                     master.target_component,
+                                                                     seq,
+                                                                     total,
+                                                                     float(
+                                                                         item[0]),
+                                                                     float(
+                                                                         item[1])
+                                                                     ]))
+            msg_in = MF.sendGFPoint(seq, total, item, master, mlog, forwarding)
+    logger.info(&#39;IC {}: msg_in {}&#39;.format(ac, msg_in))
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;&#39;)
+
+
+def loadGeoFenceFile(ac, consumer_message, q, master, mlog):
+    logger = logging.getLogger()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    filename = dir + &#39;/../Examples/GeoFences/&#39; + \
+        consumer_message[1]
+    try:
+        f = open(filename, &#39;r&#39;)
+    except Exception as e:
+        print(&#39;File not found. &#39;, dir +&#39;/..&#39; + consumer_message[1])
+        q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(e) +&#39;&#34;}&#39;)
+        return
+    fencelist = GF.read_geofence(filename)
+    logger.info(&#39;IC {}: Fence List: {}&#39;.format(ac, fencelist))
+
+    msg = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#34;TYPE&#34;:&#34;GF&#34;, &#34;LIST&#34;:[&#39;
+    for item in fencelist:
+        m = json.dumps(item)
+        msg = msg + m +&#39;,&#39;
+
+    q.put(msg[:-1] + &#39;], &#34;FILE&#34; : &#34;True&#34;}&#39;)
+    q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS &#34;, &#34;MSG&#34;:&#34;&#39; + consumer_message[1]+&#39;&#34;}&#39;)
+
+
+def loadParamFile(ac, consumer_message, q, master, mlog):
+    logger = logging.getLogger()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    try:
+        f = open(dir + &#39;/..&#39; + consumer_message[1], &#39;r&#39;)
+    except Exception as e:
+        print(&#39;File not found. &#39;, dir +&#39;/..&#39; + consumer_message[1])
+        q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(e) +&#39;&#34;}&#39;)
+        return
+
+    retry = 3
+    fail_list = []
+    for line in f:
+        if &#39;#&#39; not in line:
+            words = line.split()
+            if len(words) == 2:
+                count = 0
+                while count &lt; retry:
+                    master.mav.param_set_send(master.target_system,
+                                            master.target_component,
+                                            words[0].encode(&#39;utf8&#39;),
+                                            float(words[1]),
+                                            mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
+                    msg_in = master.recv_match(type=&#39;PARAM_VALUE&#39;,
+                                            blocking=True, timeout=.5)
+
+                    if msg_in != None:
+                        break
+                    else:
+                        count += 1
+                    if count &gt;= 3:
+                        fail_list.append(words)
+
+    f.close()
+
+    logger.info(&#39;IC {0}: Unable to load {1} parameters: {2}&#39;.format(
+        ac, len(fail_list), str(fail_list)))
+    q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + consumer_message[1]+&#39;&#34;}&#39;)
+    return
+
+def saveFile(ac, consumer_message, q, master, mlog):
+    logger = logging.getLogger()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    filename = consumer_message[2]
+    path = dir + &#39;/..&#39; + filename
+
+    if consumer_message[1] == &#39;PARAM&#39;:
+        try:
+            f = open(path, &#39;w&#39;)
+            # convert message from JSON string to list of objects
+            data = consumer_message[3]
+            loaded_data = json.loads(data)
+            for item in loaded_data:
+
+                # add proper spacing 16, 1, num.000000
+                name = item[&#39;name&#39;]
+                x = len(name)
+                name = name + (&#39; &#39; * (16 - x))
+                value = float(item[&#39;value&#39;])
+                line = &#39;{0} {1:7.6f}\n&#39;.format(name, value)
+
+                # write line
+                f.write(line)
+
+            f.close()
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+
+    elif consumer_message[1] == &#39;WAYPOINTS&#39;:
+        try:
+            f = open(path, &#39;w&#39;)
+
+            # convert message from list into component parts
+            data = consumer_message[3:]
+            vel = data[1]
+            wp_list = data[3:-1]
+
+            # add the header
+            line = &#39;QGC WPL 110\n&#39;
+            f.write(line)
+
+            # add the body
+            for x in range(int(len(wp_list)/3)):
+                if x == 0:
+                    line = &#39;{0} 0       0       22      0.000000        0.000000        0.000000        0.000000        {1}     {2}     {3}     1\n&#39;.format(
+                        x, wp_list[3*x], wp_list[3*x+1], wp_list[3*x+2])
+                    line = line + &#39;{0}  0       0       178     0.000000        {1}     0.000000        0.000000        0.000000        0.000000        0.000000        1\n&#39;.format(
+                        x+1, vel)
+                else:
+                    line = &#39;{0} 0       0       16      0.000000        0.000000        0.000000        0.000000        {1}     {2}     {3}     1\n&#39;.format(
+                        x+1, wp_list[3*x], wp_list[3*x+1], wp_list[3*x+2])
+
+                # write line
+                f.write(line)
+
+            f.close()
+
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+            logger.info(&#39;WP\&#39;s saved to {0}&#39;.format(path))
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; +
+                  str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+            logger.info(&#39;SAVE_WAYPOINTS : FAIL, &#34;INFO&#34;:&#34;&#39; +
+                  filename + &#39; &#39; + str(sys.exc_info()[0]))
+
+    elif consumer_message[1] == &#39;GEOFENCE&#39;:
+        try:
+            data = {&#39;id&#39;: consumer_message[3],
+                    &#39;type&#39;: consumer_message[4],
+                    &#39;numV&#39;: consumer_message[5],
+                    &#39;floor&#39;: consumer_message[6],
+                    &#39;roof&#39;: consumer_message[7],
+                    &#39;Vertices&#39;: {}
+                    }
+            vert = consumer_message[8:]
+            for i in range(int(len(vert)/3)):
+                data[&#39;Vertices&#39;][int(vert[(i*3)])] = {
+                    &#39;lat&#39;: vert[(i*3)+1],
+                    &#39;lon&#39;: vert[(i*3)+2]
+                }
+
+            GF.save_geofence([data], path)
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+
+    elif consumer_message[1] == &#39;SCRIPT&#39;:
+        try:
+            logger.info(consumer_message)
+            logger.info(&#39;script not working yet&#39;)
+            # f = open(path, &#39;w&#39;)
+
+            # # convert message from list into component parts
+            # data = consumer_message[3:]
+
+            # # add the header
+            # line = &#39;QGC WPL 110\n&#39;
+            # f.write(line)
+
+            # f.close()
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+
+    elif consumer_message[1] == &#39;TRAFFIC&#39;:
+        try:
+            f = open(path, &#39;w&#39;)
+
+            # convert message from list into component parts
+            data = consumer_message[3:]
+            lat = data[0]
+            lng = data[1]
+            alt = data[2]
+            vel = data[3]
+            hdg = data[4]
+            emit = data[5]
+            # write the line
+            line = &#34;{0} {1} {2} {3} {4} {5}\n&#34;.format(
+                lat, lng, alt, vel, hdg, emit)
+            f.write(line)
+
+            f.close()
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename +&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="ServerFiles.consumerFunctions.connectToHardwareIP"><code class="name flex">
+<span>def <span class="ident">connectToHardwareIP</span></span>(<span>msg, IP, PORT)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def connectToHardwareIP(msg, IP, PORT):
+    logger = logging.getLogger()
+    ac = msg[1]
+    try:
+        if msg[4] == &#39;IP&#39;:
+            m = mavutil.mavlink_connection(
+                &#34;udp:&#34; + IP + &#34;:&#34; + str(PORT), dialect=&#39;ardupilotmega&#39;, force_connected=True)
+            logger.info(&#39;IC {}: {} {}&#39;.format(ac, int(msg[3]), m))
+        else:
+            m = mavutil.mavlink_connection(
+                IP + &#34;,&#34; + msg[3], dialect=&#39;ardupilotmega&#39;)
+            logger.info(&#39;{} {}&#39;.format(int(msg[3]), m))
+        MF.requestDataStream(int(msg[3]), m)
+        logger.info(&#39;IC {}: Connected on: {}&#39;.format(ac, IP+&#39;:&#39;+str(PORT)))
+
+    except Exception as ecpt:
+        print(ecpt)
+        logger.exception(&#34;IC {0}: Error opening mavlink connection&#34;.format(ac), exc_info=True)
+        logger.info(ecpt)
+        m = &#39;NONE&#39;
+
+    return m</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.loadFlightPlan"><code class="name flex">
+<span>def <span class="ident">loadFlightPlan</span></span>(<span>ac, consumer_message, q, master, mlog, forwarding)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
+    logger = logging.getLogger()
+    logger.info(&#39;&#39;)
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;IC {}: {}&#39;.format(ac, consumer_message))
+
+    aircraft = &#39;{&#34;AIRCRAFT&#34;: &#39; + consumer_message[2]+&#39;, &#39;
+    q.put(aircraft + &#39;&#34;TYPE&#34;:&#34;WAYPOINTLOAD&#34;, &#34;INFO&#34;:&#34;START&#34;}&#39;)
+
+    # Format the message
+    consumer_message = consumer_message[:-1]
+    wp_list = [(x, consumer_message[consumer_message.index(x) + 1], consumer_message[consumer_message.index(x) + 2])
+               for x in consumer_message[6::3]]
+    # Let the system know how many wp&#39;s to expect
+    msg_in = MF.sendMissionCount(wp_list, master, mlog, forwarding)
+    logger.info(&#39;IC {}: send mission count&#39;.format(ac))
+    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;SEND MISSION COUNT&#34;}&#39;)
+
+    # Send the wp&#39;s
+    radius = 10
+    seq = 0
+
+    if msg_in is&#39;NONE&#39;:
+        logger.info(
+            &#39;IC {}: Timeout Reached. Waypoint Load Failed&#39;.format(ac))
+        q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;LOAD FAILED TIMEOUT REACHED&#34;}&#39;)
+
+    else:
+        logger.info(&#39;IC {}: message in {}&#39;.format(ac, msg_in))
+        # Send the Takeoff command
+        msg_in = MF.sendTakeoff(
+            wp_list[0], radius, seq, master, mlog, forwarding)
+        logger.info(&#39;IC {}: Takeoff point sent: {}&#39;.format(
+            ac, wp_list[0]))
+        logger.info(&#39;IC {}: Message In: {}&#39;.format(ac, msg_in))
+
+        msg_in = MF.sendVelocity(
+            float(consumer_message[4]), master, mlog, forwarding)
+        logger.info(&#39;IC {}: Velocity sent: {}&#39;.format(
+            ac, consumer_message[6]))
+        logger.info(&#39;IC {}: Message In: {}&#39;.format(ac, msg_in))
+
+        # Send the Waypoints
+        while True:
+            if msg_in is&#39;NONE&#39;:
+                logger.info(
+                    &#39;IC {}: Timeout Reached. Waypoint Load Failed&#39;.format(ac))
+                break
+            elif str(msg_in).find(&#39;MISSION_ACK&#39;) == 0:
+                logger.info(&#39;IC {}: message in {}&#39;.format(ac, msg_in))
+                if int(msg_in.type) != 0:
+                    logger.info(
+                        &#39;IC {}: End load wp. Mission Load Failed&#39;.format(ac))
+                    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;}&#39;)
+                else:
+                    logger.info(&#39;IC {}: End load wp.&#39;.format(ac))
+                    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;}&#39;)
+                break
+            else:
+
+                seq = int(msg_in.seq)
+                item = wp_list[seq-1]
+                logger.info(&#39;IC {0}: Sending waypoint {1}, {2}&#39;.format(ac, item, [
+                    float(item[0]),
+                    float(item[1]),
+                    float(item[2]),
+                    mavutil.mavlink.MAV_MISSION_TYPE_ALL,
+                    master]))
+
+                msg_in = MF.sendWaypoint(
+                    wp_list[seq-1], radius, seq, master, mlog, forwarding)
+                logger.info(&#39;IC {}: Point sent: {}&#39;.format(
+                    ac, wp_list[seq-1]))
+
+                q.put(
+                    aircraft + &#39;&#34;TYPE&#34; : &#34;WAYPOINTLOAD&#34;, &#34;INFO&#34; : &#34;SENT WAYPOINT &#39;+str(seq)+&#39;&#34;}&#39;)
+
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.loadFlightPlanFile"><code class="name flex">
+<span>def <span class="ident">loadFlightPlanFile</span></span>(<span>ac, consumer_message, q, master, mlog)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def loadFlightPlanFile(ac, consumer_message, q, master, mlog):
+    try:
+        logger = logging.getLogger()
+        wpload = mavwp.MAVWPLoader(
+            master.target_system, master.target_component)
+        dir = os.path.dirname(os.path.realpath(__file__))
+        num = wpload.load(
+            dir + &#39;/../Examples/FlightPlans/&#39;+consumer_message[1])
+        msg_list = []
+        vel = 0
+        for i in range(0, num):
+            msg_item = wpload.wp(i)
+            if msg_item.command == 16 or msg_item.command == 22:
+                msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(msg_item.seq) + \
+                    &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x) + \
+                    &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y) + \
+                    &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+                msg_list.append(msg_part)
+            elif msg_item.command == 178:
+                vel = msg_item.param2
+
+        msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+        msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;true&#34;}&#39;
+
+
+        q.put(msg)
+        q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+ac+&#39;, &#34;name&#34;:&#34;LOAD&#34; , &#34;INFO&#34;:&#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;LOAD WP FILE&#34;}&#39;)
+    except Exception as e:
+        q.put(&#39;{&#34;AIRCRAFT&#34;:&#39;+ac+&#39;, &#34;name&#34;:&#34;LOAD&#34; , &#34;INFO&#34;:&#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39;+str(e)+&#39;&#34;}&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.loadGeoFence"><code class="name flex">
+<span>def <span class="ident">loadGeoFence</span></span>(<span>ac, consumer_message, q, master, mlog, forwarding)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def loadGeoFence(ac, consumer_message, q, master, mlog, forwarding):
+    logger = logging.getLogger()
+    logger.info(&#39;&#39;)
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;IC {}: ConsumerMSG {}&#39;.format(ac, consumer_message))
+
+    aircraft = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#39;
+    # Format the message
+    wp_list = [(x, consumer_message[consumer_message.index(x) + 1])
+               for x in consumer_message[11::2]]
+
+    # this matters, if you don&#39;t start at zero icarous will crash
+    index = int(consumer_message[4]) - 1
+    floor = int(consumer_message[8])
+    roof = int(consumer_message[10])
+    total = len(wp_list)
+    f_type = consumer_message[6]
+
+    q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;GEOFENCELOAD&#34;, &#34;INFO&#34; : &#34;START&#34;}&#39;)
+    msg_in = MF.sendGFEnable(index, f_type, total,
+                             floor, roof, master, mlog, forwarding)
+
+    # send points
+    while True:
+        logger.info(&#39;IC {}: message in {}&#39;.format(ac, str(msg_in)))
+        if msg_in is&#39;NONE&#39;:
+            logger.info(&#39;Timeout Reached. Point Load Failed&#39;)
+            q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;GEOFENCELOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;}&#39;)
+            break
+
+        elif str(msg_in).find(&#39;COMMAND_ACK&#39;) == 0:
+            logger.info(&#39;IC {}: message in {}&#39;.format(ac, msg_in))
+            logger.info(&#39;IC {}: End load Geofence.&#39;.format(ac))
+            q.put(aircraft + &#39;&#34;TYPE&#34; : &#34;GEOFENCELOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;}&#39;)
+            break
+
+        else:
+            seq = int(msg_in.idx)
+            logger.info(&#39;IC {}: message in, idx {}&#39;.format(ac, msg_in.idx))
+            item = wp_list[seq]
+            # Send the point
+            logger.info(&#39;IC {0}: Sending point {1}, {2}&#39;.format(ac, item, [master.target_system,
+                                                                     master.target_component,
+                                                                     seq,
+                                                                     total,
+                                                                     float(
+                                                                         item[0]),
+                                                                     float(
+                                                                         item[1])
+                                                                     ]))
+            msg_in = MF.sendGFPoint(seq, total, item, master, mlog, forwarding)
+    logger.info(&#39;IC {}: msg_in {}&#39;.format(ac, msg_in))
+    logger.info(&#39;*******************************************************&#39;)
+    logger.info(&#39;&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.loadGeoFenceFile"><code class="name flex">
+<span>def <span class="ident">loadGeoFenceFile</span></span>(<span>ac, consumer_message, q, master, mlog)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def loadGeoFenceFile(ac, consumer_message, q, master, mlog):
+    logger = logging.getLogger()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    filename = dir + &#39;/../Examples/GeoFences/&#39; + \
+        consumer_message[1]
+    try:
+        f = open(filename, &#39;r&#39;)
+    except Exception as e:
+        print(&#39;File not found. &#39;, dir +&#39;/..&#39; + consumer_message[1])
+        q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(e) +&#39;&#34;}&#39;)
+        return
+    fencelist = GF.read_geofence(filename)
+    logger.info(&#39;IC {}: Fence List: {}&#39;.format(ac, fencelist))
+
+    msg = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#34;TYPE&#34;:&#34;GF&#34;, &#34;LIST&#34;:[&#39;
+    for item in fencelist:
+        m = json.dumps(item)
+        msg = msg + m +&#39;,&#39;
+
+    q.put(msg[:-1] + &#39;], &#34;FILE&#34; : &#34;True&#34;}&#39;)
+    q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS &#34;, &#34;MSG&#34;:&#34;&#39; + consumer_message[1]+&#39;&#34;}&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.loadParamFile"><code class="name flex">
+<span>def <span class="ident">loadParamFile</span></span>(<span>ac, consumer_message, q, master, mlog)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def loadParamFile(ac, consumer_message, q, master, mlog):
+    logger = logging.getLogger()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    try:
+        f = open(dir + &#39;/..&#39; + consumer_message[1], &#39;r&#39;)
+    except Exception as e:
+        print(&#39;File not found. &#39;, dir +&#39;/..&#39; + consumer_message[1])
+        q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(e) +&#39;&#34;}&#39;)
+        return
+
+    retry = 3
+    fail_list = []
+    for line in f:
+        if &#39;#&#39; not in line:
+            words = line.split()
+            if len(words) == 2:
+                count = 0
+                while count &lt; retry:
+                    master.mav.param_set_send(master.target_system,
+                                            master.target_component,
+                                            words[0].encode(&#39;utf8&#39;),
+                                            float(words[1]),
+                                            mavutil.mavlink.MAV_PARAM_TYPE_REAL32)
+                    msg_in = master.recv_match(type=&#39;PARAM_VALUE&#39;,
+                                            blocking=True, timeout=.5)
+
+                    if msg_in != None:
+                        break
+                    else:
+                        count += 1
+                    if count &gt;= 3:
+                        fail_list.append(words)
+
+    f.close()
+
+    logger.info(&#39;IC {0}: Unable to load {1} parameters: {2}&#39;.format(
+        ac, len(fail_list), str(fail_list)))
+    q.put(&#39;{&#34;name&#34; : &#34;LOAD&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + consumer_message[1]+&#39;&#34;}&#39;)
+    return</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.requestNewAircraft"><code class="name flex">
+<span>def <span class="ident">requestNewAircraft</span></span>(<span>msg, BAUD, UDP_PORT_2, HOST)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
+    logger = logging.getLogger()
+    v = &#39;ArduCopter&#39;  # this can be added later
+    l = &#39;&#39;.join([x+&#39;,&#39; for x in msg[2:6]])[0:-1]
+    s = &#39;1&#39;
+    i = str(int(msg[1]) - 1)
+    icarous_flag = msg[7]
+    sim_type = msg[8]
+    p = msg[9]
+    a = msg[10]
+    if icarous_flag == &#39;0&#39;:
+        UDP_PORT_2 = UDP_PORT_2 - 3
+    m = HOST + &#39;:&#39;+str(UDP_PORT_2 + 10 * (int(i)))
+
+    pidA = 0
+    if sim_type == &#39;ARDUPILOT&#39;:
+        # sim_vehicle.py -v ArduCopter -l 37.0866,-76.3789,5.000000,0 -S 1 -I 0
+        logger.info(&#34;StartAutopilot.sh -v  {} -l {} -s {} -i {} -m {}&#34;.format(v,l,s,i,m))
+        pidA = subprocess.Popen([&#34;Scripts/StartAutopilot.sh&#34;,
+                                 &#34;-v&#34;, v, &#34;-l&#34;, l, &#34;-s&#34;, s, &#34;-i&#34;, i, &#34;-m&#34;, m, &#39;-p&#39;, a]).pid
+        logger.info(&#39;Ardupilot running on pid: {}&#39;.format(pidA))
+
+    # start icarous
+    pidI = 0
+    if icarous_flag == &#39;1&#39;:
+        c = msg[1]
+        logger.info(&#39;Start Icarous: Scripts/StartIcarous.sh -C {} -I {}&#39;.format(c,i))
+        pidI = subprocess.Popen([&#34;Scripts/StartIcarous.sh&#34;,
+                                 &#39;-C&#39;, c, &#39;-I&#39;, i, &#39;-P&#39;, p]).pid
+        logger.info(&#39;Icarous running on pid: {}&#39;.format(pidI))
+
+    # Open a mavlink UDP port
+    try:
+        mas = mavutil.mavlink_connection(&#34;udp:&#34; + HOST + &#34;:&#34; + str(
+            UDP_PORT_2 + 10 * int(i)), dialect=&#39;ardupilotmega&#39;, baud=BAUD, append=True)
+
+        MF.requestDataStream(BAUD, mas)
+        logger.info(&#39;Connected on port: {}&#39;.format(str(UDP_PORT_2 + 10 * int(i))))
+
+    except Exception:
+        logger.exception(&#34;Error opening mavlink connection&#34;, exc_info=True)
+        mas = None
+
+    return mas, pidI, pidA</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.requestVert"><code class="name flex">
+<span>def <span class="ident">requestVert</span></span>(<span>msg_in, ac, m, mlog, forwarding)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def requestVert(msg_in, ac, m, mlog, forwarding):
+    # msg_item
+    # seq = fence number (zero based)
+    # frame = type (in or ex)
+    # param 1 = numV
+    # param 2 = current vert (zero based)
+    # param 3 = floor
+    # param 4 = roof
+    # x = lat
+    # y = lng
+
+    # out for each fence
+    # Geofence = {&#34;id&#34;: id, &#34;type&#34;: t, &#34;numV&#34;: numV, &#34;floor&#34;: floor,
+    #                     &#34;roof&#34;: roof, &#34;Vertices&#34;: Vertices}
+
+
+    logger = logging.getLogger()
+    logger.info(&#39;IC {}: Mission Count {}&#39;.format(ac, msg_in.count))
+    has_next = False
+    if msg_in is None:
+        return
+    if int(msg_in.count) &gt; 0:
+        has_next = True
+    i = 0
+    v_list =[]
+    f_list = []
+    id = 0
+    f_id = 0
+    while has_next:
+        msg_item = MF.requestVert(i, m, mlog, forwarding)
+        if msg_item.param2 == id:
+            if f_id == msg_item.seq:
+                logger.info(&#39;IC {}: {}&#39;.format(ac, msg_item))
+                v_list.append((msg_item.x, msg_item.y))
+                fence = {&#34;id&#34;: msg_item.seq +1,
+                         &#34;type&#34;:  msg_item.frame,
+                         &#34;numV&#34;:  msg_item.param1,
+                         &#34;floor&#34;:  msg_item.param3,
+                         &#34;roof&#34;:  msg_item.param4,
+                         &#34;Vertices&#34;:  v_list}
+                id +=1
+
+            i += 1
+
+            if i &gt;= msg_in.count:
+                f_list.append(fence)
+                has_next = False
+        else:
+            f_id +=1
+            id = 0
+            f_list.append(fence)
+            fence = []
+            v_list = []
+            logger.info(&#39;mission item {} {}&#39;.format(i, msg_item))
+
+    logger.info(&#39;IC {}: Fence List: {}&#39;.format(ac, f_list))
+
+    msg = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#34;TYPE&#34;:&#34;GF&#34;, &#34;LIST&#34;:[&#39;
+    for item in f_list:
+        m = json.dumps(item)
+        msg = msg + m +&#39;,&#39;
+
+    msg = msg[:-1] + &#39;], &#34;FILE&#34; : &#34;False&#34;}&#39;
+    return msg</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.requestWaypoints"><code class="name flex">
+<span>def <span class="ident">requestWaypoints</span></span>(<span>msg_in, ac, m, mlog, forwarding)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def requestWaypoints(msg_in, ac, m, mlog, forwarding):
+    logger = logging.getLogger()
+    logger.info(&#39;IC {}: Mission Count {}&#39;.format(ac, msg_in.count))
+    has_next = False
+    if msg_in is None:
+        return
+    if int(msg_in.count) &gt; 0:
+        has_next = True
+    i = 0
+    msg_list = []
+    vel = 0
+    while has_next:
+        msg_item = MF.requestWaypoints(i, m, mlog, forwarding)
+
+        if msg_item.seq == i:
+            logger.info(&#39;IC {}: {}&#39;.format(ac, msg_item))
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(msg_item.seq) + \
+                &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+            if msg_item.command == 178:
+                vel = msg_item.param2
+
+            msg_list.append(msg_part)
+            i += 1
+            if i &gt;= msg_in.count:
+                has_next = False
+        else:
+            logger.info(&#39;mission item {} {}&#39;.format(i, msg_item))
+
+    msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+    msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;false&#34;}&#39;
+
+    return msg</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.saveFile"><code class="name flex">
+<span>def <span class="ident">saveFile</span></span>(<span>ac, consumer_message, q, master, mlog)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def saveFile(ac, consumer_message, q, master, mlog):
+    logger = logging.getLogger()
+    dir = os.path.dirname(os.path.realpath(__file__))
+    filename = consumer_message[2]
+    path = dir + &#39;/..&#39; + filename
+
+    if consumer_message[1] == &#39;PARAM&#39;:
+        try:
+            f = open(path, &#39;w&#39;)
+            # convert message from JSON string to list of objects
+            data = consumer_message[3]
+            loaded_data = json.loads(data)
+            for item in loaded_data:
+
+                # add proper spacing 16, 1, num.000000
+                name = item[&#39;name&#39;]
+                x = len(name)
+                name = name + (&#39; &#39; * (16 - x))
+                value = float(item[&#39;value&#39;])
+                line = &#39;{0} {1:7.6f}\n&#39;.format(name, value)
+
+                # write line
+                f.write(line)
+
+            f.close()
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+
+    elif consumer_message[1] == &#39;WAYPOINTS&#39;:
+        try:
+            f = open(path, &#39;w&#39;)
+
+            # convert message from list into component parts
+            data = consumer_message[3:]
+            vel = data[1]
+            wp_list = data[3:-1]
+
+            # add the header
+            line = &#39;QGC WPL 110\n&#39;
+            f.write(line)
+
+            # add the body
+            for x in range(int(len(wp_list)/3)):
+                if x == 0:
+                    line = &#39;{0} 0       0       22      0.000000        0.000000        0.000000        0.000000        {1}     {2}     {3}     1\n&#39;.format(
+                        x, wp_list[3*x], wp_list[3*x+1], wp_list[3*x+2])
+                    line = line + &#39;{0}  0       0       178     0.000000        {1}     0.000000        0.000000        0.000000        0.000000        0.000000        1\n&#39;.format(
+                        x+1, vel)
+                else:
+                    line = &#39;{0} 0       0       16      0.000000        0.000000        0.000000        0.000000        {1}     {2}     {3}     1\n&#39;.format(
+                        x+1, wp_list[3*x], wp_list[3*x+1], wp_list[3*x+2])
+
+                # write line
+                f.write(line)
+
+            f.close()
+
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+            logger.info(&#39;WP\&#39;s saved to {0}&#39;.format(path))
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; +
+                  str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+            logger.info(&#39;SAVE_WAYPOINTS : FAIL, &#34;INFO&#34;:&#34;&#39; +
+                  filename + &#39; &#39; + str(sys.exc_info()[0]))
+
+    elif consumer_message[1] == &#39;GEOFENCE&#39;:
+        try:
+            data = {&#39;id&#39;: consumer_message[3],
+                    &#39;type&#39;: consumer_message[4],
+                    &#39;numV&#39;: consumer_message[5],
+                    &#39;floor&#39;: consumer_message[6],
+                    &#39;roof&#39;: consumer_message[7],
+                    &#39;Vertices&#39;: {}
+                    }
+            vert = consumer_message[8:]
+            for i in range(int(len(vert)/3)):
+                data[&#39;Vertices&#39;][int(vert[(i*3)])] = {
+                    &#39;lat&#39;: vert[(i*3)+1],
+                    &#39;lon&#39;: vert[(i*3)+2]
+                }
+
+            GF.save_geofence([data], path)
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+
+    elif consumer_message[1] == &#39;SCRIPT&#39;:
+        try:
+            logger.info(consumer_message)
+            logger.info(&#39;script not working yet&#39;)
+            # f = open(path, &#39;w&#39;)
+
+            # # convert message from list into component parts
+            # data = consumer_message[3:]
+
+            # # add the header
+            # line = &#39;QGC WPL 110\n&#39;
+            # f.write(line)
+
+            # f.close()
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename+&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)
+
+    elif consumer_message[1] == &#39;TRAFFIC&#39;:
+        try:
+            f = open(path, &#39;w&#39;)
+
+            # convert message from list into component parts
+            data = consumer_message[3:]
+            lat = data[0]
+            lng = data[1]
+            alt = data[2]
+            vel = data[3]
+            hdg = data[4]
+            emit = data[5]
+            # write the line
+            line = &#34;{0} {1} {2} {3} {4} {5}\n&#34;.format(
+                lat, lng, alt, vel, hdg, emit)
+            f.write(line)
+
+            f.close()
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;SUCCESS&#34;, &#34;MSG&#34;:&#34;&#39; + filename +&#39;&#34;}&#39;)
+        except:
+            q.put(&#39;{&#34;name&#34; : &#34;SAVE&#34;, &#34;INFO&#34; : &#34;FAIL&#34;, &#34;MSG&#34;:&#34;&#39; + str(sys.exc_info()[0])+&#39;&#34;}&#39;)</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.sendVert"><code class="name flex">
+<span>def <span class="ident">sendVert</span></span>(<span>msg_in, ac)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def sendVert(msg_in, ac):
+    i = 0
+    v_list =[]
+    f_list = []
+    id = 0
+    f_id = 0
+    for msg_item in msg_in[ac]:
+        if msg_item.param2 == id:
+            if f_id == msg_item.seq:
+                v_list.append((msg_item.x, msg_item.y))
+                fence = {&#34;id&#34;: msg_item.seq +1,
+                         &#34;type&#34;:  msg_item.frame,
+                         &#34;numV&#34;:  msg_item.param1,
+                         &#34;floor&#34;:  msg_item.param3,
+                         &#34;roof&#34;:  msg_item.param4,
+                         &#34;Vertices&#34;:  v_list}
+                id +=1
+            i += 1
+            if i &gt;= len(msg_in[ac]):
+                f_list.append(fence)
+        else:
+            f_id +=1
+            id = 0
+            f_list.append(fence)
+            fence = []
+            v_list = []
+
+    msg = &#39;{&#34;AIRCRAFT&#34; : &#39; + ac + &#39;, &#34;TYPE&#34;:&#34;GF&#34;, &#34;LIST&#34;:[&#39;
+    for item in f_list:
+        m = json.dumps(item)
+        msg = msg + m +&#39;,&#39;
+
+    msg = msg[:-1] + &#39;], &#34;FILE&#34; : &#34;False&#34;}&#39;
+    return msg</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.sendWaypoints"><code class="name flex">
+<span>def <span class="ident">sendWaypoints</span></span>(<span>wp_list, ac)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def sendWaypoints(wp_list, ac):
+    logger = logging.getLogger()
+    msg_list = []
+    vel = 0
+    count = 0
+    for msg_item in wp_list[ac]:
+        logger.info(&#39;IC {}: {}&#39;.format(ac, str(msg_item)))
+
+        if msg_item.command == 16:
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(count) + \
+                &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 178:
+            # do change vel
+            vel = msg_item.param2
+        if msg_item.command == 177:
+            # do jump (repeat mission items, no need to send to front end for now)
+            logger.info(&#39;Ignore do jump command.&#39;)
+            # get repeat seq num
+            num = int(msg_item.param1)
+            # add this one back in as last wp to draw
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + count + \
+                &#39;, &#34;LAT&#34;:&#39; + str(wp_list[ac][num].x) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(wp_list[ac][num].y) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(wp_list[ac][num].z) + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 20:
+            # return to home pos after complete, after a do jump
+            logger.info(&#39;Ignore return to home after do jump.&#39;)
+
+    msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+    msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;false&#34;}&#39;
+
+    return msg</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.sendWaypointsInt"><code class="name flex">
+<span>def <span class="ident">sendWaypointsInt</span></span>(<span>wp_list, ac)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def sendWaypointsInt(wp_list, ac):
+    logger = logging.getLogger()
+    msg_list = []
+    vel = 0
+
+    count = 0
+    for msg_item in wp_list[ac]:
+
+        logger.info(&#39;IC {}: {}&#39;.format(ac, msg_item))
+
+        if msg_item.command == 16:
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + str(count) + \
+                &#39;, &#34;LAT&#34;:&#39; + str(msg_item.x/1e7) + \
+                &#39;, &#34;LNG&#34;:&#39; + str(msg_item.y/1e7) + \
+                &#39;, &#34;ALT&#34;:&#39; + str(msg_item.z) + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 178:
+            # do change vel
+            vel = msg_item.param2
+        if msg_item.command == 177:
+            # do jump (repeat mission items, no need to send to front end for now)
+            logger.info(&#39;Ignore do jump command.&#39;)
+            # get repeat seq num
+            num = int(msg_item.param1)
+            # add this one back in as last wp to close the loop
+            msg_part = &#39;{ &#34;SEQ&#34;:&#39; + count + \
+                &#39;, &#34;LAT&#34;:&#39; + wp_list[ac][num].x/1e7 + \
+                &#39;, &#34;LNG&#34;:&#39; + wp_list[ac][num].y/1e7 + \
+                &#39;, &#34;ALT&#34;:&#39; + wp_list[ac][num].z + &#39;}&#39;
+            logger.info(&#39;{}&#39;.format(msg_part))
+            msg_list.append(msg_part)
+            count += 1
+        if msg_item.command == 20:
+            # return to home pos after complete, after a do jump
+            logger.info(&#39;Ignore return to home after do jump.&#39;)
+    msg = &#39;{&#34;AIRCRAFT&#34;:&#39; + ac + &#39;,&#39;+ &#39;&#34;TYPE&#34;:&#34;WP&#34;, &#34;LIST&#34;:[&#39;
+    msg = msg + (&#39;, &#39;).join(msg_list) + &#39;], &#34;VEL&#34;:&#39; + str(vel) + &#39;, &#34;FILE&#34;:&#34;false&#34;}&#39;
+
+    return msg</code></pre>
+</details>
+</dd>
+<dt id="ServerFiles.consumerFunctions.shutdownProcesses"><code class="name flex">
+<span>def <span class="ident">shutdownProcesses</span></span>(<span>pid_list)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def shutdownProcesses(pid_list):
+    logger = logging.getLogger()
+    # pid_list = [icarous start script pid, ardupilot start script pid]
+    if pid_list[1] != 0:
+        logger.info(&#39;Killing mavproxy&#39;)
+        subprocess.Popen([&#39;pkill&#39;, &#39;-f&#39;, &#39;python sim_vehicle.py&#39;]).wait(5)
+        subprocess.Popen(
+            [&#39;pkill&#39;, &#39;-f&#39;, &#39;/usr/bin/python /usr/local/bin/mavproxy.py&#39;]).wait(5)
+        subprocess.Popen([&#39;pkill&#39;, &#39;-15&#39;, &#39;mavproxy.py&#39;]).wait(5)
+
+        logger.info(&#39;Killing Xterm&#39;)
+        subprocess.Popen([&#34;pkill&#34;, &#39;-15&#39;, &#34;xterm&#34;]).wait(5)
+
+        subprocess.Popen(
+            [&#39;pkill&#39;, &#39;-f&#39;, &#39;Scripts/StartAutopilot.sh&#39;]).wait(5)
+
+    if pid_list[0] != 0:
+        logger.info(&#39;Killing Icarous on pid: {}&#39;.format(pid_list[0]))
+
+        try:
+            logger.info(&#39;Pid List: {}&#39;.format(pid_list))
+            parent = psutil.Process(pid_list[0])
+            logger.info(&#39;Parent: {}&#39;.format(parent))
+        except psutil.NoSuchProcess:
+            logger.info(&#39;Process not found.&#39;)
+            return
+
+        children = parent.children(recursive=True)
+
+        for child in children:
+            child.send_signal(signal.SIGINT)
+            logger.info(&#39;Cleaning up /dev/mqueue. pid {0}&#39;.format(child.pid))
+            subprocess.Popen(
+                [&#39;./Scripts/clearMqueue.sh&#39;, &#39;-P&#39;, str(child.pid)])
+
+    logger.info(&#39;Shutdown complete.&#39;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="ServerFiles.consumerFunctions.connectToHardwareIP" href="#ServerFiles.consumerFunctions.connectToHardwareIP">connectToHardwareIP</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.loadFlightPlan" href="#ServerFiles.consumerFunctions.loadFlightPlan">loadFlightPlan</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.loadFlightPlanFile" href="#ServerFiles.consumerFunctions.loadFlightPlanFile">loadFlightPlanFile</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.loadGeoFence" href="#ServerFiles.consumerFunctions.loadGeoFence">loadGeoFence</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.loadGeoFenceFile" href="#ServerFiles.consumerFunctions.loadGeoFenceFile">loadGeoFenceFile</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.loadParamFile" href="#ServerFiles.consumerFunctions.loadParamFile">loadParamFile</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.requestNewAircraft" href="#ServerFiles.consumerFunctions.requestNewAircraft">requestNewAircraft</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.requestVert" href="#ServerFiles.consumerFunctions.requestVert">requestVert</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.requestWaypoints" href="#ServerFiles.consumerFunctions.requestWaypoints">requestWaypoints</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.saveFile" href="#ServerFiles.consumerFunctions.saveFile">saveFile</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.sendVert" href="#ServerFiles.consumerFunctions.sendVert">sendVert</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.sendWaypoints" href="#ServerFiles.consumerFunctions.sendWaypoints">sendWaypoints</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.sendWaypointsInt" href="#ServerFiles.consumerFunctions.sendWaypointsInt">sendWaypointsInt</a></code></li>
+<li><code><a title="ServerFiles.consumerFunctions.shutdownProcesses" href="#ServerFiles.consumerFunctions.shutdownProcesses">shutdownProcesses</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.6.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

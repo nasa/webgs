@@ -1,0 +1,12 @@
+{
+    "name": "webgs",
+    "version": "1.0.0",
+    "description": "WebGS",
+    "main": "index.html",
+    "author": "Andrew Peters <andrew.l.peters@nasa.gov>",
+    "license": "Not Yet",
+    "repository": {
+        "url": "",
+        "type": "git"
+    }
+}

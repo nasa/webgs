@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script>
+    <!-- popper.js needed for bootstrap stuff -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous">
+    </script>
+    <!-- bootstrap  -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous">
+    </script>
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+        crossorigin="" />
+    <link rel="stylesheet" href="Leaflet.contextmenu/dist/leaflet.contextmenu.css" />
+    <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+        integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
+        crossorigin=""></script>
+    <script src="Leaflet.contextmenu/dist/leaflet.contextmenu.js"></script>
+    <script src="Leaflet-semicircle/Semicircle.js"></script>
+    <script src="Leaflet.RotatedMarker/leaflet.rotatedMarker.js"></script>
+
+    <!-- Flight Indicators -->
+    <link rel="stylesheet" type="text/css" href="jQuery-Flight-Indicators/css/flightindicators.css" />
+    <script src="jQuery-Flight-Indicators/js/jquery.flightindicators.js"></script>
+
+    <!-- Spinner -->
+    <link rel="stylesheet" href="LoadingSpinner/spinner.css">
+
+    <!-- local .css -->
+    <link rel="stylesheet" type="text/css" href="./MainCSS/index.css">
+    <link rel="stylesheet" type="text/css" href="./Indicators/indicators.css">
+    <link rel="stylesheet" type="text/css" href="./Traffic/traffic.css">
+    <link rel="stylesheet" type="text/css" href="./Geofence/geofence.css">
+    <!-- local .js -->
+    <script src="MainJS/map.js" type="module"></script>
+    <script src="Indicators/indicators.js" type="module"></script>
+    <script src="Traffic/traffic.js" type="module"></script>
+    <script src="Geofence/geofence.js" type="module"></script>
+
+    <title>Web GS</title>
+
+</head>
+
+<body>
+    <header id="Header">
+
+        <h2 id="title"> Web GS</h2>
+        <div id="modesec">
+
+            <button id="summary" type="button" class="btn btn-primary">
+                Summary <span class="caret"></span>
+            </button>
+
+            <input type="file" id="filechoice" style="display: none;">
+            <label for="filechoice" class="btn btn-primary label" type="button" id="file_label">Load File</label>
+
+            <div class="btn-group" id="ac_btn_group">
+                <button type="button" class="btn dropdown-toggle" data-toggle="dropdown">
+                    Aircraft <span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu" id="ac_buttons">
+                    <!-- list is auto populated -->
+                </ul>
+            </div>
+
+            <button id="settings_btn" type="button" class="btn btn-primary">
+                Settings <span class="caret"></span>
+            </button>
+
+            <button id="reload_btn" type="button" class="btn btn-primary">
+                Refresh Display <span class="caret"></span>
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <div id="map_display">
+        <MapDisplay>
+            <div id="mapid"></div>
+        </MapDisplay>
+    </div>
+
+    <div class="panel-group" id="panel">
+        <div class="panel panel-default" id="data-display">
+            <div class="panel-body summary active" id="blank"></div>
+            <div class="panel-body settings hide" id="settings"></div>
+            <!-- panels are auto populated -->
+        </div>
+
+    </div>
+
+    <div id="banner_group"></div>
+
+</body>
+
+</html>

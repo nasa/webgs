@@ -1,0 +1,99 @@
+
+# Fly by file
+
+# Example Script:
+
+repeat 3
+
+
+const x *2
+const y *1
+
+start startAc(bob, 1, 37.086699, -76.378911)
+time wait(20)
+
+# param file(bob, Examples/Parameters/icarous_custom1.txt)
+adjust param file(bob, Examples/Parameters/icarous_custom1.txt, x, bob, Examples/Parameters/icarous_custom2.txt, y)
+
+# time wait(10)
+
+forward start(bob, 127.0.0.1, 14570, 57600)
+
+adjust wp wpLoad(bob, Examples/FlightPlans/test_flightplan1.txt, y, bob, Examples/FlightPlans/test_flightplan2.txt, y, bob, Examples/FlightPlans/test_flightplan1.txt, y)
+
+# geofence load(bob1, 1, Examples/GeoFences/test_geofence1.xml)
+
+traffic add(bob, 1000, 37.10175, -76.38752, 0, 45, 10, 3, 45, 10, 255)
+traffic file(bob, 1001, Examples/Traffic/test_traffic1.txt)
+long MISSION_START(bob)
+
+# Time must be added to allow the flight to run before the shutdown commands are given
+time wait(40)
+
+
+traffic remove(bob, 1000)
+
+time wait(10)
+
+stop bob
+
+# This runs three times, starts one aircraft, then adds a single intruder, starts the flight, lets them interact for
+#    a certian time period, removes the intruder, waits, then shuts down the aircraft.
+
+# NOTES:
+# All commands follow the format:
+#       type function(arguments)
+
+# All commands have a predefined timeout period before the next command is sent
+#       This changes depending on the time needed to execute the command, ex. start is much longer than wait.
+#       These execution timeout's can be adjusted in flybyfile.js lines 168-177.
+
+# timing and start locations will need to be carefully selected to ensure test is running as expected. I would
+#       recomend running the script a single time before adding repeats to ensure expected behavior. I will be
+#       looking into adding recording of events to make script building easier.
+
+# Traffic will auto start when added
+# Traffic id should start at 1000 and increment up
+
+# Stop all is added between repeats (shuts down all running aircraft instances)
+
+# If you haven't figured it out yet all lines with a # are comments, the interpreter will ignore it and any blank lines.
+# For now use spaces not tabs.
+
+# Repeat must be the first line in the script if it is going to be used.
+
+# Adjust - the number of times args must add up to the number of repeats.
+
+# const - add a constant to reduce repetitive typing when editing a script, especially when editing adjust and repeat, format const (name) (assigned value)
+#       You have to use the whole word not just part (ex. if replacing *2 you cant just put x = 2, and try to use *x  it has to be x = *2, x)
+
+# Use a name for the aircraft id, not a number. A number might cause problems with the groundstation internal tracking of aircraft.
+#    I'm not really sure about this, but just in case I would recomend it. The name can contain numbers like s1000, just not a single
+#    number like 1.
+
+# EXAMPLE COMMANDS
+# start startAc(id, 1/0, lat, lng)
+# adjust type function([args], *num of times, [args], *num of times)
+# param file(path/to/file1.txt)
+# param single(id, param_id,param_value param_type)
+# wp wpLoad(id, path/to/file.txt)
+# geofence load(id, fence_id, path/to/file.xml)
+# time wait(s)
+# long MISSION_START(id)
+# traffic add(id, t_id, lat, lng, range, bearing, alt, gs, hdg, vs)
+# traffic remove(id, t_id)
+# traffic file(id, t_id, path/to/file.txt)
+# wind function(args)   built in function can be as simple as magnatude and direction or something much more complicated
+# stop id
+
+
+
+# TODO
+# Need to build an interupt to stop the script early
+# Continue testing everything
+
+
+
+
+
+

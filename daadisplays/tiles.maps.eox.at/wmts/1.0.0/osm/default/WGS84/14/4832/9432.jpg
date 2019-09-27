@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="EOX :: Maps Demo">
+
+        <!-- Allow address bar to hide on mobiles -->
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <title>EOX :: Maps</title>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+        <!-- Styles -->
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="screen">
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.2/css/font-awesome.min.css" rel="stylesheet">
+        <link href="./styles/styles.css" rel="stylesheet" type="text/css" media="all" />
+        <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
+        <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Droid+Serif">
+    </head>
+    <body data-spy="scroll" data-target=".navbar" data-offset="75">
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/" style="font-size: 160%"><i class="fa fa-globe"></i> EOX::Maps</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav pull-right">
+                    <li><a href="#about"><i class="fa fa-fw fa-book"></i> About</a></li>
+                    <li><a href="#showcases"><i class="fa fa-fw fa-play-circle"></i> Showcases</a></li>
+                    <li><a href="#data"><i class="fa fa-fw fa-archive"></i> Data</a></li>
+                    <li><a href="#contact"><i class="fa fa-fw fa-envelope"></i> Contact</a></li>
+                    <li><a href="#heavyload"><i class="fa fa-fw fa-spinner fa-spin"></i> Heavy load</a></li>
+                    <li>
+                        <a href="https://twitter.com/eox_a" target="_blank" style="display: inline-block; padding-right: 0;"><i class="fa fa-fw fa-twitter"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Map Element -->
+        <div class="jumbotron frontpage" style="position: relative;">
+            <div id="map">
+                <div id="zoom" class="btn-toolbar-vertical btn-group-sm">
+                    <div class="btn-group-vertical btn-group-sm">
+                        <button type="button" id="zoomIn" class="btn btn-default"><i class="fa fa-fw fa-plus"></i></button>
+                        <button type="button" id="zoomOut" class="btn btn-default"><i class="fa fa-fw fa-minus"></i></button>
+                    </div>
+                    <button type="button" id="expand" class="btn btn-default"><i class="fa fa-fw fa-expand"></i></button>
+                </div>
+                <div id="tools" class="btn-group btn-group-sm">
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" id="layerSwitcher" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><i class="fa fa-globe"></i> Terrain Light<i class="fa fa-caret-down"></i></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="baseLayer" data-layer="terrain-light"><i class="fa fa-check-square-o" data-layer="terrain-light"></i> Terrain Light</a></li>
+                            <li><a href="#" class="baseLayer" data-layer="s2cloudless"><i class="fa fa-square-o" data-layer="s2cloudless"></i> Sentinel-2 cloudless</a></li>
+                            <li><a href="#" class="baseLayer" data-layer="terrain"><i class="fa fa-square-o" data-layer="terrain"></i> Terrain</a></li>
+                            <li><a href="#" class="baseLayer" data-layer="osm"><i class="fa fa-square-o" data-layer="osm"></i> OpenStreetMap</a></li>
+                            <li><a href="#" class="baseLayer" data-layer="bluemarble"><i class="fa fa-square-o" data-layer="bluemarble"></i> Blue Marble</a></li>
+                            <li><a href="#" class="baseLayer" data-layer="blackmarble"><i class="fa fa-square-o" data-layer="blackmarble"></i> Black Marble</a></li>
+                        </ul>
+                    </div>
+                    <div class="btn-group btn-group-sm" data-toggle="buttons">
+                        <label class="btn btn-default"><input type="checkbox" id="overlay"><i class="fa fa-road"></i> Overlay</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container" id="content">
+            <h1 id="about"><i class="fa fa-fw fa-book"></i> About EOX::Maps</h1>
+            <p>EOX::Maps are our contribution to open data by offering global maps.</p>
+            <p>Try out the interactive demo at the top of this page. We are actively working on making it nicer, faster, more stable, &hellip;, simply more awesome. The demo service is provided as is without any guarantee. Content and availability may change without notice although we try hard to keep this to a minimum.</p>
+            <p>Do you want to use our maps as part of your application? Just feel free to use them. Please include <a href="//maps.eox.at">a link back to EOX::Maps</a> as well as appropriate attribution as done in the lower right corner of the demo map including the respective links e.g. <i>Terrain { Data &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors and <a href="#data">others</a>, Rendering &copy; <a href="//eox.at" target="_blank">EOX</a> }</i>.</p>
+            <p>You are interested in a custom map? You need a map in your custom projection? You need an offline map for your intranet? Just get in touch with us, we gladly offer our professional support.</p>
+            <p>You want to be mentioned as showcase? You have suggestions to make our maps more awesome?</p>
+            <p>In any case, we'd love to hear from you <a href="#contact"><i class="fa fa-fw fa-envelope"></i></a>.</p>
+
+            <h1 id="showcases"><i class="fa fa-fw fa-play-circle"></i> EOX::Maps Showcases</h1>
+
+            <h2>Interactive demo <a href="http://eox.at" target="_blank"><img src="images/eox-logo.png" alt="EOX" title="EOX" /></a></h2>
+            <p>The <a href="#map">interactive demo</a>   at the top of this page offers six background maps selectable at the top right of the map.</p>
+            <ul>
+                <li>Terrain Light</li>
+                <li>Sentinel-2 cloudless</li>
+                <li>Terrain</li>
+                <li>OpenStreetMap</li>
+                <li>Blue Marble</li>
+                <li>Black Marble</li>
+            </ul>
+            <p>Apart from the motivation to create beautiful maps one of the main drivers is to split background from overlay layers to enable embedding data properly in between. The reason is that both background and overlay provide spatial context in different ways. The background (e.g. Terrain Light) provides an idea of land usage and topography while the overlay adds labels and line features like borders or streets to provide more detailed information. Depending on the background map one of two overlays can be enabled. Over the Terrain map a dark version is used whereas a bright version for better visibility can be enabled over the marble background maps.</p>
+
+            <h2><a href="https://vires.services" target="_blank">VirES for Swarm</a> <a href="http://eox.at" target="_blank"><img src="images/eox-logo.png" alt="EOX" title="EOX" /></a> service for <a href="http://esa.int" target="_blank"><img src="images/esa-logo.png" alt="European Space Agency" title="European Space Agency" /></a></h2>
+            <p>The virtual research platform <a href="https://vires.services" target="_blank">VirES for Swarm</a> uses EOX::Maps to show Earth's magnetic field as observed by satellite in 3D.</p>
+            <p class="text-center"><a href="https://vires.services" target="_blank"><iframe width="1024" height="576" src="https://www.youtube.com/embed/7IuChwuye8c?rel=0" frameborder="0" allowfullscreen></iframe></a></p>
+
+            <h2><a href="https://s2maps.eu" target="_blank">Sentinel-2 cloudless</a></h2>
+            <p>An (almost) cloudless Sentinel-2 map of the world, crafted by EOX and made available for free.</p>
+            <p class="text-center"><a href="https://s2maps.eu" target="_blank"><img class="img-responsive img-thumbnail" style="margin: 20px 0;" src="images/s2maps.eu.png" alt="Sentinel-2 cloudless" title="Sentinel-2 cloudless" /></a></p>
+
+            <h2>European Space Agency <a href="http://esa.int" target="_blank"><img src="images/esa-logo.png" alt="European Space Agency" title="European Space Agency" /></a></h2>
+            <p>EOX::Maps are provided as a <a href="//esa.maps.eox.at" target="_blank">dedicated services</a> to the <a href="http://esa.int" target="_blank">European Space Agency (ESA)</a> and used in several applications like the <a href="https://scihub.copernicus.eu/dhus/#/home" target="_blank">Copernicus Open Access Hub</a> or the <a href="https://eoli.eo.esa.int/ngeo/" target="_blank">next generation user services (ngEO)</a>.</p>
+            <p>The ngEO system uses EOX' background and overlay maps in its central map display to put search results of Earth Observation data in spatial context.</p>
+            <p class="text-center"><a href="https://eoli.eo.esa.int/ngeo/" target="_blank"><img class="img-responsive img-thumbnail" style="margin: 20px 0;" src="images/ngeo.png" alt="ESA ngEO demo" title="ESA ngEO demo" /></a></p>
+
+            <h2>European Environment Agency <a href="http://www.eea.europa.eu" target="_blank"><img src="images/eea-logo.png" alt="European Environment Agency" title="European Environment Agency" /></a></h2>
+            <p>EOX hosts a demo of an INSPIRE download service for the EU-DEM dataset of the <a href="http://www.eea.europa.eu" target="_blank">European Environment Agency (EEA)</a>.</p>
+            <p>EOX::Maps are used in its central map display to define spatial subsets for downloading the original data.</p>
+            <p>Click on the image below for a demo.</p>
+            <p class="text-center"><a href="http://data.eox.at/eudem" target="_blank"><img class="img-responsive img-thumbnail" style="margin: 20px 0;" src="images/eudem.png" alt="EEA EU-DEM demo" title="EEA EU-DEM demo" /></a></p>
+
+            <h1 id="data"><i class="fa fa-fw fa-archive"></i> Data</h1>
+            <p>The following datasets are used to generate EOX::Maps. Note that most of these datasets are Open Data. The layers for which the dataset is used are indicated in brackets.</p>
+            <ul>
+                <li>OpenStreetMap &copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap contributors</a> [Terrain Light, Terrain, OpenStreetMap, Overlay]</li>
+                <li>NaturalEarth <a href="http://www.naturalearthdata.com/about/terms-of-use/" target="_blank">public domain</a> [Terrain Light, Terrain, Overlay]</li>
+                <li>EUDEM &copy; Produced using Copernicus data and information funded by the European Union [Terrain]</li>
+                <li><a href="https://lpdaac.usgs.gov/products/aster_policies" target="_blank">ASTER GDEM is a product of METI and NASA</a> [Terrain Light]</li>
+                <li>SRTM &copy; <a href="http://www.nasa.gov" target="_blank">NASA</a> [Terrain]</li>
+                <li>GTOPO30 <a href="https://lta.cr.usgs.gov/GTOPO30" target="_blank">Data available from the U.S. Geological Survey</a> [Terrain Light, Terrain]</li>
+                <li>CleanTOPO2 public domain [Terrain]</li>
+                <li>GEBCO &copy; <a href="http://www.gebco.net" target="_blank">GEBCO</a> [Terrain Light]</li>
+                <li>GlobCover &copy; <a href="http://due.esrin.esa.int/page_globcover.php" target="_blank">ESA</a> [Terrain]</li>
+                <li>Blue Marble &copy; NASA’s Earth Observatory [Blue Marble]</li>
+                <li>Black Marble &copy; NASA’s Earth Observatory [Black Marble]</li>
+            </ul>
+            <p>The rendering is &copy; <a href="http://eox.at" target="_blank">EOX</a> [Terrain Light, Terrain, OpenStreetMap, Overlay] and <a href="https://github.com/mapserver/basemaps" target="_blank">MapServer</a> [OpenStreetMap, Overlay].</p>
+
+            <h1 id="contact"><i class="fa fa-fw fa-envelope"></i> Contact</h1>
+<!--
+            <div class="row" style="margin-bottom: 100px;">
+                <div class="col-lg-6">
+-->
+                    <p>Do you have any questions? Do you need more information? Feel free to contact us anytime.</p>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <address>
+                                <strong>EOX IT Services GmbH</strong><br />
+                                Thurngasse 8/4<br />
+                                1090 Wien<br />
+                                Austria<br />
+                            </address>
+                        </div>
+                        <div class="col-sm-6">
+                            <address>
+                                <br />
+                                <abbr title="Phone"><i class="fa fa-phone"></i></abbr> +43 664 6207655<br />
+                                <abbr title="Email"><i class="fa fa-envelope"></i></abbr> <a href="mailto:office@eox.at">office@eox.at</a><br />
+                                <abbr title="Skype"><i class="fa fa-skype"></i></abbr> <a href="skype:eox_at">eox_at</a>
+                            </address>
+                        </div>
+                    </div>
+<!--
+                </div>
+                <div class="col-lg-6">
+                    <p>Sign up for the <strong><i class="fa fa-globe"></i> EOX::Maps Newsletter</strong> to keep up to date with information on the project. This is a low frequency newsletter with at most 1 or 2 posts per month. We promise, we will not spam your inbox and we will never share your email address or any other data.</p>
+
+                    <form action="http://eox.us7.list-manage.com/subscribe/post?u=f317a0f993a6d1c10b29d0604&amp;id=2dbe0756de" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+                        <div style="position: absolute; left: -5000px;"><input type="text" name="b_f317a0f993a6d1c10b29d0604_2dbe0756de" value=""></div>
+                        <div class="input-group">
+                            <span class="input-group-addon">@</span>
+                            <input type="email" value="" name="EMAIL" class="required email form-control" id="mce-EMAIL">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit" name="subscribe" id="mc-embedded-subscribe">Subscribe!</button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+-->
+
+            <h1 id="heavyload"><i class="fa fa-fw fa-spinner fa-spin"></i>  Heavy load</h1>
+            <p>Increased interest in our free service results in heavy loads. We put measures in place to equally distribute the available resources. However, we had to start applying rate limiting. This is why you might end up getting HTTP errors and redirects to this page.</p>
+            <p>Please get in <a href="#contact"><i class="fa fa-fw fa-envelope"></i> touch</a> if you're interested in a dedicated service under SLA.</p>
+
+        </div>
+
+        <!-- Bootstrap -->
+        <script src="//code.jquery.com/jquery.js" type="text/javascript"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="/dist/ol/OpenLayers.js" type="text/javascript"></script>
+        <script src="/scripts/eox_maps.js" type="text/javascript"></script>
+        <script type="text/javascript">
+        $(function () {
+            // ugly workaround to let the eox_maps.js script run first :(
+            window.setTimeout( function() {
+                // setup the actual map
+                var map = new OpenLayers.Map(OpenLayers.Util.applyDefaults( {
+                    center: new OpenLayers.LonLat(10.5, 46),
+                    zoom: 6,
+                    controls: [
+                        new OpenLayers.Control.Navigation(),
+                        new OpenLayers.Control.Zoom( { zoomInId: "zoomIn", zoomOutId: "zoomOut" } ),
+                        new OpenLayers.Control.Attribution( { displayClass: 'olControlAttribution' } ),
+                        //Turned of for the #data link to work in firefox
+                        //new OpenLayers.Control.Permalink( { anchor: true } )
+                    ]
+                }, eox.maps.defaults.map));
+
+                var updateBaseLayer = function() {
+                    layer = map.baseLayer
+                    $('#layerSwitcher').html("<i class='fa fa-globe'></i> " + layer.name + "  <i class='fa fa-caret-down'></i>" );
+                    $('#layerSwitcher + ul li').each( function(i) {
+                        link = $($(this)[0].children[0]);
+                        link[0].children[0].className = (layer.layer == link.data('layer')) ? "fa fa-check-square-o" : "fa fa-square-o"
+                    });
+                }
+
+                // update the button
+                updateBaseLayer();
+
+                // set the overlay state at the beginning
+                if(map.baseLayer.overlay) {
+                    if(eox.maps.layers.overlays.overlay.getVisibility() || eox.maps.layers.overlays.overlay_bright.getVisibility()) {
+                        $('#overlay')[0].checked = true;
+                        $('#overlay')[0].parentNode.className += ' active';
+                    }
+                } else {
+                    $('#overlay').parent().hide();
+                }
+
+                // event handler for the toggling overlay
+                $('#overlay').on('change.overlay', function(e) {
+                    eox.maps.layers.overlays[ map.baseLayer.overlay ].setVisibility(( this.checked ? true : false ));
+                });
+
+                // layer switcher (base layers)
+                $('.baseLayer').on('click.baselayer', function(e) {
+                    if(($('#overlay')[0].checked) && (map.baseLayer.overlay)) {
+                        eox.maps.layers.overlays[ map.baseLayer.overlay ].setVisibility( false );
+                    }
+                    map.setBaseLayer( eox.maps.layers.base[ $(e.target).data('layer') ] );
+                    if(map.baseLayer.overlay) {
+                        $('#overlay').parent().show();
+                        if($('#overlay')[0].checked) {
+                            eox.maps.layers.overlays[ map.baseLayer.overlay ].setVisibility( true );
+                        }
+                    } else {
+                        $('#overlay').parent().hide();
+                    }
+                    updateBaseLayer();
+                });
+
+                // expand / compact the map interface
+                $('#expand').on('click.expand', function(e){
+                    e = $('#map');
+                    if(e.height() == 500) {
+                        e.css({ 'position': 'fixed', 'z-index': 1111, 'top': 0, 'left': 0, 'height': '100%', 'width': '100%' });
+                        $('body').css('overflow','hidden');
+                        $('#expand i')[0].className = 'fa fa-fw fa-compress';
+                    } else {
+                        e.css({ 'position': 'static', 'z-index': 1000, 'top': undefined, 'left': undefined, 'height': '500px', 'width': '100%' });
+                        $('body').css('overflow','auto');
+                        $('#expand i')[0].className = 'fa fa-fw fa-expand';
+                    }
+                    map.updateSize();
+                });
+            }, 0);
+        });
+        </script>
+
+        <!-- Piwik -->
+        <script type="text/javascript">
+        var _paq = _paq || [];
+        _paq.push(["trackPageView"]);
+        _paq.push(["enableLinkTracking"]);
+
+        (function() {
+            var u=(("https:" == document.location.protocol) ? "https" : "http") + "://nix.eox.at/piwik/";
+            _paq.push(["setTrackerUrl", u+"piwik.php"]);
+            _paq.push(["setSiteId", "1"]);
+            var d=document, g=d.createElement("script"), s=d.getElementsByTagName("script")[0]; g.type="text/javascript";
+            g.defer=true; g.async=true; g.src=u+"piwik.js"; s.parentNode.insertBefore(g,s);
+        })();
+        </script>
+        <noscript>
+            <img src="https://nix.eox.at/piwik/piwik.php?idsite=1&amp;rec=1" style="border:0" alt="" />
+        </noscript>
+        <!-- End Piwik Code -->
+    </body>
+</html>
