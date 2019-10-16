@@ -2,6 +2,11 @@
 
 Web GS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/ICAROUS/), version greater than 2.1.19, and capable of multi-aircraft simulations.
 
+![](screenshots/screenshot1_webgs.png)
+![](screenshots/screenshot2_webgs.png)
+![](screenshots/screenshot4_webgs.png)
+![](screenshots/screenshot3_webgs.png)
+
 ### Instalation:
 
 After cloning this repository run `git submodule update --init --recursive` to clone the submodules.
@@ -114,6 +119,7 @@ Webgs is capable of flying scripted scenarios that are repeatable and adjustable
     2. Ardupilot has issues with multi-aircraft simulations. I would recommend using the rotorsim that comes with Icarous.
 
 ### Current version:
+
 Web GS v1.0.3
 
 ### Notices:
@@ -148,5 +154,5 @@ BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
 
 ### Contact
 
-Andrew Peters andrew.peters@nianet.org  
-Cesar Munoz cesar.a.munoz@nasa.gov  
+Andrew Peters andrew.peters@nianet.org
+Cesar Munoz cesar.a.munoz@nasa.gov
