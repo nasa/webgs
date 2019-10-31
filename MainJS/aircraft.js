@@ -100,7 +100,8 @@ export class Aircraft {
 
         this.status = 0; //  0 = planning, 1 = pre-flight, 2 = in-flight, 3 = post-flight
         this.mode = '' // sitl, hitl, playback
-        this.flightmode = '' // stablized, guided,... armed/disarmed
+        this.flightmode = 'UNKNOWN' // stablized, guided,... armed/disarmed
+        this.icflightmode = 'UNKNOWN'
         this.stopCalled = false
         this.hasComms = false;
 
@@ -118,7 +119,9 @@ export class Aircraft {
 
         this.icarous = 1;
         this.ic_control = false;
-        this.bands = [];
+        this.bands1 = [];
+        this.bands2 = []
+        this.bands3 = []
         this.band_markers = [];
         this.ic_radius = null;
         this.icRad = 0;
@@ -137,7 +140,7 @@ export class Aircraft {
         this.large = null
 
         this.forwarding = false; // forwarding raw data to somewhere else
-        this.f_ip = '146.165.72.2'
+        this.f_ip = '0.0.0.0'
         this.f_port = '14550'
         this.f_baud = '56700'
 
@@ -155,7 +158,7 @@ export class Aircraft {
         let acIcon
         for (let item of Object.keys(mymap._layers)) {
             acIcon = L.icon({
-                iconUrl: acIconList[parseInt(acId) - 1],
+                iconUrl: acIconList[1],
                 // shadowUrl: 'images/drone-svgrepo-com-green.svg',
                 iconSize: [40, 40], // size of the icon
                 // shadowSize: [36, 36], // size of the shadow
@@ -179,11 +182,11 @@ export class Aircraft {
         let acIcon
         for (let item of Object.keys(mymap._layers)) {
             acIcon = L.icon({
-                iconUrl: acIconList[parseInt(acId) - 1],
-                shadowUrl: 'images/drone-svgrepo-com-red.svg',
+                iconUrl: acIconList[0],
+                //shadowUrl: 'images/drone-svgrepo-com-red.svg',
                 iconSize: [40, 40], // size of the icon
-                shadowSize: [36, 36], // size of the shadow
-                shadowAnchor: [17, 16], // the same for the shadow
+                //shadowSize: [36, 36], // size of the shadow
+                //shadowAnchor: [17, 16], // the same for the shadow
                 popupAnchor: [4, 62] // point from which the popup should open relative to the iconAnchor
             })
         }
@@ -245,8 +248,8 @@ export function acShutdown(ac, originator = true) {
 
 
 let acIconList = [
-    'images/quad_red.svg',
-    'images/quad_blue.svg',
+    'images/quad_red.svg', // Active ac
+    'images/quad_blue.svg', // All other ac
     'images/quad_green.svg',
     'images/quad_yellow.svg',
     'images/quad_purple.svg',

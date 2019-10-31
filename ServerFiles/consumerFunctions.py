@@ -73,6 +73,7 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
         print(msg)
         c = str(int((float(msg[1])-1)//4 +1)) # Icarous allows 4 instances per cpu
         i = str((int(msg[1]) - 1)%4)
+        print('cpu', c, 'instance', i, 'port', UDP_PORT_2 + 10 * (int(i) + (int(c)-1)*4))
         logger.info('Start Icarous: Scripts/StartIcarous.sh -C {} -I {}'.format(c,i))
         pidI = subprocess.Popen(["Scripts/StartIcarous.sh",
                                  '-C', c, '-I', i, '-P', p]).pid
@@ -81,7 +82,7 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
     # Open a mavlink UDP port
     try:
         mas = mavutil.mavlink_connection("udp:" + HOST + ":" + str(
-            UDP_PORT_2 + 10 * int(i)), dialect='ardupilotmega', baud=BAUD, append=True)
+            UDP_PORT_2 + 10 * (int(i) + (int(c)-1)*4)), dialect='ardupilotmega', baud=BAUD, append=True)
 
         MF.requestDataStream(BAUD, mas)
         logger.info('Connected on port: {}'.format(str(UDP_PORT_2 + 10 * int(i))))
@@ -165,7 +166,7 @@ def requestWaypoints(msg_in, ac, m, mlog, forwarding):
     has_next = False
     if msg_in is None:
         print('Failed to recieve mission count, WP.')
-        return
+        return '"None"'
     if int(msg_in.count) > 0:
         has_next = True
     i = 0
@@ -215,7 +216,7 @@ def requestVert(msg_in, ac, m, mlog, forwarding):
     has_next = False
     if msg_in is None:
         print('Failed to recieve mission count, GF.')
-        return
+        return '"None"'
     if int(msg_in.count) > 0:
         has_next = True
     i = 0  # point count total
@@ -270,7 +271,7 @@ def requestReplan(msg_in, ac, m, mlog, forwarding):
     has_next = False
     if msg_in is None:
         print('Failed to recieve mission count, RP.')
-        return
+        return '"None"'
     if int(msg_in.count) > 0:
         has_next = True
     i = 0
@@ -495,7 +496,7 @@ def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
         logger.info('IC {}: Velocity sent: {}'.format(
             ac, consumer_message[4]))
         logger.info('IC {}: Message In: {}'.format(ac, msg_in))
-
+        # print(wp_list)
         # Send the Waypoints
         while True:
             if msg_in is'NONE' or msg_in is None:
@@ -516,6 +517,7 @@ def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
             else:
 
                 seq = int(msg_in.seq)
+                print(seq, wp_list[seq-1])
                 item = wp_list[seq-1]
                 logger.info('IC {0}: Sending waypoint {1}, {2}'.format(ac, item, [
                     float(item[0]),

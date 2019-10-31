@@ -79,30 +79,33 @@ def readTlog(tlog, out=False):
         t_prev = timestamp
 
         # get the message
-        m = log.recv_msg()
+        try:
+            m = log.recv_msg()
 
-        if m != None:
+            if m != None:
+                m_list.append([ac, m, timestamp, delta])
+
+            # Stuff for debuging
+            # if out:
+            #     # output as text for testing
+            #     with open('../LogFiles/test_out.txt', 'a') as f:
+            #         f.write(str(m)+'\n')
+            #     if m.get_type() != 'None':
+            #         if m.get_type() == 'MISSION_ITEM':
+            #             print(tlog.timestamp)
+            #             print(m)
+
+            #         elif not single:
+            #             print(tlog.timestamp)
+            #             print(m)
+
+            #     elif bad:
+            #         print(tlog.timestamp)
+            #         print(m)
+
             m_list.append([ac, m, timestamp, delta])
-
-        # Stuff for debuging
-        # if out:
-        #     # output as text for testing
-        #     with open('../LogFiles/test_out.txt', 'a') as f:
-        #         f.write(str(m)+'\n')
-        #     if m.get_type() != 'None':
-        #         if m.get_type() == 'MISSION_ITEM':
-        #             print(tlog.timestamp)
-        #             print(m)
-
-        #         elif not single:
-        #             print(tlog.timestamp)
-        #             print(m)
-
-        #     elif bad:
-        #         print(tlog.timestamp)
-        #         print(m)
-
-        m_list.append([ac, m, timestamp, delta])
+        except Exception as e:
+            print(e)
 
     log.close()
     return m_list
@@ -144,27 +147,30 @@ def readMlog(mlog, out=False):
         tprev = timestamp
 
         # get the message
-        m = log.recv_msg()
+        try:
+            m = log.recv_msg()
 
-        if m != None:
-            m_list.append([ac, m, timestamp, delta])
-
-        # stuff for debuging
-        if out:
             if m != None:
-                # output as text for testing
-                with open('../LogFiles/test_out.txt', 'a') as f:
-                    f.write(h + str(m) + '\n')
-                if m.get_type() != 'None':
+                m_list.append([ac, m, timestamp, delta])
 
-                    if m.get_type() == 'MISSION_ITEM':
+            # stuff for debuging
+            if out:
+                if m != None:
+                    # output as text for testing
+                    with open('../LogFiles/test_out.txt', 'a') as f:
+                        f.write(h + str(m) + '\n')
+                    if m.get_type() != 'None':
+
+                        if m.get_type() == 'MISSION_ITEM':
+                            print(h, m)
+
+                        elif not single:
+                            print(h, m)
+
+                    elif bad:
                         print(h, m)
-
-                    elif not single:
-                        print(h, m)
-
-                elif bad:
-                    print(h, m)
+        except Exception as e:
+            print(e)
     log.close()
     return m_list
 

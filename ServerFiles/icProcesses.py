@@ -193,6 +193,7 @@ def update_position(q, TM, master, mlog, forwarding):
     global ac
     global has_heartbeat
     global hitl
+    global logplayer
     logger = logging.getLogger()
     global starttime_now
     TM.update_traffic()
@@ -344,8 +345,10 @@ def update_position(q, TM, master, mlog, forwarding):
             elif msg.name == "PARAM_VALUE":
                 if str(msg.param_id) == 'STAT_RUNTIME':
                     return
-                else:
+                # elif logplayer is None:
+                elif '"' not in msg.param_id:
                     msg.param_id = '"'+msg.param_id+'"'
+                    # print(msg)
 
             elif msg.name == "STATUSTEXT":
                 logger.info('IC {} : {}'.format(ac, msg))
@@ -353,8 +356,8 @@ def update_position(q, TM, master, mlog, forwarding):
 
             elif msg.name == "ADSB_VEHICLE":
                 # print(msg)
-                if msg.emitter_type == 255:
-                    TM.checkTrafficList(msg.ICAO_address)
+                # if msg.emitter_type == 255:
+                #     TM.checkTrafficList(msg.ICAO_address)
 
                 msg.name = "TRAFFIC"
                 msg.TRAFFIC = msg.ICAO_address
@@ -378,7 +381,7 @@ def update_position(q, TM, master, mlog, forwarding):
 
             id = '{"AIRCRAFT" : ' + str(ac) + ', "TYPE" : "' + \
                 str(msg.name) + '"' + m + '}'
-            # print(id)
+            # print('id', id)
             q.put(id)
 
 
@@ -411,7 +414,12 @@ def completeCommands(q, msg, TM, master, mlog):
             BAUD = consumer_message[3]
             IP = consumer_message[5]
             PORT = consumer_message[7]
+            COMP = consumer_message[9]
             ac = consumer_message[1]
+
+            if COMP != 'Default':
+                MF.setTargetComponent(int(COMP))
+            print('ic processes', COMP)
 
             master = CF.connectToHardwareIP(consumer_message, IP, PORT, BAUD)
 
@@ -504,6 +512,9 @@ def completeCommands(q, msg, TM, master, mlog):
             logger.info(
                 '**************************************************************')
             logger.info('')
+
+        elif 'ADSB_VEHICLE' in consumer_message:
+            MF.sendTraffic(consumer_message, master)
 
         elif 'LOAD_FLIGHT_PLAN' in consumer_message:
             CF.loadFlightPlan(ac, consumer_message, q,
@@ -604,5 +615,7 @@ def completeCommands(q, msg, TM, master, mlog):
                 print(device, baud)
                 forwarding = mavutil.mavlink_connection(
                     device, baud=baud, input=False, dialect='ardupilotmega')
+        # else:
+        #     print('UNKNOWN MESSAGE: ', consumer_message)
 
     return master, mlog

@@ -496,12 +496,14 @@ export function createGfPlanPanel(ac, f_id) {
     in_div.appendChild(tog)
 
     // highlight the correct button
+    let inc = document.getElementById('include_' + f.id + '_' + ac.id + '_on')
+    let exc = document.getElementById('include_' + f.id + '_' + ac.id + '_off')
     if (f.type == 0) {
-        let btn = document.getElementById('include_' + f.id + '_' + ac.id + '_on')
-        btn.classList.add('highlight_f')
+        inc.classList.add('highlight_f')
+        exc.classList.remove('highlight_f')
     } else {
-        let btn = document.getElementById('include_' + f.id + '_' + ac.id + '_off')
-        btn.classList.add('highlight_f')
+        exc.classList.add('highlight_f')
+        inc.classList.remove('highlight_f')
     }
 
     // add form
@@ -700,21 +702,15 @@ export function drawGeofences() {
             // purple - bb73ff
 
             let color = 'orange';
-            if (MapBox.line_color == 'default') {
-                if (ac.id == 1) {
-                    color = '#fa3535'
-                } else if (ac.id == 2) {
-                    color = '#356dfa'
-                } else if (ac.id == 3) {
-                    color = '#4dfaac'
-                } else if (ac.id == 4) {
-                    color = '#fcfc83'
-                } else if (ac.id == 5) {
-                    color = '#bb73ff'
-                }
+            // if (MapBox.line_color == 'default') {
+            if (ac.id == Aircraft.getActiveAc().id) {
+                color = '#fa3535'
             } else {
-                color = MapBox.line_color
+                color = '#356dfa'
             }
+            // } else {
+            //     color = MapBox.line_color
+            // }
 
             let dashArray
             if (fence.submitted) {

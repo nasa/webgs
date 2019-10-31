@@ -71,7 +71,7 @@ async def consumer_handler(websocket, path):
         logger.info('SERVER: Input Message: ' + str(message))
         # parse the message
         message = message.split(' ')
-        print(message)
+        # print(message)
         # look for message to start new instance of icaorus
         if 'NEW_AIRCRAFT' in message:
             ac = int(message[3])

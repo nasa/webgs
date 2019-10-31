@@ -128,19 +128,19 @@ class LogPlayer():
         if len(self.messages) <= 0:
             return []
 
-        if self.position == -99:
+        elif self.position == -99:
             x = self.messages[0]
             self.position = 0
             return x
 
-        if self.position + self.jump <= self.total_messages - 1 and self.position + self.jump >= 0 and self.speed != 0:
+        elif self.position + self.jump <= self.total_messages - 1 and self.position + self.jump >= 0 and self.speed != 0:
             x = self.messages[self.position + self.jump]
             self.position = self.position + self.jump
             time.sleep(x[3]/self.speed)
             return x
-
-        self.Play(value=True)
-        return []
+        else:
+            self.Play(value=True)
+            return []
 
     def getStats(self):
         current_time = self.messages[self.position][2]
