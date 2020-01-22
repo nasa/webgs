@@ -10,10 +10,6 @@ env/*
 
 UserSettings/userSettings.txt
 
-Examples/FlightPlans/*
-
-Examples/Parameters/*
-Examples/Traffic/*
 
 doc/components.wmf
 doc/WebGS_Design_Diagrams.pptx
