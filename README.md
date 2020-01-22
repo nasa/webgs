@@ -1,6 +1,6 @@
 # WEB GS
 
-Web GS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/ICAROUS/), version greater than 2.1.19, and capable of multi-aircraft simulations.
+Web GS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/ICAROUS/), version greater than 2.1.26, and capable of multi-aircraft simulations.
 
 ![](screenshots/screenshot1_webgs.png)
 ![](screenshots/screenshot2_webgs.png)
@@ -120,7 +120,7 @@ Webgs is capable of flying scripted scenarios that are repeatable and adjustable
 
 ### Current version:
 
-Web GS v1.0.3
+Web GS v1.0.4
 
 ### Notices:
 
