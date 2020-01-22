@@ -74,7 +74,7 @@ window.addEventListener('unload', unloadBody)
 document.getElementById('summary').addEventListener('click', clickSummary);
 document.getElementById('filechoice').addEventListener('change', clickLoadFile);
 document.getElementById('settings_btn').addEventListener('click', clickSettings);
-document.getElementById('reload_btn').addEventListener('click', refreshDisplay)
+document.getElementById('reload_btn').addEventListener('click', refreshDisplayAll)
 window.addEventListener('resize', form.adjustFormSize)
 
 
@@ -286,11 +286,8 @@ export function createNewAircraft(name = null, ic = 1, center = null, mode = nul
     form.createLoadingPanel('startup', ac)
     form.makePanelActive('loading_startup_' + ac.id)
 
-    // check for loaded wp's
-    comms.sendMessage('REQUEST_WAYPOINTS ' + ac.id);
-    comms.sendMessage('REQUEST_FENCE ' + ac.id)
-    comms.sendMessage('REQUEST_REPLAN ' + ac.id)
-
+    // request info from ac
+    refreshDisplay(ac)
 
     // add a layer to the map
     map.addNewLayerGroup(ac);
@@ -336,9 +333,6 @@ export function clickLoadFile(e) {
         // load the file
         let fr = new FileReader();
         let file_name = this.files[0].name
-        console.log(fr)
-        console.log(this.files[0])
-
 
         // remove any old panel for this file
         let old = document.getElementById('file_load_' + file_name);
@@ -355,7 +349,10 @@ export function clickLoadFile(e) {
         };
         fr.readAsText(this.files[0]);
 
+        // this clears the input and allows the same file to be loaded twice
+        document.getElementById('filechoice').value = ''
         form.makePanelActive('file_load_' + file_name);
+
     } else {
         form.alertBannerRed('Fly By File only works in SITL Mode')
     }
@@ -439,6 +436,7 @@ export function clickSubmitChanges() {
 
                     // send change message to server
                     comms.sendMessage(message);
+                    comms.sendMessage('UPDATE_PARAM_LIST')
                 } else {
                     console.log('Change param canceled')
                 }
@@ -855,6 +853,7 @@ export function highlightCurrentSettings() {
         name_list = [
             'serviceWorker_toggle',
             'adsb_toggle',
+            'Tadsb_toggle',
             'multi_toggle',
             'sim_toggle',
             'sensor_toggle',
@@ -867,6 +866,7 @@ export function highlightCurrentSettings() {
         name_list = [
             'serviceWorker_toggle',
             'adsb_toggle',
+            // 'Tadsb_toggle',
             'sim_toggle',
             'sensor_toggle',
             // 'radar_toggle',
@@ -993,7 +993,8 @@ export function clickLoadWPFile(e) {
         let lines = text.split('\n')
 
         // add options for other file types
-        if (lines[0] != 'QGC WPL 110') {
+        if (!lines[0].includes('QGC WPL 110')) {
+            console.log(lines[0])
             form.alertBannerRed('Invalid file format.')
             return
         }
@@ -1013,6 +1014,8 @@ export function clickLoadWPFile(e) {
                 lat = 0
                 lng = 0
                 alt = 0
+            } else if (words[0] == '') {
+                // pass, empty line
             } else {
                 console.log(words)
                 lat = 0
@@ -1020,14 +1023,15 @@ export function clickLoadWPFile(e) {
                 alt = 0
             }
             // need to be able to handle do jumps and a catch all for other entries
-
-            wp = {
-                'SEQ': words[0],
-                'LAT': lat,
-                'LNG': lng,
-                'ALT': alt
+            if (words.length > 1) {
+                wp = {
+                    'SEQ': words[0],
+                    'LAT': lat,
+                    'LNG': lng,
+                    'ALT': alt
+                }
+                wps.push(wp)
             }
-            wps.push(wp)
 
         }
 
@@ -1043,6 +1047,8 @@ export function clickLoadWPFile(e) {
     }
 
     fr.readAsText(this.files[0])
+    document.getElementById('wp_load' + ac.id + '_file_' + ac.id).value = ''
+
 }
 
 export function clickLoadPlaybackFile() {
@@ -1152,16 +1158,19 @@ export function sendConnectToAc() {
             dev = document.getElementById('ipAddress_input').value
             let port = document.getElementById('port_input').value
             let baud = document.getElementById('baud_input').value
+            let comp = document.getElementById('component_input').value
             let name = comms.getAircraftList().length + 1
-            let msg = 'AIRCRAFT None HITL ' + name + ' BAUD ' + baud + ' IP ' + dev + ' PORT ' + port
+            let msg = 'AIRCRAFT None HITL ' + name + ' BAUD ' + baud + ' IP ' + dev + ' PORT ' + port + ' COMP ' + comp
             comms.sendFullMessage(msg)
             createNewAircraftHITL()
         } else if (item.value == 'USB' && item.checked) {
             dev = document.getElementById('usbport_input').value
             let port = document.getElementById('port_input').value
             let baud = document.getElementById('baud_input').value
+            let comp = document.getElementById('component_input').value
             let name = comms.getAircraftList().length + 1
-            let msg = 'AIRCRAFT None HITL ' + name + ' BAUD ' + baud + ' USB ' + dev + ' PORT ' + port
+            let msg = 'AIRCRAFT None HITL ' + name + ' BAUD ' + baud + ' USB ' + dev + ' PORT ' + port + ' COMP ' + comp
+            comms.sendFullMessage(msg)
             comms.sendFullMessage(msg)
             createNewAircraftHITL()
         }
@@ -1228,6 +1237,7 @@ export function clickOpenDAADisplay() {
     let url = 'http://' + MODE.ipAddress + ':8082/daa.html'
     window.open(url, '_blank')
 }
+
 
 /**
  * @function <a name="clickForwardData">clickForwardData</a>
@@ -1417,7 +1427,7 @@ export function testFunction() {
 }
 
 
-export function refreshDisplay() {
+export function refreshDisplayAll() {
     let ac_list = comms.getAircraftList()
     for (let ac of ac_list) {
         comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
@@ -1425,4 +1435,11 @@ export function refreshDisplay() {
         comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_REPLAN ' + ac.id)
         comms.sendFullMessage('AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST')
     }
+}
+
+export function refreshDisplay(ac) {
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_FENCE ' + ac.id)
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_REPLAN ' + ac.id)
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST')
 }

@@ -152,15 +152,18 @@ export function updateIndicators(ac) {
 
 
         let ind = document.getElementById('battery_text_' + ac.id)
-        ind.innerText = ac.battery_remaining + '%'
-
+        if (ind) {
+            ind.innerText = ac.battery_remaining + '%'
+        }
         let inner = document.getElementById('radio_text_' + ac.id)
-        inner.innerText = ac.radio_percent + '%,  ' + ac.radio_missing + '%'
-
+        if (inner) {
+            inner.innerText = ac.radio_percent + '%,  ' + ac.radio_missing + '%'
+        }
         let indi = document.getElementById('gps_text_' + ac.id)
-        indi.innerText = ac.satellites_visible
-
-        // I left the optional functions in incase we decide to use them
+        if (indi) {
+            indi.innerText = ac.satellites_visible
+        }
+        // I left the optional functions here incase we decide to use them
         // will have to calculate
         //indicator.setVario(vario);		// Sets the climb speed of an variometer indicator
         //indicator.setPressure(pressure);	// Sets the pressure of an altimeter indicator

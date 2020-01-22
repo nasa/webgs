@@ -66,6 +66,7 @@ export class GCSmode {
         this.con_status = 'Connection Status: Disconnected'
         this.serviceWorker = false;
         this.adsb = true;
+        this.Tadsb = true
         this.sim = true;
         this.sensor = true;
         this.create_ac = true;
@@ -105,6 +106,7 @@ export class GCSmode {
         this.filename = 'merged.mlog'
         this.playerActive = false
         this.swToggle = 'Off';
+        this.component = 'Default'
     }
 
 
@@ -149,6 +151,7 @@ export class GCSmode {
         this.editflight = true;
         this.buildGeofence = true;
         this.removeGeofence = true;
+        this.component = 'Default'
     }
 
     /**
@@ -194,7 +197,7 @@ export class GCSmode {
         if (MODE.mode == 'SITL') {
 
             // Path to icarous
-            set_pan.appendChild(form.addTextInput('path_', "Path To Icarous", MODE.path, E.setPathToIcarous))
+            set_pan.appendChild(form.addTextInput('ic_path_', "Path To Icarous", MODE.path, E.setPathToIcarous))
 
             // Path to Ardupilot
             set_pan.appendChild(form.addTextInput('path_', "Path To Ardupilot", MODE.ardu_path, E.setPathToArdupilot))
@@ -237,6 +240,12 @@ export class GCSmode {
             })
             set_pan.appendChild(adsb_buttons)
 
+            // transmit adsb position
+            let Tadsb_buttons = form.addButtonSwitch('Tadsb_toggle', 'Transmit ADSB', function () {
+                E.clickToggleButton('Tadsb_toggle');
+            })
+            set_pan.appendChild(Tadsb_buttons)
+
             // allow sim traffic
             let sim_buttons = form.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
                 E.clickToggleButton('sim_toggle');
@@ -253,7 +262,7 @@ export class GCSmode {
             let bands_buttons = form.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
                 E.clickToggleButton('bands_toggle');
             })
-            set_pan.appendChild(bands_buttons)
+            set_pan.appendChild(bands_buttons);
 
             // // ***************************************************
             // // add radar buttons
@@ -262,7 +271,6 @@ export class GCSmode {
             // })
             // set_pan.appendChild(radar_buttons)
             // // ***************************************************
-
 
 
             // Display the current center of the map
@@ -309,6 +317,10 @@ export class GCSmode {
             let baud_input = form.addTextInput('baud', 'Baud Rate', MODE.baud, E.onInputSetMode);
             set_pan.appendChild(baud_input);
 
+            // add component id input
+            let comp_input = form.addTextInput('component', 'Component Id', MODE.component, E.onInputSetMode);
+            set_pan.appendChild(comp_input);
+
             // add submit button
             let submit_btn = form.addBlockButton('submit', 'hitl', 'Connect To Aircraft', E.sendConnectToAc)
             set_pan.appendChild(submit_btn)
@@ -329,6 +341,12 @@ export class GCSmode {
                 E.clickToggleButton('adsb_toggle');
             })
             set_pan.appendChild(adsb_buttons)
+
+            // // transmit adsb position
+            // let T_adsb_buttons = form.addButtonSwitch('T_adsb_toggle', 'ADSB Traffic Display', function () {
+            //     E.clickToggleButton('T_adsb_toggle');
+            // })
+            // set_pan.appendChild(T_adsb_buttons)
 
             // allow sim traffic
             let sim_buttons = form.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
@@ -523,16 +541,16 @@ export class GCSmode {
 
             // ***************************************************
             // add sim traffic buttons
-            if (MODE.sim) {
-                // update ac
-                if (!ac.traffic_list) {
-                    ac['traffic_list'] = []
-                    ac['hasT'] = false
-                    ac['activeTSummary'] = false
-                }
-                let t = ac.prev_panel
-                btn_div = Traffic.addSimTrafficButtons(btn_div, ac.id, t)
-            }
+            // if (MODE.sim) {
+            //     // update ac
+            //     if (!ac.traffic_list) {
+            //         ac['traffic_list'] = []
+            //         ac['hasT'] = false
+            //         ac['activeTSummary'] = false
+            //     }
+            //     let t = ac.prev_panel
+            //     btn_div = Traffic.addSimTrafficButtons(btn_div, ac.id, t)
+            // }
             // ***************************************************
 
             // add forward data button
@@ -611,16 +629,16 @@ export class GCSmode {
 
             // ***************************************************
             // add sim traffic buttons
-            if (MODE.sim) {
-                // update ac
-                if (!ac.traffic_list) {
-                    ac['traffic_list'] = []
-                    ac['hasT'] = false
-                    ac['activeTSummary'] = false
-                }
-                let t = ac.prev_panel
-                btn_div = Traffic.addSimTrafficButtons(btn_div, ac.id, t)
-            }
+            // if (MODE.sim) {
+            //     // update ac
+            //     if (!ac.traffic_list) {
+            //         ac['traffic_list'] = []
+            //         ac['hasT'] = false
+            //         ac['activeTSummary'] = false
+            //     }
+            //     let t = ac.prev_panel
+            //     btn_div = Traffic.addSimTrafficButtons(btn_div, ac.id, t)
+            // }
             // ***************************************************
 
         } else if (ac.mode == 'Playback') {

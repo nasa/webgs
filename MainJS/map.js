@@ -485,6 +485,7 @@ export function removeACShutdown(ac) {
 
     // remove the layer
     removeLayer('Aircraft ' + ac.id)
+    DrawFlightPlan()
 }
 
 
@@ -509,20 +510,11 @@ export function DrawFlightPlan() {
         // change color depending on ac
         if (polyLineVertices.length > 1) {
             let color;
-            if (MapBox.line_color == 'default') {
-                if (ac.id == 1) {
-                    color = '#fa3535'
-                } else if (ac.id == 2) {
-                    color = '#356dfa'
-                } else if (ac.id == 3) {
-                    color = '#4dfaac'
-                } else if (ac.id == 4) {
-                    color = '#fcfc83'
-                } else if (ac.id == 5) {
-                    color = '#bb73ff'
-                }
+            let a = Aircraft.getActiveAc()
+            if (a && a != 'Aircraft Not Found' && ac.id == Aircraft.getActiveAc().id) {
+                color = '#fa3535'
             } else {
-                color = MapBox.line_color
+                color = '#356dfa'
             }
             let dashArray;
             if (ac.status == 0) {
@@ -558,7 +550,7 @@ export function DrawFlightPlan() {
         }
 
         let p2 = 0
-        if (ac.mission_current > 0) {
+        if (ac.mission_current != 0 && ac.flightplan.length > 1) {
             p2 = ac.flightplan[ac.mission_current - 1]
 
         }
@@ -616,16 +608,10 @@ export function DrawRePlan() {
         if (polyLineVertices.length > 1) {
             let color;
             if (MapBox.line_color == 'default') {
-                if (ac.id == 1) {
+                if (ac.id == Aircraft.getActiveAc().id) {
                     color = '#fa3535'
-                } else if (ac.id == 2) {
+                } else {
                     color = '#356dfa'
-                } else if (ac.id == 3) {
-                    color = '#4dfaac'
-                } else if (ac.id == 4) {
-                    color = '#fcfc83'
-                } else if (ac.id == 5) {
-                    color = '#bb73ff'
                 }
             } else {
                 color = MapBox.line_color
@@ -747,10 +733,11 @@ export function drawBands(ac) {
     let stop;
     // remove any previous bands
     removeBands(ac)
+    // TODO: clean this up no need for the repition
     if (ac.ic_control && ac.showBands) {
-        for (let i = 0; i < ac.bands[0].length; i++) {
-            start = ac.bands[0][i];
-            stop = ac.bands[1][i];
+        for (let i = 0; i < ac.bands3[0].length; i++) {
+            start = ac.bands3[0][i];
+            stop = ac.bands3[1][i];
             // add new band
             let band = L.semiCircle([ac.lat, ac.lng], {
                 radius: ac.icRad,
@@ -758,6 +745,40 @@ export function drawBands(ac) {
                 fillColor: '#f44242',
                 fillOpacity: 0.5,
                 color: '#f44242',
+                opacity: 0.5,
+                startAngle: start,
+                stopAngle: stop,
+            })
+            addMarkerToLayer(ac.id, band)
+            ac.band_markers.push(band)
+        }
+        for (let i = 0; i < ac.bands2[0].length; i++) {
+            start = ac.bands2[0][i];
+            stop = ac.bands2[1][i];
+            // add new band
+            let band = L.semiCircle([ac.lat, ac.lng], {
+                radius: ac.icRad,
+                fill: true,
+                fillColor: '#f5f542',
+                fillOpacity: 0.5,
+                color: '#f5f542',
+                opacity: 0.5,
+                startAngle: start,
+                stopAngle: stop,
+            })
+            addMarkerToLayer(ac.id, band)
+            ac.band_markers.push(band)
+        }
+        for (let i = 0; i < ac.bands1[0].length; i++) {
+            start = ac.bands1[0][i];
+            stop = ac.bands1[1][i];
+            // add new band
+            let band = L.semiCircle([ac.lat, ac.lng], {
+                radius: ac.icRad,
+                fill: true,
+                fillColor: '#84f542',
+                fillOpacity: 0.5,
+                color: '#84f542',
                 opacity: 0.5,
                 startAngle: start,
                 stopAngle: stop,

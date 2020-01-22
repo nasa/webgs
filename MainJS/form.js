@@ -47,6 +47,7 @@ import * as map from './map.js';
 import * as E from './eventFunctions.js';
 import * as F from '../FlyByFile/flyByFile.js';
 import * as IC from './icSettings.js'
+import * as G from '../Geofence/geofence.js'
 
 import {
     Spinner
@@ -94,7 +95,8 @@ export function setSummaryPanelInfo() {
         p2.innerHTML = p2.innerHTML +
             '<br><b>Aircraft: ' + item.name +
             '<p> Status: ' + message +
-            '</p><p> Flight Mode: ' + item.mode + '</p></b>'
+            '</p><p> Flight Mode: ' + item.mode + '</p></b>' +
+            '</p><p> Icarous Flight Mode: ' + ac.icflightmode + '</p></b>'
 
     }
     div_summary.append(p2);
@@ -116,7 +118,7 @@ export function createFilePanel(pan_id) {
 
     // Add label to panel
     let pan_label = document.createElement('h5');
-    let name = pan_id.split('_').splice(2, pan_id.split('_').length - 2).join(' ');
+    let name = pan_id.split('_').splice(2, pan_id.split('_').length - 2).join('_');
     pan_label.innerHTML = 'File Name: ' + name
     ac_pan_div.appendChild(pan_label);
 
@@ -626,7 +628,8 @@ export function setPanelInfo(ac, div_id) {
 export function aircraftInfo(ac) {
     let p1 = document.createElement('P');
     let stuff = '<ul>' +
-        '<li>Flight Mode ' + ac.flightmode + '</li>' +
+        '<li>Flight Mode: ' + ac.flightmode + '</li>' +
+        '<li>Icarous Flight Mode: ' + ac.icflightmode + '</li>' +
         '<li>Lat: ' + ac.lat + ' Lng: ' + ac.lng + '</li>' +
         '<li>Altitude (m agl): ' + ac.alt + ' Relative alt: ' + ac.rel_alt + '</li>' +
         '<li>Velocity (m/s) vx: ' + ac.vx + ' vy: ' + ac.vy + ' vz: ' + ac.vz + '</li>' +
@@ -729,6 +732,8 @@ export function makePanelActive(id) {
         console.log('This is worse than the other screw up. ')
     }
     contextmenuControl()
+    map.DrawFlightPlan()
+    G.drawGeofences()
 }
 
 /**

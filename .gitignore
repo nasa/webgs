@@ -10,10 +10,6 @@ env/*
 
 UserSettings/userSettings.txt
 
-Examples/FlightPlans/*
-Examples/GeoFences/*
-Examples/Parameters/*
-Examples/Traffic/*
 
 doc/components.wmf
 doc/WebGS_Design_Diagrams.pptx
@@ -32,10 +28,11 @@ Scripts/*.waypoints
 OfflineTiles/*.mbtiles
 
 
-
 utils/*.txt
 utils/*.png
 OfflineTiles/npm-debug.log
 temp/*
 UserSettings/userSettings.txt
 .vscode/settings.json
+LogFiles/*.txt
+LogFiles/*.log

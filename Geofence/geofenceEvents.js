@@ -502,6 +502,7 @@ export function clickLoadFence() {
     }
 
     fr.readAsText(this.files[0])
+    document.getElementById(this.id).value = ''
 }
 
 

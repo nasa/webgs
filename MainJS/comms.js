@@ -137,7 +137,8 @@ export function createConnection(ip, port) {
 
         connection.send('Connection Established');
 
-        setInterval(periodicEvents, 5000);
+        setInterval(periodicEvents_5, 5000) // checks connection
+        setInterval(periodicEvents_1, 1000) // sends adsb to all aircraft
         window.addEventListener('unload', function () {
             window.connection.close(1000, 'Closing or Refreshing')
         })
@@ -151,14 +152,12 @@ export function createConnection(ip, port) {
         if (event.code == 1006) {
 
             let MODE = E.getMode()
-            // MODE.observeonly = true
             MODE.con_status = 'Connection Status: Disconnected'
             form.updateSettingsPanel()
 
             form.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.')
         } else {
             let MODE = E.getMode()
-            // MODE.observeonly = true
             MODE.con_status = 'Connection Status: Disconnected'
             form.updateSettingsPanel()
             form.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.', event.code)
@@ -189,7 +188,7 @@ export function createConnection(ip, port) {
             return
 
         } else if (m.TYPE == 'CONNECTING') {
-            form.alertBannerRed('Waiting for Heartbeat')
+            form.alertBannerRed('Waiting for Heartbeat from ac ' + m.AIRCRAFT)
             return
 
         } else if (m.name == 'SHUT_DOWN') {
@@ -380,37 +379,62 @@ export function createConnection(ip, port) {
             I.updateIndicators(ac);
 
         } else if (m.TYPE == 'HEARTBEAT') {
-            let flightmode = m.base_mode
+
 
             // works with ardupilot, rotorsim always returns '18'
             // HITL on telem link works, not on icarous out link
+
             if (ac != 'Aircraft Not Found') {
+
                 ac.hasComms = true;
                 ac.commsLast = Date.now() / 1000
-                if (flightmode == '1') {
-                    ac.flightmode = 'PRE-FLIGHT';
 
-                } else if (flightmode == 81) {
-                    ac.flightmode = 'STABILIZE DISARMED';
-                } else if (flightmode == 209) {
-                    ac.flightmode = 'STABILIZE ARMED';
+                if (m.type == 14) {
+                    let flightmode = m.base_mode
+                    if (flightmode == '1') {
+                        ac.flightmode = 'PRE-FLIGHT';
 
-                } else if (flightmode == 89) {
-                    ac.flightmode = 'GUIDED DISARMED';
-                } else if (flightmode == 217) {
-                    ac.mode = 'GUIDED ARMED';
+                    } else if (flightmode == 81) {
+                        ac.flightmode = 'STABILIZE DISARMED';
+                    } else if (flightmode == 209) {
+                        ac.flightmode = 'STABILIZE ARMED';
 
-                } else if (flightmode == 93) {
-                    ac.flightmode = 'AUTO DISARMED';
-                } else if (flightmode == 221) {
-                    ac.flightmode = 'AUTO ARMED';
+                    } else if (flightmode == 89) {
+                        ac.flightmode = 'GUIDED DISARMED';
+                    } else if (flightmode == 217) {
+                        ac.mode = 'GUIDED ARMED';
+
+                    } else if (flightmode == 93) {
+                        ac.flightmode = 'AUTO DISARMED';
+                    } else if (flightmode == 221) {
+                        ac.flightmode = 'AUTO ARMED';
+                    } else if (flightmode == 0) {
+                        ac.flightmode == 'UNKNOWN'
+                    }
+
+                    if (ac.parameters.length == 0) {
+                        let msg = 'AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST'
+                        sendFullMessage(msg)
+                    }
+
+                } else if (m.type == 18) {
+                    let icflightmode = m.custom_mode
+                    if (icflightmode == 0) {
+                        ac.icflightmode = 'IDLE'
+                    } else if (icflightmode = 1) {
+                        ac.icflightmode = 'TAKEOFF'
+                    } else if (icflightmode = 2) {
+                        ac.icflightmode = 'CLIMB'
+                    } else if (icflightmode = 3) {
+                        ac.icflightmode = 'CRUISE'
+                    } else if (icflightmode = 4) {
+                        ac.icflightmode = 'APPROACH'
+                    } else if (icflightmode = 5) {
+                        ac.icflightmode = 'LAND'
+                    }
                 }
 
-                //  TODO: Make sure this is the only place we do this
-                if (ac.parameters.length == 0) {
-                    let msg = 'AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST'
-                    sendFullMessage(msg)
-                }
+
             }
 
 
@@ -437,21 +461,38 @@ export function createConnection(ip, port) {
             }
 
         } else if (m.TYPE == 'ICAROUS_KINEMATIC_BANDS') {
+            // console.log(m)
             ac.ic_control = true;
             ac.ic_last = Date.now()
             let num_bands = m.numBands
-            let min = [];
-            let max = [];
-            let count = 0;
+            let min1 = [];
+            let max1 = [];
+            let min2 = []
+            let max2 = []
+            let min3 = []
+            let max3 = []
+            let count1 = 0;
+            let count2 = 0
+            let count3 = 0
             // find the danger area or areas
             for (let i = 1; i <= num_bands; i++) {
                 if (m['type' + i] === 3) {
-                    min[count] = m['min' + i]
-                    max[count] = m['max' + i]
-                    count++;
+                    min3[count3] = m['min' + i]
+                    max3[count3] = m['max' + i]
+                    count3++;
+                } else if (m['type' + i] == 2) {
+                    min3[count2] = m['min' + i]
+                    max3[count2] = m['max' + i]
+                    count2++;
+                } else if (m['type' + i] == 1) {
+                    min1[count1] = m['min' + i]
+                    max1[count1] = m['max' + i]
+                    count1++;
                 }
             }
-            ac.bands = [min, max]
+            ac.bands3 = [min3, max3]
+            ac.bands2 = [min2, max2]
+            ac.bands1 = [min1, max1]
             map.drawBands(ac)
 
         } else if (m.TYPE == 'COMMAND_LONG') {
@@ -709,7 +750,7 @@ export function sendFullMessage(out_message) {
  * @param none
  * @memberof module:comms
  */
-function periodicEvents() {
+function periodicEvents_5() {
     // No need for loading panels in playback
     let MODE = E.getMode()
     if (MODE.mode == 'Playback') {
@@ -737,12 +778,35 @@ function periodicEvents() {
         // Move to loading page if lost comms with ac
         if (Date.now() / 1000 - el.commsLast >= comms_timeout) {
             el.hasComms = false;
-            if (el.id == Aircraft.getActiveAc().id) {
+            let ac = Aircraft.getActiveAc()
+            let ac_id
+            if (ac && ac != 'Aircraft Not Found') {
+                ac_id = ac.id
+            }
+            if (ac_id && el.id == ac_id) {
                 form.makePanelActive('loading_startup_' + el.id)
             }
             el.gps_status = false
         }
     })
+}
+
+
+function periodicEvents_1() {
+    let MODE = E.getMode()
+    let m
+    // limited to SITL for now
+    // TODO: Expand to HITL
+    if (MODE.Tadsb && MODE.mode == 'SITL') {
+        for (let ac of aircraft_list) {
+            for (let a of aircraft_list) {
+                if (a.id != ac.id) {
+                    m = 'AIRCRAFT ' + a.id + ' ADSB_VEHICLE ' + ac.id + ' ' + ac.vx + ' ' + ac.vy + ' ' + ac.vz + ' ' + ac.lat + ' ' + ac.lng + ' ' + ac.rel_alt
+                    sendFullMessage(m)
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -802,10 +866,8 @@ function createAircraft(id, mode) {
     form.createLoadingPanel('startup', ac)
     form.makePanelActive('ac_pan_' + ac.id)
 
-    // check for loaded wp's
-    sendMessage('REQUEST_WAYPOINTS ' + ac.id);
-    sendMessage('REQUEST_FENCE ' + ac.id)
-    sendMessage('REQUEST_REPLAN ' + ac.id)
+    // check for loaded wp's, fences, replan and params
+    E.refreshDisplay(ac)
 
     // draw the marker - keep this after request wp's
     // has issues auto drawing all of the flight plans
@@ -817,7 +879,7 @@ function createAircraft(id, mode) {
 }
 
 export function wpInMessage(m, ac) {
-    console.log(m)
+    // console.log(m)
     // clear the rows from the table
     let table = document.getElementById('ac_fp_table_' + ac.id)
     let rows = document.getElementsByClassName('fp_row')
@@ -971,6 +1033,16 @@ export function gfInMessage(m, ac) {
             let roof = document.getElementById('gf_roof_GF Roof_' + f.id + '_' + ac.id)
             floor.value = f.floor
             roof.value = f.roof
+            // make sure inc/exc toggle is updated
+            let inc = document.getElementById('include_' + f.id + '_' + ac.id + '_on')
+            let exc = document.getElementById('include_' + f.id + '_' + ac.id + '_off')
+            if (f.type == 0) {
+                inc.classList.add('highlight_f')
+                exc.classList.remove('highlight_f')
+            } else {
+                exc.classList.add('highlight_f')
+                inc.classList.remove('highlight_f')
+            }
         }
     }
 
@@ -981,5 +1053,4 @@ export function gfInMessage(m, ac) {
     form.makePanelActive('ac_pan_' + ac.id)
     // Re draw the flight plan
     map.DrawFlightPlan();
-    // console.log(ac.gf_list)
 }

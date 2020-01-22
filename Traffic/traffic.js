@@ -516,6 +516,14 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
 
 
     } else {
+
+        // make sure there is a traffic layer on the map
+        if (!map.checkForLayer('Aircraft ' + ac.id)) {
+            form.alertBannerRed('Layer not found. Unable to add Traffic. ac: ' + ac.id + ' t: ' + t_id)
+            // ignore the message until the aircraft layer has been created
+            return
+        }
+
         // create new traffic object
         let position = new L.LatLng(ac.lat, ac.lng);
         let marker = defineTrafficMarker(position, traffic.hdg, ac.id, t_id, source);
@@ -524,11 +532,6 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
         let t = getTrafficById(ac, t_id)
         t.inFlight = true
         t.lastUpdate = Date.now()
-
-        // make sure there is a traffic layer on the map
-        if (!map.checkForLayer('Aircraft ' + ac.id)) {
-            alert('Layer not found. Run and hide this is bad.')
-        }
 
         // update the map
         addTrafficToLayer(ac.id, marker)

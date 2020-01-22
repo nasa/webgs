@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='ASCII'?>
+<Geofence>
+  <fence id="1">
+    <type>0</type>
+    <num_vertices>4</num_vertices>
+    <floor>0</floor>
+    <roof>100</roof>
+    <vertex id="0">
+      <lat>37.10261616067551</lat>
+      <lon>-76.3891276717186</lon>
+    </vertex>
+    <vertex id="1">
+      <lat>37.103809832083336</lat>
+      <lon>-76.38933151960374</lon>
+    </vertex>
+    <vertex id="2">
+      <lat>37.10374565667964</lat>
+      <lon>-76.39185816049577</lon>
+    </vertex>
+    <vertex id="3">
+      <lat>37.102534870540715</lat>
+      <lon>-76.39176160097124</lon>
+    </vertex>
+  </fence>
+</Geofence>
