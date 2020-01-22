@@ -106,17 +106,6 @@ Webgs uses the MAVProxy format for creating .tlog files for each flight. These f
 
 Webgs is capable of flying scripted scenarios that are repeatable and adjustable. Functionality is still limited but it has been tested with four simulated aircraft flying simultaneously, each with multiple intruders and a geofence, repeated 50 times, adjusting parameters, flight plans, and intruders after 25 flights. Examples and instructions on building a script are located in `/webgs/Examples/TestScripts`.
 
-### Other tips and tricks:
-
-    1. To run Icarous without sudo the mqueue max_size must be raised from the default of 10.
-
-        To check the current setting:
-        cat /proc/sys/fs/mqueue/msg_max
-
-        To change the value:
-        sudo sh -c "echo 500 > /proc/sys/fs/mqueue/msg_max"
-
-    2. Ardupilot has issues with multi-aircraft simulations. I would recommend using the rotorsim that comes with Icarous.
 
 ### Current version:
 
