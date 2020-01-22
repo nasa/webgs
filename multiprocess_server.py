@@ -118,7 +118,7 @@ async def consumer_handler(websocket, path):
 
         elif 'CHECK_PATH' in message:
             complete_path = os.path.join(
-                os.path.expanduser('~'), message[1][1:], 'cFS/bin/cpu1/core-cpu1')
+                os.path.expanduser('~'), message[1][1:], 'exe/cpu1/core-cpu1')
             print(complete_path)
             try:
                 f = open(complete_path, 'r')

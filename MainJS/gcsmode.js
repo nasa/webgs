@@ -197,7 +197,7 @@ export class GCSmode {
         if (MODE.mode == 'SITL') {
 
             // Path to icarous
-            set_pan.appendChild(form.addTextInput('path_', "Path To Icarous", MODE.path, E.setPathToIcarous))
+            set_pan.appendChild(form.addTextInput('ic_path_', "Path To Icarous", MODE.path, E.setPathToIcarous))
 
             // Path to Ardupilot
             set_pan.appendChild(form.addTextInput('path_', "Path To Ardupilot", MODE.ardu_path, E.setPathToArdupilot))

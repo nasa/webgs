@@ -215,7 +215,7 @@ def calcRadioQuality(msg):
 def recvMatchAndLog(master, mlog, forwarding, t):
     logger = logging.getLogger()
     t_now = time.time()
-    timeout = 1
+    timeout = 2
 
     while True:
         msg = recvAndLog(master, mlog, forwarding)

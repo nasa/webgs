@@ -188,7 +188,7 @@ export function createConnection(ip, port) {
             return
 
         } else if (m.TYPE == 'CONNECTING') {
-            form.alertBannerRed('Waiting for Heartbeat from ac '+ m.AIRCRAFT)
+            form.alertBannerRed('Waiting for Heartbeat from ac ' + m.AIRCRAFT)
             return
 
         } else if (m.name == 'SHUT_DOWN') {
@@ -867,7 +867,7 @@ function createAircraft(id, mode) {
     form.makePanelActive('ac_pan_' + ac.id)
 
     // check for loaded wp's, fences, replan and params
-    E.refreshDisplay()
+    E.refreshDisplay(ac)
 
     // draw the marker - keep this after request wp's
     // has issues auto drawing all of the flight plans

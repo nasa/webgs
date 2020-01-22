@@ -74,7 +74,7 @@ window.addEventListener('unload', unloadBody)
 document.getElementById('summary').addEventListener('click', clickSummary);
 document.getElementById('filechoice').addEventListener('change', clickLoadFile);
 document.getElementById('settings_btn').addEventListener('click', clickSettings);
-document.getElementById('reload_btn').addEventListener('click', refreshDisplay)
+document.getElementById('reload_btn').addEventListener('click', refreshDisplayAll)
 window.addEventListener('resize', form.adjustFormSize)
 
 
@@ -287,7 +287,7 @@ export function createNewAircraft(name = null, ic = 1, center = null, mode = nul
     form.makePanelActive('loading_startup_' + ac.id)
 
     // request info from ac
-    refreshDisplay()
+    refreshDisplay(ac)
 
     // add a layer to the map
     map.addNewLayerGroup(ac);
@@ -1427,7 +1427,7 @@ export function testFunction() {
 }
 
 
-export function refreshDisplay() {
+export function refreshDisplayAll() {
     let ac_list = comms.getAircraftList()
     for (let ac of ac_list) {
         comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
@@ -1435,4 +1435,11 @@ export function refreshDisplay() {
         comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_REPLAN ' + ac.id)
         comms.sendFullMessage('AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST')
     }
+}
+
+export function refreshDisplay(ac) {
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_FENCE ' + ac.id)
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_REPLAN ' + ac.id)
+    comms.sendFullMessage('AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST')
 }

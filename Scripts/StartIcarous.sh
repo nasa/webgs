@@ -45,7 +45,7 @@ done
 
 HERE=$PWD
 # change path to icarous
-cd $HOME$P/cFS/bin/cpu1/
+cd $HOME$P/exe/cpu1/
 
 echo $PWD
 ./core-cpu1 -C $CPU -I $INSTANCE >| $HERE/LogFiles/icarousout$CPU.txt
