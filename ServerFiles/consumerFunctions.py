@@ -71,8 +71,8 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
     pidI = 0
     if icarous_flag == '1':
         print(msg)
-        c = str(int((float(msg[1])-1)//4 +1)) # Icarous allows 4 instances per cpu
-        i = str((int(msg[1]) - 1)%4)
+        c = str(1)
+        i = str(int(msg[1]) - 1)
         print('cpu', c, 'instance', i, 'port', UDP_PORT_2 + 10 * (int(i) + (int(c)-1)*4))
         logger.info('Start Icarous: Scripts/StartIcarous.sh -C {} -I {}'.format(c,i))
         pidI = subprocess.Popen(["Scripts/StartIcarous.sh",
