@@ -200,7 +200,7 @@ export function addT(ac, center) {
 
     // show the summary button
     let s_btn = document.getElementById('t_summary_pan_btn_' + ac.id)
-    if (s_bin) {
+    if (s_btn) {
         s_btn.classList.replace('hide', 'show')
     }
 }

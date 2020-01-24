@@ -4,7 +4,7 @@
 # Author: Andrew Peters
 #
 # Edited 9/3/2019 - added target component global - andrew peters
-# This is dumb. find a better way to do it.
+#
 #
 # Copyright 2019 United States Government as represented by the Administrator of the National Aeronautics
 # and Space Administration. All Rights Reserved.
@@ -52,7 +52,7 @@ none_count = 0
 bad_count = 0
 pre_seq = 0
 missing = 0
-targetComponent = None
+targetComponent = 5
 
 # Util
 
@@ -370,6 +370,27 @@ def sendClearMission(master, mlog, forwarding):
     msg_in = recvMatchAndLog(master, mlog, forwarding, ['MISSION_ACK'])
     logger.info('SERVER: Clear Mission {}'.format(msg_in))
 
+
+def setHome(point, master, mlog, forwarding):
+    logger = logging.getLogger()
+    global targetComponent
+    if targetComponent is None:
+        component = master.target_component
+    else:
+        component = targetComponent
+    master.mav.command_long_send(master.target_system, component,
+                                    #  mavutil.mavlink.MAV_CMD_DO_SET_HOME,
+                                    179,
+                                     0,  # confirmation number
+                                     # param1 - 0 specified location, 1 current location
+                                     0,
+                                     0,  # param2
+                                     0,  # param3
+                                     0,  # param4
+                                     float(point[0]),  # param5 - lat
+                                     float(point[1]),  # param6 - lng
+                                     float(10))  # param7 - alt
+    logger.info('SERVER: Setting Home to {}, {}, {}'.format(point[0],point[1],10))
 
 def sendMissionCount(wp_list, master, mlog, forwarding):
     # Let the system know how many wp's to expect

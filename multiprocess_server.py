@@ -40,15 +40,16 @@ import functools
 import signal
 import time
 import logging
+import json
+import subprocess
 
 import ServerFiles.icProcesses as ICP
 import ServerFiles.userControl as UC
 import ServerFiles.userManager as UM
-import ServerFiles.cFSstartup as CS
-
 
 q = Queue()
 playback = False
+path_icarous = ''
 
 
 def to_ic(q, m):
@@ -64,6 +65,7 @@ def addProcess(target, args):
 async def consumer_handler(websocket, path):
     global q
     global playback
+    global path_icarous
     logger = logging.getLogger()
 
     while True:
@@ -120,11 +122,13 @@ async def consumer_handler(websocket, path):
             complete_path = os.path.join(
                 os.path.expanduser('~'), message[1][1:], 'exe/cpu1/core-cpu1')
             print(complete_path)
+
             try:
                 f = open(complete_path, 'r')
                 print('valid')
                 q.put(
                     '{"name":"PATH_ICAROUS", "type":"PASS", "I":"VALID PATH"}')
+                path_icarous = complete_path
             except Exception as e:
                 print('check path error', e)
                 q.put(
@@ -208,37 +212,6 @@ async def consumer_handler(websocket, path):
                 p.start()
                 logger.info('SERVER: Starting HITL {}'.format(processes))
 
-            elif 'ICAROUS_STARTUP' in message:
-                logger.info('SERVER: {}'.format(message))
-                P = message[4]
-                P = P[1:]+'/'
-                F = 'cFS/bin/cpu1/cf/cfe_es_startup.scr'
-
-                if message[3] == 'GET_NAMES':
-                    x = CS.readFile(P, F)
-                    names = CS.showAppNames()
-                    CS.printCurrentStatus()
-                    q.put(
-                        '{"name":"ICAROUS_APPS", "INFO": ' + names + '}')
-                    logger.info('ICAROUS_APPS : APPS : {}'.format(names))
-
-                elif message[3] == 'ACTIVE':
-                    CS.changeAppStatus(message[3:])
-                    x = CS.writeFile(P, F)
-                    CS.printCurrentStatus()
-
-                    if x == 0:
-                        names = CS.showAppNames()
-                        q.put(
-                            '{"name":"ICAROUS_APPS", "INFO": ' + names + '}')
-                        q.put(
-                            '{"name":"ICAROUS_APPS", "INFO": "FILE_WRITE_SUCCESS"}')
-                        logger.info(
-                            'SERVER: ICAROUS_APPS : FILE_WRITE_SUCCESS')
-                    else:
-                        q.put('{"name":"ICAROUS_APPS", "INFO": "FILE_WRITE_FAIL"}')
-                        logger.info('SERVER: ICAROUS_APPS : FILE_WRITE_FAIL')
-
             elif 'READ_USER_SETTINGS' in message:
                 settings = UM.readUserSettings()
                 q.put('{"name":"USER_SETTINGS"' + settings+'}')
@@ -282,7 +255,7 @@ async def consumer_handler(websocket, path):
                 x = ['AIRCRAFT '] + [m[0]] + message
                 m[1].append(x)
 
-        elif 'REMOVE_TRAFFIC'in message:
+        elif 'REMOVE_TRAFFIC' in message:
             for m in m_lists:
                 x = ['AIRCRAFT '] + [m[0]] + message
                 m[1].append(x)
@@ -321,7 +294,7 @@ async def handler(websocket, path):
 
 
 def ask_exit(signame):
-    print("got signal %s: exit" % signame)
+    # print("got signal %s: exit" % signame)
     loop.close()
 
 

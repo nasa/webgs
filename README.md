@@ -1,11 +1,9 @@
-# WEB GS
+# WEB GS - This is the development version. The current release is located at https://gitlab.larc.nasa.gov/github/WebGS
 
-Web GS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/ICAROUS/), version greater than 2.1.26, and capable of multi-aircraft simulations.
+Web GS is a web based ground control station that is compatible with Icarous versions greater than 2.1.19 and capable of multi-aircraft simulations.
 
-![](screenshots/screenshot1_webgs.png)
-![](screenshots/screenshot2_webgs.png)
-![](screenshots/screenshot4_webgs.png)
-![](screenshots/screenshot3_webgs.png)
+![](screenshots/screenshot1_webgs.png)![](screenshots/screenshot2_webgs.png)
+![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
 
 ### Instalation:
 
@@ -106,10 +104,17 @@ Webgs uses the MAVProxy format for creating .tlog files for each flight. These f
 
 Webgs is capable of flying scripted scenarios that are repeatable and adjustable. Functionality is still limited but it has been tested with four simulated aircraft flying simultaneously, each with multiple intruders and a geofence, repeated 50 times, adjusting parameters, flight plans, and intruders after 25 flights. Examples and instructions on building a script are located in `/webgs/Examples/TestScripts`.
 
+### Other tips and tricks:
 
-### Current version:
+    1. To run Icarous without sudo the mqueue max_size must be raised from the default of 10.
 
-Web GS v1.0.4
+        To check the current setting:
+        cat /proc/sys/fs/mqueue/msg_max
+
+        To change the value:
+        sudo sh -c "echo 500 > /proc/sys/fs/mqueue/msg_max"
+
+    2. Ardupilot has issues with multi-aircraft simulations. I would recommend using the rotorsim that comes with Icarous.
 
 ### Notices:
 

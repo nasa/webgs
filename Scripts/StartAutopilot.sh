@@ -51,5 +51,5 @@ cd $HOME$P/Tools/autotest
 echo $PWD
 # cd $HOME/Documents/Software/ardupilot/Tools/autotest
 
-python sim_vehicle.py -v $TYPE -l $LATLNG -S $SPEED -I $INSTANCE >| $HERE/LogFiles/ardusimout$INSTANCE.txt
+python sim_vehicle.py -v $TYPE -l $LATLNG -S $SPEED -I $INSTANCE -w >| $HERE/LogFiles/ardusimout$INSTANCE.txt
 # sim_vehicle.py -v ArduCopter -l 37.0866,-76.3789,5.000000,0 -S 1 -I 0 -m "--out=127.0.0.1:14553"

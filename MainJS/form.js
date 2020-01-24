@@ -45,8 +45,7 @@ import * as Aircraft from './aircraft.js';
 import * as comms from './comms.js';
 import * as map from './map.js';
 import * as E from './eventFunctions.js';
-import * as F from '../FlyByFile/flyByFile.js';
-import * as IC from './icSettings.js'
+import * as F from '../FlyByFile/flyByFile.js'
 import * as G from '../Geofence/geofence.js'
 
 import {
@@ -723,8 +722,7 @@ export function makePanelActive(id) {
         subPanelHandler(ac)
     } else if (pan_type == 'settings') {
         document.getElementById(id).classList.replace('hide', 'active');
-        updateSettingsPanel();
-        subPanelHandler('settings')
+        updateSettingsPanel()
     } else if (other.includes(pan_type)) {
         document.getElementById(id).classList.replace('hide', 'active');
         updateSettingsPanel();
@@ -830,37 +828,31 @@ export function subPanelHandler(ac) {
         }
     }
     let active_sub = []
-    if (ac == 'settings') {
-        // check for active sub panels
-        for (let item of MODE.activeSubPanels) {
-            active_sub.push(document.getElementById(item))
-        }
-        IC.updateIcSettingsPanel()
-    } else {
-        // check ac for active subpanels
-        for (let item of ac.activeSubPanels) {
-            active_sub.push(document.getElementById(item))
-        }
 
-        // sort the array for a clean output
-        if (ac.activeSubPanels.length > 1) {
-            active_sub.sort((a, b) => {
-                if (a.id.includes('loading')) {
-                    return -1
-                }
-                if (b.id.includes('loading')) {
-                    return 1
-                }
-                if (a.id > b.id) {
-                    return 1
-                }
-                if (b.id > a.id) {
-                    return -1
-                }
-                return 0
-            })
-        }
+    // check ac for active subpanels
+    for (let item of ac.activeSubPanels) {
+        active_sub.push(document.getElementById(item))
     }
+
+    // sort the array for a clean output
+    if (ac.activeSubPanels.length > 1) {
+        active_sub.sort((a, b) => {
+            if (a.id.includes('loading')) {
+                return -1
+            }
+            if (b.id.includes('loading')) {
+                return 1
+            }
+            if (a.id > b.id) {
+                return 1
+            }
+            if (b.id > a.id) {
+                return -1
+            }
+            return 0
+        })
+    }
+
     // make the panels active and move to sub option div
     // fill from right to left - 5,4,3,2
     let count = 5;

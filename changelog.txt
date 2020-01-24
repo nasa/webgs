@@ -1,0 +1,36 @@
+# Change Log
+
+### v1.0.5 (&v1.0.4)
+Removed IcApps functionality.
+Updated Python Requirements.
+Updated ArduCopter Startup.
+Updated Sim Type Selection.
+Minor Bug Fixes.
+Changed Default Component Id to 5.
+Cleanup Settings Panel.
+
+
+### v1.0.3
+Adjusted Refresh timeout.
+Fixed HITL bugs.
+Fixed Radio and GPS indicator.
+Added forwarding data injection.
+
+
+### v1.0.2
+Added Startup script.
+Added Offline Functionality.
+Updated Status Text alerting.
+Added Radio Quality indicator.
+Fixed HITL bugs.
+Fixed Playback Multi-geofence bugs.
+Added Merging Rings.
+Added mavlink repeater.
+
+### v1.0.1
+Bug fixes.
+Multi-aircraft Traffic fixes.
+Waypoint loading updates.
+
+### v1.0.0
+Initial submission. See project documentation.

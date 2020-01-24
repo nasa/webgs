@@ -47,7 +47,6 @@ import * as map from './map.js'
 import * as Aircraft from './aircraft.js'
 import * as E from './eventFunctions.js'
 import * as I from '../Indicators/indicators.js'
-import * as IC from './icSettings.js'
 import * as user from './updateUser.js'
 import * as P from './playback.js'
 
@@ -234,65 +233,6 @@ export function createConnection(ip, port) {
                 form.alertBannerGreen(m.I)
             } else {
                 form.alertBannerRed(m.I + m.name)
-            }
-
-        } else if (m.name == 'ICAROUS_APPS') {
-            if (m.INFO == 'FILE_WRITE_SUCCESS') {
-                form.alertBannerGreen('FILE_WRITE_SUCCESS')
-                return
-
-            } else if (m.INFO == 'FILE_WRITE_FAIL') {
-                form.alertBannerRed('FILE_WRITE_FAIL')
-                return
-
-            } else {
-                // remove the loading panel
-                let pan = document.getElementsByClassName('active loading ic')
-                for (let item of pan) {
-                    item.parentNode.removeChild(item)
-                }
-
-                // add apps to MODE.icSettings
-                MODE.icSettings = IC.getIcApps()
-                MODE.icSettings.clearList()
-
-                // check for valid apps to display
-                if (m.INFO.length <= 1) {
-                    return
-                }
-
-                for (let i of m.INFO) {
-                    let name = i.NAME
-                    let active = function () {
-                        if (i.ACTIVE == 'True') {
-                            return true
-                        } else {
-                            return false
-                        }
-                    }
-                    MODE.icSettings.addApp(name, active())
-                    // check which sim is active and update MODE
-                    if (name == 'RotorSim' && active()) {
-                        MODE.sim_type = 'RotorSim'
-                    }
-                    if (name == 'ARDUPILOT' && active()) {
-                        MODE.sim_type = 'ARDUPILOT'
-                    }
-                }
-                // create the ic settings sub panel if needed
-                let icsub = document.getElementById("ic_settings_pan")
-                if (!icsub) {
-                    IC.createIcSettingsPanel()
-                }
-
-                // update the sub panel
-                IC.updateIcSettingsPanel()
-
-                // make the sub panel active
-                MODE.activeSubPanels = []
-                MODE.activeSubPanels.push('ic_settings_pan')
-                form.makePanelActive('settings')
-                return
             }
 
         } else if (m.name == 'SAVE') {
