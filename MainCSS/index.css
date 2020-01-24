@@ -126,6 +126,7 @@ option {
     grid-row: 18/20;
     background: rgba(248, 248, 248, 0.123);
     border-width: 3px;
+    align-content: left;
     border-style: solid;
     border-color: rgba(255, 255, 255, 0.589);
     border-radius: 1em;
@@ -485,7 +486,6 @@ table {
 #file_label {
     margin-bottom: 0rem;
     background: var(--main-background);
-    -webkit-appearance: none;
 }
 
 .fileplan {

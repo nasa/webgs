@@ -44,8 +44,6 @@
 import * as E from './eventFunctions.js';
 import * as form from './form.js';
 import * as map from './map.js';
-import * as IC from './icSettings.js';
-import * as Traffic from '../Traffic/traffic.js';
 import * as I from '../Indicators/indicators.js';
 import * as GF from '../Geofence/geofence.js';
 import * as GE from '../Geofence/geofenceEvents.js';
@@ -83,12 +81,10 @@ export class GCSmode {
         this.usbport = '/dev/ttyUSB0';
         this.baud = 57600;
         this.context_added = false;
-        this.sim_type = 'RotorSim' // either 'ARDUPILOT' or 'RotorSim'
-        this.icSettings = [];
-        this.icSettings.ic_toggle = true;
+        this.sim_type = 'Rotorsim' // either 'Arducopter' or 'RotorSim'
         this.activeSubPanels = [];
         this.radar = false;
-        this.ipAddress = '146.165.84.29';
+        this.ipAddress = '0.0.0.0';
         this.outport = '8000'
         this.port = '14553';
         this.path = '/code/icarous';
@@ -106,9 +102,8 @@ export class GCSmode {
         this.filename = 'merged.mlog'
         this.playerActive = false
         this.swToggle = 'Off';
-        this.component = 'Default'
+        this.component = 5
     }
-
 
 
     /**
@@ -202,30 +197,17 @@ export class GCSmode {
             // Path to Ardupilot
             set_pan.appendChild(form.addTextInput('path_', "Path To Ardupilot", MODE.ardu_path, E.setPathToArdupilot))
 
-            // add Icarous on/off button
-            let ic_button = form.addButtonSwitch('ic_toggle', 'Use Icarous', function () {
-                IC.clickIcToggleButton('ic_toggle');
-            })
-            set_pan.appendChild(ic_button)
-
-            // highlight curent status
-            if (MODE.icSettings.ic_toggle) {
-                document.getElementById('ic_toggle_on').classList.add('highlight')
-            } else {
-                document.getElementById('ic_toggle_off').classList.add('highlight')
-            }
+            // add button for Icarous settings
+            set_pan.appendChild(form.addTextInput('sim_type', 'SIM TYPE: RotorSim/ArduCopter', MODE.sim_type, E.setSimType));
 
             // add button test
             // set_pan.appendChild(form.addBlockButton('ic', 'test_settings', '!!! TEST !!!', E.testFunction));
 
-            // add button for Icarous settings
-            set_pan.appendChild(form.addBlockButton('ic', 'icarous_settings', 'Change Icarous Settings', IC.clickChangeIcSettings));
-
             // Turn service worker on/off
-            let sw_buttons = form.addButtonSwitch('serviceWorker_toggle', 'Enable Cache', function () {
-                E.clickToggleButton('serviceWorker_toggle');
-            })
-            set_pan.appendChild(sw_buttons)
+            // let sw_buttons = form.addButtonSwitch('serviceWorker_toggle', 'Enable Cache', function () {
+            //     E.clickToggleButton('serviceWorker_toggle');
+            // })
+            // set_pan.appendChild(sw_buttons)
 
             // Allow multiple aircraft to be created
             let multi_buttons = form.addButtonSwitch('multi_toggle', 'Multiple Aircraft', function () {
@@ -234,17 +216,18 @@ export class GCSmode {
             set_pan.appendChild(multi_buttons)
 
             // ***************************************************
-            // allow adsb traffic
-            let adsb_buttons = form.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
-                E.clickToggleButton('adsb_toggle');
-            })
-            set_pan.appendChild(adsb_buttons)
 
             // transmit adsb position
             let Tadsb_buttons = form.addButtonSwitch('Tadsb_toggle', 'Transmit ADSB', function () {
                 E.clickToggleButton('Tadsb_toggle');
             })
             set_pan.appendChild(Tadsb_buttons)
+
+            // allow adsb traffic
+            let adsb_buttons = form.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
+                E.clickToggleButton('adsb_toggle');
+            })
+            set_pan.appendChild(adsb_buttons)
 
             // allow sim traffic
             let sim_buttons = form.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
@@ -262,7 +245,7 @@ export class GCSmode {
             let bands_buttons = form.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
                 E.clickToggleButton('bands_toggle');
             })
-            set_pan.appendChild(bands_buttons);
+            set_pan.appendChild(bands_buttons)
 
             // // ***************************************************
             // // add radar buttons
@@ -271,7 +254,6 @@ export class GCSmode {
             // })
             // set_pan.appendChild(radar_buttons)
             // // ***************************************************
-
 
             // Display the current center of the map
             let center_display = document.createElement('p')

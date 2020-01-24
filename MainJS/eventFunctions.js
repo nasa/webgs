@@ -47,7 +47,6 @@ import * as map from './map.js';
 import * as form from './form.js';
 import * as mode from './gcsmode.js';
 import * as save from '../FlyByFile/saveFile.js';
-import * as IC from '../MainJS/icSettings.js';
 import * as user from '../MainJS/updateUser.js';
 import * as P from '../MainJS/playback.js'
 
@@ -264,13 +263,13 @@ export function createNewAircraft(name = null, ic = 1, center = null, mode = nul
 
     if (mode != 'HITL') {
         // let the server know a new aircraft has been created
-        let out_message = 'AIRCRAFT ' + ac.id + ' NEW_AIRCRAFT ' +
+        let out_message = 'AIRCRAFT ' + ac.id +
+            ' NEW_AIRCRAFT ' +
             ac.id + ' ' +
             ac.lat + ' ' +
             ac.lng + ' ' +
             ac.alt + ' ' +
             ac.hdg + ' ' +
-            ac.type + ' ' +
             ac.icarous + ' ' +
             MODE.sim_type + ' ' +
             MODE.path + ' ' +
@@ -492,6 +491,7 @@ export function clickSubmitFlightPlan() {
 
     let message = 'LOAD_FLIGHT_PLAN AC_ID ' + ac.id +
         ' VEL ' + ac.u_vel +
+        ' ' + MODE.sim_type +
         ' WP' + wp_string
 
     // send message to server
@@ -851,7 +851,7 @@ export function highlightCurrentSettings() {
     let name_list;
     if (MODE.mode == 'SITL') {
         name_list = [
-            'serviceWorker_toggle',
+            // 'serviceWorker_toggle',
             'adsb_toggle',
             'Tadsb_toggle',
             'multi_toggle',
@@ -864,7 +864,7 @@ export function highlightCurrentSettings() {
         ]
     } else if (MODE.mode == 'HITL') {
         name_list = [
-            'serviceWorker_toggle',
+            // 'serviceWorker_toggle',
             'adsb_toggle',
             // 'Tadsb_toggle',
             'sim_toggle',
@@ -1197,18 +1197,8 @@ export function sendDisconnectFromAc() {
  */
 export function setPathToIcarous(e) {
     if (e.key == 'Enter') {
-        // get the input value
-        let path = e.srcElement.value
-        MODE.path = path
-
-        // check icarous path
-        comms.sendFullMessage('CHECK_PATH ' + path)
-
-        // form.alertBannerGreen("Icarous path set to: " + MODE.path)
-
-        // check current settings
-        let icApps = IC.getIcApps()
-        icApps.getApps()
+        MODE.path = e.srcElement.value
+        comms.sendFullMessage('CHECK_PATH ' + MODE.path)
     }
 }
 
@@ -1220,10 +1210,15 @@ export function setPathToIcarous(e) {
  */
 export function setPathToArdupilot(e) {
     if (e.key == 'Enter') {
-        // get the input value
-        let path = e.srcElement.value
-        MODE.ardu_path = path
+        MODE.ardu_path = e.srcElement.value
         form.alertBannerGreen("ArduPilot path set to: " + MODE.ardu_path)
+    }
+}
+
+export function setSimType(e) {
+    if (e.key == 'Enter') {
+        MODE.sim_type = e.srcElement.value
+        form.alertBannerGreen("Sim type set to: " + MODE.sim_type)
     }
 }
 

@@ -3,7 +3,7 @@
   <fence id="1">
     <type>0</type>
     <num_vertices>4</num_vertices>
-    <floor>0</floor>
+    <floor>-5</floor>
     <roof>100</roof>
     <vertex id="0">
       <lat>37.10261616067551</lat>

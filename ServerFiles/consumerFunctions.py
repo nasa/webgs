@@ -47,22 +47,23 @@ import ServerFiles.gfManager as GF
 
 def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
     logger = logging.getLogger()
-    v = 'ArduCopter'  # this can be added later
-    l = ''.join([x+',' for x in msg[2:6]])[0:-1]
-    s = '1'
-    i = str(int(msg[1]) - 1)
-    icarous_flag = msg[7]
-    sim_type = msg[8]
-    p = msg[9]
-    a = msg[10]
+    v = 'ArduCopter'  #version
+    l = ''.join([x+',' for x in msg[2:6]])[0:-1] #lat,lng,alt,hdg
+    s = '1' #speed Arducoper only
+    i = str(int(msg[1]) - 1) #instance
+    c = '1' #cpu number
+    port = UDP_PORT_2 + 10 * (int(i) + (int(c)-1)*4) #port to connect to icarous on
+    icarous_flag = msg[6] #icarous on=1 or off=0
+    sim_type = msg[7] #sim type
+    p = msg[8] #path to icarous
+    a = msg[9] #path to arducopter
     if icarous_flag == '0':
-        UDP_PORT_2 = UDP_PORT_2 - 3
-    m = HOST + ':'+str(UDP_PORT_2 + 10 * (int(i)))
+        port = port - 3 #connect directly to arducopter
+    m = '{}:{}'.format(HOST,port)
 
     pidA = 0
-    if sim_type == 'ARDUPILOT':
-        # sim_vehicle.py -v ArduCopter -l 37.0866,-76.3789,5.000000,0 -S 1 -I 0
-        logger.info("StartAutopilot.sh -v  {} -l {} -s {} -i {} -m {}".format(v,l,s,i,m))
+    if sim_type == 'ArduCopter':
+        logger.info("StartAutopilot.sh -v  {} -l {} -s {} -i {} -m {} -p {}".format(v,l,s,i,m,a))
         pidA = subprocess.Popen(["Scripts/StartAutopilot.sh",
                                  "-v", v, "-l", l, "-s", s, "-i", i, "-m", m, '-p', a]).pid
         logger.info('Ardupilot running on pid: {}'.format(pidA))
@@ -71,21 +72,20 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
     pidI = 0
     if icarous_flag == '1':
         print(msg)
-        c = str(1)
-        i = str(int(msg[1]) - 1)
-        print('cpu', c, 'instance', i, 'port', UDP_PORT_2 + 10 * (int(i) + (int(c)-1)*4))
-        logger.info('Start Icarous: Scripts/StartIcarous.sh -C {} -I {}'.format(c,i))
+        print('cpu {}, instance {}, port,{}'.format(c,i,port))
+        logger.info('Start Icarous: Scripts/StartIcarous.sh -C {} -I {} -P {}'.format(c,i,p))
+
         pidI = subprocess.Popen(["Scripts/StartIcarous.sh",
                                  '-C', c, '-I', i, '-P', p]).pid
+
         logger.info('Icarous running on pid: {}'.format(pidI))
 
     # Open a mavlink UDP port
     try:
-        mas = mavutil.mavlink_connection("udp:" + HOST + ":" + str(
-            UDP_PORT_2 + 10 * (int(i) + (int(c)-1)*4)), dialect='ardupilotmega', baud=BAUD, append=True)
+        mas = mavutil.mavlink_connection('udp:{}'.format(m), dialect='ardupilotmega', baud=BAUD, append=True)
 
         MF.requestDataStream(BAUD, mas)
-        logger.info('Connected on port: {}'.format(str(UDP_PORT_2 + 10 * int(i))))
+        logger.info('Connected on port: {}'.format(port))
 
     except Exception:
         logger.exception("Error opening mavlink connection", exc_info=True)
@@ -98,20 +98,20 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
 def connectToHardwareIP(msg, IP, PORT, BAUD):
     logger = logging.getLogger()
     ac = msg[1]
+    address = 'udp:{}:{}'.format(IP,PORT)
+    serial = '{},{}'.format(IP,BAUD)
     try:
         if msg[4] == 'IP':
-            print("udp:" + IP + ":" + str(PORT))
-            m = mavutil.mavlink_connection(
-                "udp:" + IP + ":" + str(PORT), dialect='ardupilotmega', force_connected=True)
+            print(address)
+            m = mavutil.mavlink_connection(address, dialect='ardupilotmega', force_connected=True)
             logger.info('IC {}: {} {}'.format(ac, BAUD, m))
         else:
-            print(IP+','+BAUD)
-            m = mavutil.mavlink_connection(
-                IP + "," + BAUD, dialect='ardupilotmega')
-
+            print(serial)
+            m = mavutil.mavlink_connection(serial, dialect='ardupilotmega')
             logger.info('{} {}'.format(BAUD, m))
+
         MF.requestDataStream(int(msg[3]), m)
-        logger.info('IC {}: Connected on: {}'.format(ac, IP+':'+str(PORT)))
+        logger.info('IC {}: Connected on: {}'.format(ac, address))
 
     except Exception as ecpt:
         print(ecpt)
@@ -464,9 +464,10 @@ def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
 
     # Format the message
     consumer_message = consumer_message[:-1]
-    lats = consumer_message[6::3]
-    lngs = consumer_message[7::3]
-    alts = consumer_message[8::3]
+    lats = consumer_message[7::3]
+    lngs = consumer_message[8::3]
+    alts = consumer_message[9::3]
+    sim_type = consumer_message[6]
     wp_list = list(zip(lats, lngs, alts))
 
     # Let the system know how many wp's to expect
@@ -486,6 +487,9 @@ def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
     else:
         logger.info('IC {}: message in {}'.format(ac, msg_in))
 
+        # set home location to first point
+        MF.setHome(wp_list[int(msg_in.seq)], master, mlog, forwarding)
+
         # Send start point
         msg_in = MF.sendWaypoint(wp_list[int(msg_in.seq)], radius, int(msg_in.seq), master, mlog, forwarding)
         logger.info('IC {}: Point sent: {}'.format(ac, wp_list[0]))
@@ -496,7 +500,7 @@ def loadFlightPlan(ac, consumer_message, q, master, mlog, forwarding):
         logger.info('IC {}: Velocity sent: {}'.format(
             ac, consumer_message[4]))
         logger.info('IC {}: Message In: {}'.format(ac, msg_in))
-        # print(wp_list)
+        print(wp_list)
         # Send the Waypoints
         while True:
             if msg_in is'NONE' or msg_in is None:

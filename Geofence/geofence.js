@@ -68,7 +68,7 @@ export class Fence {
         this.submittedId = null
         this.seq = 0
         this.type = 1; // 0=include (vehicle stays in), 1=exclude (vehicle stays out)
-        this.floor = 0;
+        this.floor = -5;
         this.roof = 100;
     }
 

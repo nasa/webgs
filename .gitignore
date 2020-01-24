@@ -32,7 +32,6 @@ utils/*.txt
 utils/*.png
 OfflineTiles/npm-debug.log
 temp/*
-UserSettings/userSettings.txt
 .vscode/settings.json
 LogFiles/*.txt
 LogFiles/*.log

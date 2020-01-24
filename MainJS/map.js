@@ -1,6 +1,6 @@
 /**
  *
- * @module icSettings
+ * @module map
  * @version 1.0.1
  * @description <b> map module </b>
  *
@@ -276,6 +276,7 @@ function onMarkerClick(e) {
         let h_row = document.getElementById('row_fp_' + ac.id + '_' + row);
         h_row.setAttribute('class', 'fp_row highlight')
     }
+
 }
 
 
@@ -733,7 +734,6 @@ export function drawBands(ac) {
     let stop;
     // remove any previous bands
     removeBands(ac)
-    // TODO: clean this up no need for the repition
     if (ac.ic_control && ac.showBands) {
         for (let i = 0; i < ac.bands3[0].length; i++) {
             start = ac.bands3[0][i];

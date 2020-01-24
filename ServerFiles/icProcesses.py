@@ -54,7 +54,7 @@ from pymavlink import mavutil, mavwp, mavparm
 
 ic = I.IcClass()
 HOST = '0.0.0.0'
-IP = '169.254.1.12'
+IP = '127.0.0.1'
 PORT = 8000
 UDP_PORT_1 = 14550
 UDP_PORT_2 = 14553
@@ -102,6 +102,8 @@ def data(q, m):
                 global sim_type
                 sim_type = m[0][10]
                 logger.info('IC {}: Waiting for Icarous to load.'.format(ac))
+
+                # setup the .tlog
                 d = int(time.time())
                 d_formated = time.strftime(
                     "%Y-%m-%d_%H:%M:%S", time.localtime(d))
@@ -109,10 +111,13 @@ def data(q, m):
                     ac, d_formated)
                 with open(log, 'w') as f:
                     f.write('')
+
+                # connect to the log
                 mlog = mavutil.mavlink_connection(
                     log, dialect='ardupilotmega', baud=BAUD, write=True, append=True)
                 mavutil.set_dialect("ardupilotmega")
 
+                # give time for icarous to load
                 time.sleep(12)
 
                 logger.info('IC {}: Loading parameters.'.format(ac))
@@ -397,7 +402,6 @@ def completeCommands(q, msg, TM, master, mlog):
     if len(msg) > 0:
         # parse the message
         message = msg
-
         consumer_message = message[2:]
 
         if 'NEW_AIRCRAFT' in consumer_message:
@@ -521,14 +525,14 @@ def completeCommands(q, msg, TM, master, mlog):
                               master, mlog, forwarding)
 
         elif 'FLIGHT_STARTED' in consumer_message:
-            logger.info('IC {}: ConsumerMSG {}'.format(ac, consumer_message))
-            aircraft = '{"AIRCRAFT" : '+consumer_message[-3]+', '
             icarous_flag = consumer_message[-1]
             launch = consumer_message[-2]
+
             logger.info('IC {}: Icarous Flag: {}'.format(ac, icarous_flag))
             MF.startFlight(icarous_flag, launch, master, mlog, forwarding)
             logger.info('IC {}: Flight Started'.format(ac))
-            q.put(aircraft + '"TYPE":"STARTFLIGHT", "INFO": "SUCCESS"}')
+
+            q.put('{"AIRCRAFT" : '+consumer_message[-3]+', "TYPE":"STARTFLIGHT", "INFO": "SUCCESS"}')
 
         elif 'ADD_TRAFFIC' in consumer_message:
             message.append(master)
@@ -615,7 +619,7 @@ def completeCommands(q, msg, TM, master, mlog):
                 print(device, baud)
                 forwarding = mavutil.mavlink_connection(
                     device, baud=baud, input=False, dialect='ardupilotmega')
-        # else:
-        #     print('UNKNOWN MESSAGE: ', consumer_message)
+        else:
+            print('UNKNOWN MESSAGE: ', consumer_message)
 
     return master, mlog

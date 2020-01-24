@@ -257,7 +257,7 @@ export function createTrafficPanel(ac, t_id) {
     btn_div.setAttribute('class', 't_btndiv')
 
     // add save traffic to file
-    btn_div.appendChild(form.addTextInput('t_file_save_' + ac.id, "Save To File", MODE.save_traffic_default, ET.enterSaveTraffic))
+    btn_div.appendChild(form.addTextInput('t_file_save_' + t_id + '_' + ac.id, "Save To File", MODE.save_traffic_default, ET.enterSaveTraffic))
 
     // add a add start traffic button
     btn_div.appendChild(form.addBlockButton(t_id + '_' + ac.id, 'start_traffic', 'Start Traffic', ET.clickStartTraffic));

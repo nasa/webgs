@@ -1,11 +1,9 @@
 # WEB GS
 
-Web GS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/ICAROUS/), version greater than 2.1.26, and capable of multi-aircraft simulations.
+Web GS is a web based ground control station that is compatible with Icarous versions greater than 2.1.19 and capable of multi-aircraft simulations.
 
-![](screenshots/screenshot1_webgs.png)
-![](screenshots/screenshot2_webgs.png)
-![](screenshots/screenshot4_webgs.png)
-![](screenshots/screenshot3_webgs.png)
+![](screenshots/screenshot1_webgs.png)![](screenshots/screenshot2_webgs.png)
+![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
 
 ### Instalation:
 
@@ -107,9 +105,8 @@ Webgs uses the MAVProxy format for creating .tlog files for each flight. These f
 Webgs is capable of flying scripted scenarios that are repeatable and adjustable. Functionality is still limited but it has been tested with four simulated aircraft flying simultaneously, each with multiple intruders and a geofence, repeated 50 times, adjusting parameters, flight plans, and intruders after 25 flights. Examples and instructions on building a script are located in `/webgs/Examples/TestScripts`.
 
 
-### Current version:
-
-Web GS v1.0.4
+### Current version:  
+Web GS v1.0.5  
 
 ### Notices:
 

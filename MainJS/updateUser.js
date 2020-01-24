@@ -93,7 +93,7 @@ export function updateModeFromFile(settings_list) {
 export function updateUserSettingsFile() {
     let MODE = E.getMode()
     let msg = 'SAVE_USER_SETTINGS '
-    let ignore = ['mode', 'icSettings', 'activeSubPanels', 'context_added', 'flybyfile', 'con_status']
+    let ignore = ['mode', 'activeSubPanels', 'context_added', 'flybyfile', 'con_status']
     for (var key in MODE) {
         if (MODE.hasOwnProperty(key)) {
             if (ignore.includes(key)) {
