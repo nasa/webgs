@@ -1,4 +1,4 @@
-# WEB GS - This is the development version. The current release is located at https://gitlab.larc.nasa.gov/github/WebGS
+# WEB GS
 
 Web GS is a web based ground control station that is compatible with Icarous versions greater than 2.1.19 and capable of multi-aircraft simulations.
 
