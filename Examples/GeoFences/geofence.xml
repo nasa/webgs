@@ -3,7 +3,7 @@
   <fence id="0">
     <type>0</type>
     <num_vertices>4</num_vertices>
-    <floor>0</floor>
+    <floor>-5</floor>
     <roof>1000</roof>
     <vertex id="0">
       <lat>37.1020599</lat>
@@ -20,12 +20,12 @@
     <vertex id="3">
       <lat>37.1020174</lat>
       <lon>-76.3872664</lon>
-    </vertex>      
+    </vertex>
   </fence>
   <fence id="1">
     <type>1</type>
     <num_vertices>3</num_vertices>
-    <floor>0</floor>
+    <floor>-5</floor>
     <roof>1000</roof>
     <vertex id="0">
       <lat>37.1021970</lat>
@@ -34,7 +34,7 @@
     <vertex id="1">
       <lat>37.1021160</lat>
       <lon>-76.3871900</lon>
-    </vertex>    
+    </vertex>
     <vertex id="2">
       <lat>37.1021340</lat>
       <lon>-76.3870780</lon>
