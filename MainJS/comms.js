@@ -311,11 +311,6 @@ export function createConnection(ip, port) {
             ac.pitchSpeed = degrees(m.pitchspeed)
             ac.yawSpeed = degrees(m.yawspeed)
 
-            if (ac.status == 1) {
-                form.setPanelInfo(ac, 'pre_flight_info_div_')
-            } else if (ac.status == 2) {
-                form.setPanelInfo(ac, 'flight_info_div_')
-            }
             I.updateIndicators(ac);
 
         } else if (m.TYPE == 'HEARTBEAT') {
@@ -745,6 +740,15 @@ function periodicEvents_1() {
                     sendFullMessage(m)
                 }
             }
+        }
+    }
+
+    let ac = Aircraft.getActiveAc()
+    for (!(ac == 'Aircraft Not Found' || ac == null)) {
+        if (ac.status == 1) {
+            form.setPanelInfo(ac, 'pre_flight_info_div_')
+        } else if (ac.status == 2) {
+            form.setPanelInfo(ac, 'flight_info_div_')
         }
     }
 }
