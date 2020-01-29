@@ -17,9 +17,11 @@ Python3 is required to run the socket server. After python3 is installed, instal
 Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
 Then install a simple http-server: <https://www.npmjs.com/package/http-server>
 
-Webgs is configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
+Webgs is setup by default to connect to Open Street Maps.  
 
-Webgs is also setup to connect to Open Street Maps, and instructions are included in the MapSettings file for setting up an offline tile server.
+Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
+
+Also, instructions are included in the MapSettings file for setting up an offline tile server.
 
 ### Startup
 
@@ -43,7 +45,7 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
     1. Enter the ip address of the machine running the web server into the browser address bar in format - <ip adress>:8082
     2. From the settings panel Under Connect to Remote Host, change the IP Address to the device the socket server is running on (The port should not change). Then Press the Create New Connection button.
 
-### Connect WebGS to Jetson/PX4 over UDP
+### Connect WebGS over UDP
 
     Assuming Icarous is configured properly:
     1. Ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine.
@@ -52,10 +54,11 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
         GCS Mode -> 'Connect to Hardware'
         Select Input Type -> IP
         IP Address -> {the same IP address Icarous is configured to output to}
+        Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)
     4. Ensure the Port and Baud Rate are correct.
     5. Press connect to aircraft.
 
-### Connect WebGS to Jetson/PX4 via Serial USB Device
+### Connect WebGS via Serial USB Device
 
     Assuming Icarous is configured properly:
     1. Ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine.
@@ -64,6 +67,7 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
         GCS Mode -> 'Connect to Hardware'
         Select Input Type -> USB
         IP Address -> {the same IP address Icarous is configured to output to}
+        Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)  
     4. Ensure the Port and Baud Rate are correct.
     5. Press connect to aircraft.
 
@@ -75,10 +79,10 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
         GCS Mode is set to 'SITL'
         Path to icarous is set correctly
         Path to Ardupilot is set correctly (if needed)
+        SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)  
 
-    3. Change icarous startup apps if needed.
-    4. Then either right click on the map or click on the Aircraft button and select 'New Aircraft'
-    5. The parameters for Icarous in version 2 are auto loaded. They may need to be changed.
+    3. Then either right click on the map or click on the Aircraft button and select 'New Aircraft'
+    4. The parameters for Icarous in version 2 are auto loaded. They may need to be changed. This can be done once the aircraft is started.  
 
 ### To view own-ship perspective flight instruments
 
@@ -141,4 +145,4 @@ BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
 ### Contact
 
 Andrew Peters andrew.peters@nianet.org  
-Cesar Munoz cesar.a.munoz@nasa.gov
+Cesar Munoz cesar.a.munoz@nasa.gov  
