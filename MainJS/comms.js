@@ -51,6 +51,7 @@ import * as user from './updateUser.js'
 import * as P from './playback.js'
 
 import * as Traffic from '../Traffic/traffic.js'
+import * as ET from '../Traffic/eventFunctionsTraffic.js'
 import * as F from '../Geofence/geofence.js'
 import * as FE from '../Geofence/geofenceEvents.js'
 
@@ -137,6 +138,7 @@ export function createConnection(ip, port) {
         connection.send('Connection Established');
 
         setInterval(periodicEvents_5, 5000) // checks connection
+        setInterval(periodicEvents_3, 3000) // clean up traffic
         setInterval(periodicEvents_1, 1000) // sends adsb to all aircraft
         window.addEventListener('unload', function () {
             window.connection.close(1000, 'Closing or Refreshing')
@@ -461,7 +463,7 @@ export function createConnection(ip, port) {
             gfInMessage(m, ac)
 
         } else if (m.TYPE == 'REPLAN') {
-            console.log(m)
+            // console.log(m)
             let newLatLng;
             let wp;
             let count = 0
@@ -568,7 +570,11 @@ export function createConnection(ip, port) {
         } else if (m.TYPE == 'GEOFENCELOAD') {
             let msg = document.createElement('p')
             msg.innerHTML = m.INFO
-            document.getElementById('sendgeofence').appendChild(msg)
+
+            let x = document.getElementById('sendgeofence')
+            if (x) {
+                x.appendChild(msg)
+            }
             if (m.INFO == 'FAIL') {
                 form.alertBannerRed('Load Failed: Timeout Reached')
                 let pan = document.getElementById('loading_ac_sendgeofence')
@@ -726,6 +732,19 @@ function periodicEvents_5() {
     })
 }
 
+function periodicEvents_3() {
+    let MODE = E.getMode()
+    if (MODE.Tadsb && MODE.mode == 'SITL') {
+        for (let ac of aircraft_list) {
+            for (let t of ac.traffic_list) {
+                if (Date.now() - t.lastUpdate > 2000) {
+                    ET.removeTraffic(ac, t)
+                }
+            }
+        }
+    }
+}
+
 
 function periodicEvents_1() {
     let MODE = E.getMode()
@@ -744,7 +763,7 @@ function periodicEvents_1() {
     }
 
     let ac = Aircraft.getActiveAc()
-    for (!(ac == 'Aircraft Not Found' || ac == null)) {
+    if (!(ac == 'Aircraft Not Found' || ac == null)) {
         if (ac.status == 1) {
             form.setPanelInfo(ac, 'pre_flight_info_div_')
         } else if (ac.status == 2) {

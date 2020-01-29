@@ -701,17 +701,13 @@ export function drawGeofences() {
             // blue - 356dfa
             // purple - bb73ff
 
-            let color = 'orange';
-            // if (MapBox.line_color == 'default') {
-            if (ac.id == Aircraft.getActiveAc().id) {
+            let color = 'orange'
+            let a = Aircraft.getActiveAc()
+            if (ac && a && ac.id == a.id) {
                 color = '#fa3535'
             } else {
                 color = '#356dfa'
             }
-            // } else {
-            //     color = MapBox.line_color
-            // }
-
             let dashArray
             if (fence.submitted) {
                 dashArray = '1 1'

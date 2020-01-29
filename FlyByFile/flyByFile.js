@@ -454,7 +454,7 @@ function functionSwitch(line, a_list) {
                 } catch (e) {
                     console.log(e)
                 }
-            }, 5000)
+            }, 7000)
 
             break;
 

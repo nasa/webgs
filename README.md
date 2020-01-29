@@ -5,7 +5,7 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 ![](screenshots/screenshot1_webgs.png)![](screenshots/screenshot2_webgs.png)
 ![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
 
-### Instalation:
+### Instalation
 
 After cloning this repository run `git submodule update --init --recursive` to clone the submodules.
 
@@ -14,14 +14,14 @@ Python3 is required to run the socket server. After python3 is installed, instal
     cd into the webgs directory
     pip3 install -r requirements.txt
 
-Make sure you have installed node.js and npm. https://www.npmjs.com/get-npm
-Then install a simple http-server: https://www.npmjs.com/package/http-server
+Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
+Then install a simple http-server: <https://www.npmjs.com/package/http-server>
 
-Webgs is configured to use mapbox for the background display. To get an authorization key go to https://www.mapbox.com/ and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
+Webgs is configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
 
 Webgs is also setup to connect to Open Street Maps, and instructions are included in the MapSettings file for setting up an offline tile server.
 
-### Startup:
+### Startup
 
     Open a terminal and cd into the webgs directory then,
 
@@ -37,13 +37,13 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
 
     There are potentially some compatibility issues with browsers other than Chrome and Firefox. These issues are mainly just styling. There may be some weird colors, or things may be slightly out of place.
 
-### To connect to the server from another device (only if on the same local network):
+### To connect to the server from another device (only if on the same local network)
 
     If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network.
     1. Enter the ip address of the machine running the web server into the browser address bar in format - <ip adress>:8082
     2. From the settings panel Under Connect to Remote Host, change the IP Address to the device the socket server is running on (The port should not change). Then Press the Create New Connection button.
 
-### Connect WebGS to Jetson/PX4 over UDP:
+### Connect WebGS to Jetson/PX4 over UDP
 
     Assuming Icarous is configured properly:
     1. Ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine.
@@ -55,7 +55,7 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
     4. Ensure the Port and Baud Rate are correct.
     5. Press connect to aircraft.
 
-### Connect WebGS to Jetson/PX4 via Serial USB Device:
+### Connect WebGS to Jetson/PX4 via Serial USB Device
 
     Assuming Icarous is configured properly:
     1. Ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine.
@@ -67,7 +67,7 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
     4. Ensure the Port and Baud Rate are correct.
     5. Press connect to aircraft.
 
-### To run simulations:
+### To run simulations
 
     1. Icarous must be installed and properly built.
     2. On the settings page ensure
@@ -80,7 +80,7 @@ Webgs is also setup to connect to Open Street Maps, and instructions are include
     4. Then either right click on the map or click on the Aircraft button and select 'New Aircraft'
     5. The parameters for Icarous in version 2 are auto loaded. They may need to be changed.
 
-### To view own-ship perspective flight instruments:
+### To view own-ship perspective flight instruments
 
     After the aircraft has started, click Open DAA Display. This will open the display in a new tab. This is currently only configured to show information for Aircraft 1. Currently this display only works on port 8082. If the server was launched on another port the map will not be displayed.
 
@@ -94,7 +94,7 @@ Webgs uses the MAVProxy format for creating .tlog files for each flight. These f
 
     Note: I would not recommend fast forwarding at the beginning of the file. If you miss the flight plan messages, a flight plan will not show up on the map.
 
-### Merging .tlog files for multi-aircraft playback:
+### Merging .tlog files for multi-aircraft playback
 
     1. A Python3 script has been included for creating a .mlog file that webgs is capable of playing.
     2. It is located in webgs/ServerFiles/
@@ -104,11 +104,11 @@ Webgs uses the MAVProxy format for creating .tlog files for each flight. These f
 
 Webgs is capable of flying scripted scenarios that are repeatable and adjustable. Functionality is still limited but it has been tested with four simulated aircraft flying simultaneously, each with multiple intruders and a geofence, repeated 50 times, adjusting parameters, flight plans, and intruders after 25 flights. Examples and instructions on building a script are located in `/webgs/Examples/TestScripts`.
 
+### Current version
 
-### Current version:  
-Web GS v1.0.5  
+Web GS v1.0.6
 
-### Notices:
+### Notices
 
 Copyright 2019 United States Government as represented by the Administrator of the National Aeronautics
 and Space Administration. All Rights Reserved.

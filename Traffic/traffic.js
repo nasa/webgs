@@ -98,8 +98,8 @@ export class Traffic {
  * @param source {string} type of traffic
  * @memberof module:traffic
  */
-export function addTraffic(ac, t_id, lat, lng, vel, hdg, alt, marker, emit, source) {
-    let traffic = new Traffic(t_id, lat, lng, vel, hdg, alt, marker, source, emit, Date.now())
+export function addTraffic(ac, t_id, lat, lng, vel, hdg, alt, marker, emit, source, time) {
+    let traffic = new Traffic(t_id, lat, lng, vel, hdg, alt, marker, source, emit, time)
     ac.traffic_list.push(traffic)
 }
 
@@ -406,7 +406,6 @@ export function updateTrafficSummaryPanel() {
     let p;
     for (let ac of comms.getAircraftList()) {
         for (let i of ac.traffic_list) {
-            i.lastUpdate = Date.now()
             // update the list
             li = document.createElement('li')
             // li.setAttribute('class', 't_summary_list')
@@ -507,7 +506,7 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
         traffic.vel = vel
         traffic.alt = alt
         traffic.inFlight = true
-        // traffic.lastUpdate = Date.now()
+        traffic.lastUpdate = Date.now()
         if (traffic.source == 'SIM' || traffic.source == 'MULTI') {
             traffic.marker.setRotationAngle(traffic.hdg) // adjust for icon rotation
         } else {
@@ -528,10 +527,10 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
         let position = new L.LatLng(ac.lat, ac.lng);
         let marker = defineTrafficMarker(position, traffic.hdg, ac.id, t_id, source);
         // update the aircraft
-        addTraffic(ac, t_id, lat, lng, vel, hdg, alt, marker, emit, source)
+        let time = Date.now()
+        addTraffic(ac, t_id, lat, lng, vel, hdg, alt, marker, emit, source, time)
         let t = getTrafficById(ac, t_id)
         t.inFlight = true
-        t.lastUpdate = Date.now()
 
         // update the map
         addTrafficToLayer(ac.id, marker)
@@ -632,40 +631,39 @@ export function defineTrafficMarker(position, bearing, id, t_id, source) {
     return acMarker;
 }
 
-/**
- * @function <a name="checkForMultiAcTraffic">checkForMultiAcTraffic</a>
- * @description checks all aircraft for multi aircraft traffic, if any aircraft is missing the multi will send message.
- * @param e {event} event
- * @param traffic {Object} Traffic Object
- * @memberof module:GeoFence
- */
-export function checkForMultiAcTraffic(ac) {
-    let m_t
-    let this_t
-    for (let a of comms.getAircraftList()) {
-        if (a.id != ac.id) {
-            // check for multi traffic
-            m_t = ac.traffic_list.filter(el => el.source == 'MULTI' && el.inFlight)
+// /**
+//  * @function <a name="checkForMultiAcTraffic">checkForMultiAcTraffic</a>
+//  * @description checks all aircraft for multi aircraft traffic, if any aircraft is missing the multi will send message.
+//  * @param e {event} event
+//  * @param traffic {Object} Traffic Object
+//  * @memberof module:GeoFence
+//  */
+// export function checkForMultiAcTraffic(ac) {
+//     let m_t
+//     let this_t
+//     for (let a of comms.getAircraftList()) {
+//         if (a.id != ac.id) {
+//             // check for multi traffic
+//             m_t = ac.traffic_list.filter(el => el.source == 'MULTI' && el.inFlight)
 
-            for (let t of m_t) {
-                // check if they are already listed in the ac.traffic list
-                this_t = a.traffic_list.filter(el => el.id == t.id)
-                if (this_t.length == 0) {
-                    let msg = 'AIRCRAFT ' + a.id +
-                        ' ADD_TRAFFIC ' + t.id + ' ' +
-                        t.lat + ' ' +
-                        t.lng + ' ' +
-                        t.range + ' ' +
-                        t.bearing + ' ' +
-                        t.alt + ' ' +
-                        t.vel + ' ' +
-                        t.hdg + ' ' +
-                        t.vs + ' ' +
-                        t.emit
-                    comms.sendFullMessage(msg);
-                    console.log(msg)
-                }
-            }
-        }
-    }
-}
+//             for (let t of m_t) {
+//                 // check if they are already listed in the ac.traffic list
+//                 this_t = a.traffic_list.filter(el => el.id == t.id)
+//                 if (this_t.length == 0) {
+//                     let msg = 'AIRCRAFT ' + a.id +
+//                         ' ADD_TRAFFIC ' + t.id + ' ' +
+//                         t.lat + ' ' +
+//                         t.lng + ' ' +
+//                         t.range + ' ' +
+//                         t.bearing + ' ' +
+//                         t.alt + ' ' +
+//                         t.vel + ' ' +
+//                         t.hdg + ' ' +
+//                         t.vs + ' ' +
+//                         t.emit
+//                     comms.sendFullMessage(msg);
+//                 }
+//             }
+//         }
+//     }
+// }

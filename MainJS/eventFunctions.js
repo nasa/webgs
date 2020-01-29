@@ -521,10 +521,12 @@ export function clickSubmitFlightPlan() {
 export function scriptSubmitFlightPlan(ac, vel, wp_string) {
     let message = 'AIRCRAFT ' + ac.id + ' LOAD_FLIGHT_PLAN AC_ID ' + ac.id +
         ' VEL ' + vel +
+        ' ' + MODE.sim_type +
         ' WP' + wp_string
 
     // send message to server
     comms.sendFullMessage(message);
+    console.log(message)
 
     // Update ac
     ac.status = 1;

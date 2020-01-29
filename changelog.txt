@@ -1,5 +1,14 @@
 # Change Log
 
+### v1.0.6
+Update Leaflet version to v1.6.0.
+Fix Panel Update Rate.
+Fix Fly-By-File Wp Load.
+Fix Fly-By-File Geofence error.
+Fix Traffic Cleanup.
+Revert Python Requirements.
+
+
 ### v1.0.5 (&v1.0.4)
 Removed IcApps functionality.
 Updated Python Requirements.

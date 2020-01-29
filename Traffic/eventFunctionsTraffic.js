@@ -48,28 +48,28 @@ import * as E from '../MainJS/eventFunctions.js';
 import * as Traffic from './traffic.js';
 import * as save from '../FlyByFile/saveFile.js';
 
-// event listner to remove traffic if no recieved message for a certian time period
-window.addEventListener('load', periodicTrafficCleanup);
+// // event listner to remove traffic if no recieved message for a certian time period
+// window.addEventListener('load', periodicTrafficCleanup);
 
-/**
- * @function <a name="periodicTrafficCleanup">periodicTrafficCleanup</a>
- * @description Removes traffic that has stopped sending messages
- * @param none
- * @memberof module:eventFunctionsTraffic
- */
-function periodicTrafficCleanup() {
-    setInterval(function () {
-        for (let ac of comms.getAircraftList()) {
-            for (let i of ac.traffic_list) {
-                if (i.inFlight) {
-                    if (Date.now() - i.lastUpdate > 5000) {
-                        removeTraffic(ac, i)
-                    }
-                }
-            }
-        }
-    }, 3000)
-}
+// /**
+//  * @function <a name="periodicTrafficCleanup">periodicTrafficCleanup</a>
+//  * @description Removes traffic that has stopped sending messages
+//  * @param none
+//  * @memberof module:eventFunctionsTraffic
+//  */
+// function periodicTrafficCleanup() {
+//     setInterval(function () {
+//         for (let ac of comms.getAircraftList()) {
+//             for (let i of ac.traffic_list) {
+//                 if (i.inFlight) {
+//                     if (Date.now() - i.lastUpdate > 5000) {
+//                         removeTraffic(ac, i)
+//                     }
+//                 }
+//             }
+//         }
+//     }, 3000)
+// }
 
 /**
  * @function <a name="updateContextMenuT">updateContextMenuT</a>
@@ -182,7 +182,8 @@ export function addT(ac, center) {
     let marker = Traffic.defineTrafficMarker(position, bearing, ac.id, t_id, source);
 
     // create the traffic object
-    Traffic.addTraffic(ac, t_id, center[0], center[1], 1, 0, 50, marker, emit, source)
+    let time = Date.now()
+    Traffic.addTraffic(ac, t_id, center[0], center[1], 1, 0, 50, marker, emit, source, time)
 
     // update the map
     Traffic.addTrafficToLayer(ac.id, marker)

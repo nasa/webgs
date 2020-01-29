@@ -17,13 +17,13 @@ buildGeofence : true
 removeGeofence : true
 usbport : /dev/ttyUSB0
 baud : 57600
-sim_type : ArduCopter
+sim_type : RotorSim
 radar : false
 ipAddress : 0.0.0.0
 outport : 8000
 port : 8000
 path : /code/icarous
-ardu_path : /code/ardupilot
+ardu_path : /PycharmProjects/ardupilot
 bands : true
 alert : true
 load_wp_default : flightplan1.txt
@@ -33,7 +33,7 @@ save_param_default : icarous_custom1.txt
 load_gf_default : geofence.xml
 save_gf_default : testgeofence1.xml
 save_traffic_default : test_traffic1.txt
-filename : N539NU_flt181.tlog
+filename : merged.mlog
 playerActive : false
 swToggle : Off
 component : Default
