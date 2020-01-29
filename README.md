@@ -5,7 +5,7 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 ![](screenshots/screenshot1_webgs.png)![](screenshots/screenshot2_webgs.png)
 ![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
 
-### Instalation
+## Instalation
 
 After cloning this repository run `git submodule update --init --recursive` to clone the submodules.
 
@@ -17,102 +17,84 @@ Python3 is required to run the socket server. After python3 is installed, instal
 Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
 Then install a simple http-server: <https://www.npmjs.com/package/http-server>
 
-Webgs is setup by default to connect to Open Street Maps.  
+Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update. Also, instructions are included in the MapSettings file for setting up an offline tile server.
 
-Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
+## Startup
 
-Also, instructions are included in the MapSettings file for setting up an offline tile server.
+Open a terminal and cd into the webgs directory then,
 
-### Startup
+    python3 start_webgs.py  
 
-    Open a terminal and cd into the webgs directory then,
+This script starts a local http server, starts the webgs socket server, and opens the default web browser (preferably a current version of chrome) to `localhost:8082` or, the components can be run individually:
 
-    python3 start_webgs.py
+    http-server -p 8082 -i  
+    python3 multiprocessing_server.py  
+    and navigate to localhost:8082 in a browser.  
 
-    This script starts a local http server, starts the webgs socket server, and opens the default web browser (preferably a current version of chrome) to `localhost:8082`
-
-    or, the components can be run individually:
-
-    http-server -p 8082 -i
-    python3 multiprocessing_server.py
-    and navigate to localhost:8082 in a browser.
-
-    There are potentially some compatibility issues with browsers other than Chrome and Firefox. These issues are mainly just styling. There may be some weird colors, or things may be slightly out of place.
+There are potentially some compatibility issues with browsers other than Chrome and Firefox. These issues are mainly just styling. There may be some weird colors, or things may be slightly out of place.
 
 ### To connect to the server from another device (only if on the same local network)
 
-    If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network.
-    1. Enter the ip address of the machine running the web server into the browser address bar in format - <ip adress>:8082
-    2. From the settings panel Under Connect to Remote Host, change the IP Address to the device the socket server is running on (The port should not change). Then Press the Create New Connection button.
+If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - <ip adress>:8082 From the settings panel Under Connect to Remote Host, change the IP Address to the device the socket server is running on (The port should not change). Then Press the Create New Connection button.
 
 ### Connect WebGS over UDP
 
-    Assuming Icarous is configured properly:
-    1. Ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine.
-    2. Start the web server and the socket server. Ensure the Web page is connected to the socket server.
-    3. In the settings panel, set:
-        GCS Mode -> 'Connect to Hardware'
-        Select Input Type -> IP
-        IP Address -> {the same IP address Icarous is configured to output to}
-        Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)
-    4. Ensure the Port and Baud Rate are correct.
-    5. Press connect to aircraft.
+Assuming Icarous is configured properly, ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
+
+    GCS Mode -> 'Connect to Hardware'  
+    Select Input Type -> IP  
+    IP Address -> {the same IP address Icarous is configured to output to}  
+    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)  
+
+Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
 ### Connect WebGS via Serial USB Device
 
-    Assuming Icarous is configured properly:
-    1. Ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine.
-    2. Start the web server and the socket server. Ensure the Web page is connected to the socket server.
-    3. In the settings panel, set:
-        GCS Mode -> 'Connect to Hardware'
-        Select Input Type -> USB
-        IP Address -> {the same IP address Icarous is configured to output to}
-        Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)  
-    4. Ensure the Port and Baud Rate are correct.
-    5. Press connect to aircraft.
+Assuming Icarous is configured properly, ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
+
+    GCS Mode -> 'Connect to Hardware'  
+    Select Input Type -> USB  
+    IP Address -> {the same IP address Icarous is configured to output to}  
+    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)  
+
+Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
 ### To run simulations
 
-    1. Icarous must be installed and properly built.
-    2. On the settings page ensure
+Icarous must be installed and properly built. On the settings page ensure
 
-        GCS Mode is set to 'SITL'
-        Path to icarous is set correctly
-        Path to Ardupilot is set correctly (if needed)
-        SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)  
+    GCS Mode is set to 'SITL'  
+    Path to icarous is set correctly  
+    Path to Ardupilot is set correctly (if needed)  
+    SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)  
 
-    3. Then either right click on the map or click on the Aircraft button and select 'New Aircraft'
-    4. The parameters for Icarous in version 2 are auto loaded. They may need to be changed. This can be done once the aircraft is started.  
+Then either right click on the map or click on the Aircraft button and select 'New Aircraft'. The parameters for Icarous in version 2 are auto loaded and they may need to be changed. This can be done once the aircraft is started.  
 
 ### To view own-ship perspective flight instruments
 
-    After the aircraft has started, click Open DAA Display. This will open the display in a new tab. This is currently only configured to show information for Aircraft 1. Currently this display only works on port 8082. If the server was launched on another port the map will not be displayed.
+After the aircraft has started, click Open DAA Display. This will open the display in a new tab. This is currently only configured to show information for Aircraft 1. Currently this display only works on port 8082. If the server was launched on another port the map will not be displayed.
 
 ### Playback
 
-Webgs uses the MAVProxy format for creating .tlog files for each flight. These files along with the Server logs, Icarous outputs, ardupilot outputs, and a text file containing all of the received mavlink messages are stored in the LogFiles directory. To playback a file:
+Webgs uses the MAVProxy format for creating .tlog files for each flight. These files along with the Server logs, Icarous outputs, ardupilot outputs, and a text file containing all of the received mavlink messages are stored in the LogFiles directory. To playback a file, change the GCS Mode to Playback. Enter the file name in the text box. (It assumes files will be located in the LogFiles directory.) Click Start Playback. It may take a few seconds to load the file.
 
-    1. Change the GCS Mode to Playback
-    2. Enter the file name in the text box. (It assumes files will be located in the LogFiles directory.)
-    3. Click Start Playback. It may take a few seconds to load the file.
-
-    Note: I would not recommend fast forwarding at the beginning of the file. If you miss the flight plan messages, a flight plan will not show up on the map.
+Note: I would not recommend fast forwarding at the beginning of the file. If you miss the flight plan messages, a flight plan will not show up on the map.
 
 ### Merging .tlog files for multi-aircraft playback
 
-    1. A Python3 script has been included for creating a .mlog file that webgs is capable of playing.
-    2. It is located in webgs/ServerFiles/
-    3. python3 mergeTlogs.py -h or --help for instructions on how to use it.
+A Python3 script has been included for creating a .mlog file that webgs is capable of playing. It is located in webgs/ServerFiles/  
+
+    python3 mergeTlogs.py -h or --help for instructions on how to use it.
 
 ### Fly By File
 
 Webgs is capable of flying scripted scenarios that are repeatable and adjustable. Functionality is still limited but it has been tested with four simulated aircraft flying simultaneously, each with multiple intruders and a geofence, repeated 50 times, adjusting parameters, flight plans, and intruders after 25 flights. Examples and instructions on building a script are located in `/webgs/Examples/TestScripts`.
 
-### Current version
+## Current version
 
 Web GS v1.0.6
 
-### Notices
+## Notices
 
 Copyright 2019 United States Government as represented by the Administrator of the National Aeronautics
 and Space Administration. All Rights Reserved.
