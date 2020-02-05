@@ -1,5 +1,8 @@
 # Change Log
 
+### v1.0.7
+Added Merging Rings Display Toggle 
+
 ### v1.0.6
 Update Leaflet version to v1.6.0.
 Fix Panel Update Rate.
