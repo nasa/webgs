@@ -92,7 +92,7 @@ Webgs is capable of flying scripted scenarios that are repeatable and adjustable
 
 ## Current version
 
-Web GS v1.0.6
+Web GS v1.0.7
 
 ## Notices
 
