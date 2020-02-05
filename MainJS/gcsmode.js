@@ -91,6 +91,7 @@ export class GCSmode {
         this.ardu_path = '/PycharmProjects/ardupilot';
         this.flybyfile = false;
         this.bands = true;
+        this.ring = false
         this.alert = true;
         this.load_wp_default = 'flightplan1.txt'
         this.save_wp_default = 'test_flightplan1.txt'
@@ -146,7 +147,7 @@ export class GCSmode {
         this.editflight = true;
         this.buildGeofence = true;
         this.removeGeofence = true;
-        this.component = 'Default'
+        this.component = 5
     }
 
     /**
@@ -246,6 +247,12 @@ export class GCSmode {
                 E.clickToggleButton('bands_toggle');
             })
             set_pan.appendChild(bands_buttons)
+
+            // allow merging rings display
+            let ring_buttons = form.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
+                E.clickToggleButton('ring_toggle');
+            })
+            set_pan.appendChild(ring_buttons)
 
             // // ***************************************************
             // // add radar buttons
@@ -347,6 +354,12 @@ export class GCSmode {
                 E.clickToggleButton('bands_toggle');
             })
             set_pan.appendChild(bands_buttons)
+
+            // allow merging rings display
+            let ring_buttons = form.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
+                E.clickToggleButton('ring_toggle');
+            })
+            set_pan.appendChild(ring_buttons)
 
             // // ***************************************************
             // // add radar buttons

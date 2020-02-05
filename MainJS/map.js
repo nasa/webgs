@@ -557,7 +557,8 @@ export function DrawFlightPlan() {
         }
         // console.log(p2)
         // wp2 circles for merging and spacing
-        if (p2 != 0) {
+        let MODE = E.getMode()
+        if (p2 != 0 && MODE.ring) {
             if (ac.entry_radius != 0) {
                 ac.small = L.circle([p2.latlng.lat, p2.latlng.lng], {
                     color: 'red',

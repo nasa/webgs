@@ -861,6 +861,7 @@ export function highlightCurrentSettings() {
             'sensor_toggle',
             // 'radar_toggle',
             'bands_toggle',
+            'ring_toggle',
             // 'alert_toggle',
             //'observeonly_toggle'
         ]
@@ -873,6 +874,7 @@ export function highlightCurrentSettings() {
             'sensor_toggle',
             // 'radar_toggle',
             'bands_toggle',
+            'ring_toggle',
             // 'alert_toggle',
             //'observeonly_toggle'
         ]
