@@ -5,7 +5,7 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 ![](screenshots/screenshot1_webgs.png)![](screenshots/screenshot2_webgs.png)
 ![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
 
-## Instalation
+## Installation
 
 After cloning this repository run `git submodule update --init --recursive` to clone the submodules.
 
