@@ -120,6 +120,26 @@ option {
     bottom: 6vh;
 } */
 
+.myToolTip {
+    position: absolute;
+    /* width: 1000px;
+    font-size: 20px; */
+    color: var(--main-color);
+    text-shadow: var(--main-shadow);
+    font-weight: 900;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.leaflet-tooltip-left.myToolTip::before {
+    border-left-color: transparent;
+}
+
+.leaflet-tooltip-right.myToolTip::before {
+    border-right-color: transparent;
+}
+
+
 /* Playback */
 .playback {
     grid-column: 7/10;

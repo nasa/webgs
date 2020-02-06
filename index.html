@@ -22,15 +22,14 @@
         integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous">
     </script>
     <!-- leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.3/dist/leaflet.css"
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
         crossorigin="" />
     <link rel="stylesheet" href="Leaflet.contextmenu/dist/leaflet.contextmenu.css" />
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-        integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    <script src="https://unpkg.com/leaflet@1.3.3/dist/leaflet.js"
+        integrity="sha512-tAGcCfR4Sc5ZP5ZoVz0quoZDYX5aCtEm/eu1KhSLj2c9eFrylXZknQYmxUssFaVJKvvc0dJQixhGjG2yXWiV9Q=="
         crossorigin=""></script>
     <script src="Leaflet.contextmenu/dist/leaflet.contextmenu.js"></script>
-    <script src="Leaflet-semicircle/Semicircle.js"></script>
     <script src="Leaflet.RotatedMarker/leaflet.rotatedMarker.js"></script>
 
     <!-- Flight Indicators -->
@@ -40,18 +39,19 @@
     <!-- Spinner -->
     <link rel="stylesheet" href="LoadingSpinner/spinner.css">
 
+    <!-- local Leaflet Plugin -->
+    <script src="LeafletPlugin/circleArc.js"></script>
+
     <!-- local .css -->
     <link rel="stylesheet" type="text/css" href="./MainCSS/index.css">
-    <link rel="stylesheet" type="text/css" href="./Indicators/indicators.css">
-    <link rel="stylesheet" type="text/css" href="./Traffic/traffic.css">
-    <link rel="stylesheet" type="text/css" href="./Geofence/geofence.css">
-    <!-- local .js -->
-    <script src="MainJS/map.js" type="module"></script>
-    <script src="Indicators/indicators.js" type="module"></script>
-    <script src="Traffic/traffic.js" type="module"></script>
-    <script src="Geofence/geofence.js" type="module"></script>
+    <link rel="stylesheet" type="text/css" href="./MainJS/Indicators/indicators.css">
+    <link rel="stylesheet" type="text/css" href="./MainJS/Traffic/traffic.css">
+    <link rel="stylesheet" type="text/css" href="./MainJS/Geofence/geofence.css">
 
-    <title>Web GS</title>
+    <!-- local .js -->
+    <script src="MainJS/control/entry.js" type="module"></script>
+
+    <title>WebGS</title>
 
 </head>
 

@@ -1,7 +1,24 @@
 # Change Log
 
+### v1.0.8
+Using local storage for holding mode values
+Using local storage to reset zoom and center of map to last location
+Using address bar ip to auto connect to websocket (assumes http and websocket servers are on same machine)
+Update radio buttons to use local storage and show value automatically
+Added labels to Aircraft and Traffic
+Added update .cfg files for compatability with Icarous updates
+Update Icarous band colors and style
+Auto use callsign as aircraft name
+Refactor file structure
+Update DAA Displays to use GitHub version as Submodule
+Allow for multi-band types (track, hspeed, alt, vspeed) - working on updating displays for each
+Updated aircraft icon - movement, added z-level, and onclick function
+Stop using http-server, using custom express.js server
+Allow https and http(DEV mode) option
+
+
 ### v1.0.7
-Added Merging Rings Display Toggle 
+Added Merging Rings Display Toggle
 
 ### v1.0.6
 Update Leaflet version to v1.6.0.
@@ -10,7 +27,6 @@ Fix Fly-By-File Wp Load.
 Fix Fly-By-File Geofence error.
 Fix Traffic Cleanup.
 Revert Python Requirements.
-
 
 ### v1.0.5 (&v1.0.4)
 Removed IcApps functionality.
@@ -21,13 +37,11 @@ Minor Bug Fixes.
 Changed Default Component Id to 5.
 Cleanup Settings Panel.
 
-
 ### v1.0.3
 Adjusted Refresh timeout.
 Fixed HITL bugs.
 Fixed Radio and GPS indicator.
 Added forwarding data injection.
-
 
 ### v1.0.2
 Added Startup script.
