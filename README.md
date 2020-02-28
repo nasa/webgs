@@ -7,18 +7,18 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 
 ## Installation
 
-Clone the repository.
-Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
+Clone the repository.  
+Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>  
 Python3 is also required. <https://www.python.org/downloads/>
 
-The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.
+The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.  
+Move into the webgs directory and run:  
 
-    cd into the webgs directory and run
     ./install.sh
 
-Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
+Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/settings/MapSettings.js in a text editor, and follow the instructions to update.
 
-DAA Displays are installed as a submodule in the apps/DAA/daa-displays folder by default. Go to: <https://github.com/nasa/daa-displays> for further requirements. Go into the daa-displays folder and run make from a terminal to build the app. It can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on the daa-displays github page).
+DAA Displays are installed as a submodule in the apps/DAA/daa-displays folder by default. Go to: <https://github.com/nasa/daa-displays> for further requirements. The installation script will build the daa-displays automatically. It can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on the daa-displays github page).
 
 ## Startup
 By default WebGS uses https. This assumes the proper ssl certs have been generated and loaded into the `/certs' directory. Webgs can also be run in developer mode which uses http and does not require certs. Detailed instructions on creating self signed certificates are located in /certs.README.md.
@@ -35,13 +35,13 @@ Or, start with http:
 
     python3 start_webgs.py -DEV True
 
-This script starts a local http server, starts the webgs socket server, and opens the default web browser (preferably a current version of chrome) to `{hostname}:8082`.
+This script starts a local http server, starts the webgs socket server, and opens a web browser (chrome if it can be found otherwise the default browser) to `{hostname}:8082`.
 
 There are potentially some compatibility issues with browsers other than Chrome and Firefox. These issues are mainly just styling. There may be some weird colors, or things may be slightly out of place.
 
 ### To connect to the server from another device (only if on the same local network)
 
-If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - <ip adress>:8082 From the settings panel Under Connect to Remote Host, change the IP Address to the device the socket server is running on (The port should not change). Then Press the Create New Connection button.
+If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - {https or http}://<hostname>:8082 
 
 ### Connect WebGS over UDP
 
