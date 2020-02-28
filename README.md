@@ -1,4 +1,4 @@
-# WEB GS
+# WEB GS - This is the development version. The current release is located at <https://gitlab.larc.nasa.gov/github/WebGS>
 
 Web GS is a web based ground control station that is compatible with Icarous versions greater than 2.1.19 and capable of multi-aircraft simulations.
 
@@ -7,29 +7,35 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 
 ## Installation
 
-After cloning this repository run `git submodule update --init --recursive` to clone the submodules.
-
-Python3 is required to run the socket server. After python3 is installed, install the required packages:
-
-    cd into the webgs directory
-    pip3 install -r requirements.txt
-
+Clone the repository.
 Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
-Then install a simple http-server: <https://www.npmjs.com/package/http-server>
+Python3 is also required. <https://www.python.org/downloads/>
 
-Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update. Also, instructions are included in the MapSettings file for setting up an offline tile server.
+The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.
+
+    cd into the webgs directory and run
+    ./install.sh
+
+Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/MapSettings.js in a text editor, and follow the instructions to update.
+
+DAA Displays are installed as a submodule in the apps/DAA/daa-displays folder by default. Go to: <https://github.com/nasa/daa-displays> for further requirements. Go into the daa-displays folder and run make from a terminal to build the app. It can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on the daa-displays github page).
 
 ## Startup
+By default WebGS uses https. This assumes the proper ssl certs have been generated and loaded into the `/certs' directory. Webgs can also be run in developer mode which uses http and does not require certs. Detailed instructions on creating self signed certificates are located in /certs.README.md.
 
-Open a terminal and cd into the webgs directory then,
+To start Webgs:
 
-    python3 start_webgs.py  
+    python3 start_webgs.py -HOST {name or localhost} -CERT {filename}.crt -KEY {filename}.key
 
-This script starts a local http server, starts the webgs socket server, and opens the default web browser (preferably a current version of chrome) to `localhost:8082` or, the components can be run individually:
+Update -HOST, -CERT and -KEY as needed, -CERT and -KEY default to localhost.crt and localhost.key respectivly, so they are not needed if that is the names you chose.
 
-    http-server -p 8082 -i  
-    python3 multiprocessing_server.py  
-    and navigate to localhost:8082 in a browser.  
+    python3 start_webgs.py -HOST {name or localhost}
+
+Or, start with http:
+
+    python3 start_webgs.py -DEV True
+
+This script starts a local http server, starts the webgs socket server, and opens the default web browser (preferably a current version of chrome) to `{hostname}:8082`.
 
 There are potentially some compatibility issues with browsers other than Chrome and Firefox. These issues are mainly just styling. There may be some weird colors, or things may be slightly out of place.
 
@@ -41,10 +47,10 @@ If the web server and socket server are on another device on your local network.
 
 Assuming Icarous is configured properly, ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
 
-    GCS Mode -> 'Connect to Hardware'  
-    Select Input Type -> IP  
-    IP Address -> {the same IP address Icarous is configured to output to}  
-    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)  
+    GCS Mode -> 'Connect to Hardware'
+    Select Input Type -> IP
+    IP Address -> {the same IP address Icarous is configured to output to}
+    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)
 
 Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
@@ -52,10 +58,10 @@ Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
 Assuming Icarous is configured properly, ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
 
-    GCS Mode -> 'Connect to Hardware'  
-    Select Input Type -> USB  
-    IP Address -> {the same IP address Icarous is configured to output to}  
-    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)  
+    GCS Mode -> 'Connect to Hardware'
+    Select Input Type -> USB
+    IP Address -> {the same IP address Icarous is configured to output to}
+    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)
 
 Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
@@ -63,16 +69,16 @@ Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
 Icarous must be installed and properly built. On the settings page ensure
 
-    GCS Mode is set to 'SITL'  
-    Path to icarous is set correctly  
-    Path to Ardupilot is set correctly (if needed)  
-    SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)  
+    GCS Mode is set to 'SITL'
+    Path to icarous is set correctly
+    Path to Ardupilot is set correctly (if needed)
+    SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)
 
-Then either right click on the map or click on the Aircraft button and select 'New Aircraft'. The parameters for Icarous in version 2 are auto loaded and they may need to be changed. This can be done once the aircraft is started.  
+Then either right click on the map or click on the Aircraft button and select 'New Aircraft'. The parameters for Icarous in version 2 are auto loaded and they may need to be changed. This can be done once the aircraft is started.
 
 ### To view own-ship perspective flight instruments
 
-After the aircraft has started, click Open DAA Display. This will open the display in a new tab. This is currently only configured to show information for Aircraft 1. Currently this display only works on port 8082. If the server was launched on another port the map will not be displayed.
+After the aircraft has started, click Open DAA Display. This will open the display in a new tab. Currently this display only works on port 8082. If the server was launched on another port the map will not be displayed.
 
 ### Playback
 
@@ -82,7 +88,7 @@ Note: I would not recommend fast forwarding at the beginning of the file. If you
 
 ### Merging .tlog files for multi-aircraft playback
 
-A Python3 script has been included for creating a .mlog file that webgs is capable of playing. It is located in webgs/ServerFiles/  
+A Python3 script has been included for creating a .mlog file that webgs is capable of playing. It is located in webgs/utils/
 
     python3 mergeTlogs.py -h or --help for instructions on how to use it.
 
@@ -92,7 +98,7 @@ Webgs is capable of flying scripted scenarios that are repeatable and adjustable
 
 ## Current version
 
-Web GS v1.0.7
+Web GS v1.0.8
 
 ## Notices
 
@@ -126,5 +132,5 @@ BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
 
 ### Contact
 
-Andrew Peters andrew.peters@nianet.org  
-Cesar Munoz cesar.a.munoz@nasa.gov  
+Andrew Peters andrew.peters@nianet.org
+Cesar Munoz cesar.a.munoz@nasa.gov

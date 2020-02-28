@@ -1,12 +1,19 @@
 {
     "name": "webgs",
-    "version": "1.0.0",
+    "version": "1.0.8",
     "description": "WebGS",
     "main": "index.html",
     "author": "Andrew Peters <andrew.l.peters@nasa.gov>",
-    "license": "Not Yet",
+    "license": "NASA-1.3",
     "repository": {
-        "url": "",
+        "url": "https://github.com/nasa/webgs",
         "type": "git"
+    },
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "express": "^4.17.1",
+        "fs": "0.0.1-security",
+        "helmet": "^3.21.3",
+        "https": "^1.0.0"
     }
 }

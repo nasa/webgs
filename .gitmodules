@@ -7,9 +7,10 @@
 [submodule "Leaflet.contextmenu"]
 	path = Leaflet.contextmenu
 	url = https://github.com/aratcliffe/Leaflet.contextmenu.git
-[submodule "Leaflet-semicircle"]
-	path = Leaflet-semicircle
-	url = https://github.com/jieter/Leaflet-semicircle.git
 [submodule "jQuery-Flight-Indicators"]
 	path = jQuery-Flight-Indicators
 	url = https://github.com/sebmatton/jQuery-Flight-Indicators.git
+[submodule "daa-displays"]
+	path = apps/DAA/daa-displays
+	url = https://github.com/nasa/daa-displays.git
+	ignore = all
