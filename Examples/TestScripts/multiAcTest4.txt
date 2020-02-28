@@ -10,19 +10,19 @@ const z *2
 
 # setup ac 1
 start startAc(bob1, 1, 37.086699, -76.378911)
-adjust param file(bob1, Examples/Parameters/icarous_custom1.txt, x, bob1, Examples/Parameters/icarous_custom2.txt, z)
+adjust param file(bob1, Examples/Parameters/icarous_default.parm, x, bob1, Examples/Parameters/icarous_default.parm, z)
 
 # setup ac 2
 start startAc(bob2, 1, 37.086699, -76.378911)
-adjust param file(bob2, Examples/Parameters/icarous_custom1.txt, x, bob2, Examples/Parameters/icarous_custom2.txt, z)
+adjust param file(bob2, Examples/Parameters/icarous_default.parm, x, bob2, Examples/Parameters/icarous_default.parm, z)
 
 # setup ac 3
 start startAc(bob3, 1, 37.086699, -76.378911)
-adjust param file(bob3, Examples/Parameters/icarous_custom1.txt, x, bob3, Examples/Parameters/icarous_custom2.txt, z)
+adjust param file(bob3, Examples/Parameters/icarous_default.parm, x, bob3, Examples/Parameters/icarous_default.parm, z)
 
 # setup ac 4
 start startAc(bob4, 1, 37.086699, -76.378911)
-adjust param file(bob4, Examples/Parameters/icarous_custom1.txt, x, bob4, Examples/Parameters/icarous_custom2.txt, z)
+adjust param file(bob4, Examples/Parameters/icarous_default.parm, x, bob4, Examples/Parameters/icarous_default.parm, z)
 
 time wait(20)
 

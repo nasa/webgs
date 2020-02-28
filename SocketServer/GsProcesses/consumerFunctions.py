@@ -552,7 +552,7 @@ def loadFlightPlanFile(ac, consumer_message, q, master, mlog):
             master.target_system, master.target_component)
         dir = os.path.dirname(os.path.realpath(__file__))
         num = wpload.load(
-            dir + '/../Examples/FlightPlans/'+consumer_message[1])
+            dir + '/../../Examples/FlightPlans/'+consumer_message[1])
         msg_list = []
         vel = 0
         for i in range(0, num):
@@ -635,14 +635,14 @@ def loadGeoFence(ac, consumer_message, q, master, mlog, forwarding):
 def loadGeoFenceFile(ac, consumer_message, q, master, mlog):
     logger = logging.getLogger()
     dir = os.path.dirname(os.path.realpath(__file__))
-    filename = dir + '/../Examples/GeoFences/' + \
+    filename = dir + '/../../Examples/GeoFences/' + \
         consumer_message[1]
     try:
         # Make sure the file exists
         f = open(filename, 'r')
         f.close()
     except Exception as e:
-        print('File not found. ', dir +'/..' + consumer_message[1])
+        print('File not found. ', dir +'/../..' + consumer_message[1])
         q.put('{"name" : "LOAD", "INFO" : "FAIL", "MSG":"' + str(e) +'"}')
         return
     fencelist = GF.read_geofence(filename)
@@ -661,9 +661,9 @@ def loadParamFile(ac, consumer_message, q, master, mlog):
     logger = logging.getLogger()
     dir = os.path.dirname(os.path.realpath(__file__))
     try:
-        f = open(dir + '/..' + consumer_message[1], 'r')
+        f = open(dir + '/../..' + consumer_message[1], 'r')
     except Exception as e:
-        print('File not found. ', dir +'/..' + consumer_message[1])
+        print('File not found. ', dir +'/../..' + consumer_message[1])
         q.put('{"name" : "LOAD", "INFO" : "FAIL", "MSG":"' + str(e) +'"}')
         return
 

@@ -548,7 +548,7 @@ def completeCommands(q, msg, TM, master, mlog):
             # open the file
             dir = os.path.dirname(os.path.realpath(__file__))
             filename = consumer_message[2]
-            path = dir + '/..' + filename
+            path = dir + '/../..' + filename
 
             # get the data
             with open(path) as f:

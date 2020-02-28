@@ -621,7 +621,7 @@ table {
     right: 0;
     bottom: 0;
     background-color: rgba(197, 8, 8, 0.5);
-    z-index: 3;
+    z-index: 1;
     cursor: pointer;
 }
 
