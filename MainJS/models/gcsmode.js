@@ -255,11 +255,11 @@ export class GCSmode {
             })
             set_pan.appendChild(label_buttons)
 
-            // open graph page
-            set_pan.appendChild(form.addBlockButton('graph', 'graph_page', 'Open Graph Page', E.clickOpenGraphDisplay));
+            // // open graph page
+            // set_pan.appendChild(form.addBlockButton('graph', 'graph_page', 'Open Graph Page', E.clickOpenGraphDisplay));
 
-            // open batch sim
-            set_pan.appendChild(form.addBlockButton('batch', 'batch_page', 'Open Batch Sim Page', E.clickOpenBatchDisplay));
+            // // open batch sim
+            // set_pan.appendChild(form.addBlockButton('batch', 'batch_page', 'Open Batch Sim Page', E.clickOpenBatchDisplay));
 
             // // ***************************************************
             // // add radar buttons
