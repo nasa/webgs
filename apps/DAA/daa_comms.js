@@ -311,6 +311,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                     item.hdg = m['heading']
                     item.alt = m['altitude']
                     item.lastUpdate = Date.now()
+                    item.convert_vel()
                     item.descriptor = {
                         s: {
                             lat: parseFloat(item.lat) / 10000000,
@@ -318,8 +319,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                             alt: parseFloat(item.alt) / 1000
                         },
                         v: {
-                            x: parseFloat(item.vel) / 100,
-                            y: parseFloat(item.vel) / 100,
+                            x: item.x,
+                            y: item.y,
                             z: 0.0
                         },
                         symbol: "daa-traffic-monitor",

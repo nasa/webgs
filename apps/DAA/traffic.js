@@ -52,6 +52,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             this.alt = alt;
             this.vel = vel;
             this.hdg = hdg;
+            this.x = 0
+            this.y = 0
             this.callsign = callsign
             this.lastUpdate = time;
             this.descriptor = {
@@ -61,13 +63,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
                     alt: parseFloat(alt) / 1000
                 },
                 v: {
-                    x: parseFloat(this.vel) / 100,
-                    y: parseFloat(this.vel) / 100,
+                    x: this.x,
+                    y: this.y,
                     z: 0
                 },
                 symbol: "daa-traffic-monitor",
                 callSign: callsign
             }
+        }
+        convert_vel() {
+            let vel = parseFloat(this.vel) / 100
+            let ang = parseFloat(this.hdg) / 100
+            let rad = (ang + 90) * Math.PI / 180
+            this.x = vel * Math.cos(rad)
+            this.y = vel * Math.sin(rad)
         }
     }
 

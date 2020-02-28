@@ -49,11 +49,6 @@ from argparse import ArgumentParser
 import GsProcesses.icProcesses as ICP
 import User.userControl as UC
 import User.userManager as UM
-import Runner.batchSimulation as BS
-import Runner.batchFastTime as FS
-import Generator.flightplan_generator_avoid_1_intruder as G_Avoid
-import Generator.flightplan_generator_merging as G_Merge
-import Generator.get_yaml_filenames as GY
 
 
 
@@ -269,90 +264,6 @@ async def consumer_handler(websocket, path):
             for m in m_lists:
                 x = ['AIRCRAFT '] + [m[0]] + message
                 m[1].append(x)
-
-        elif 'BATCH_SIM' in message:
-            print('server message in:', message)
-            msg = message[2:]
-            msg = ''.join(msg)
-            msg = json.loads(msg)
-            ac = 'batch'
-
-            if msg['TYPE'] == 'START_SIM':
-                m = manager.list([msg])
-                p = addProcess(BS.runSimulation, (q, m))
-                m_lists.append([ac, m])
-                processes.append([ac, p])
-                p.start()
-
-            elif msg['TYPE'] == 'START_FAST':
-                try:
-                    print(msg['BATCH']['SCENARIOS'])
-                    comm = ['python3', '-u', 'apps/batch_sim/ServerFiles/Runner/batchFastTime.py', path_icarous, msg['BATCH']['SCENARIOS']]
-                    print(['apps/batch_sim/ServerFiles/Runner/batchFastTime.py', path_icarous])
-
-                    # run the script and capture the output
-                    for path in execute(comm):
-                        val = path.decode().strip('\n')
-                        # filter out unwanted messages
-                        if "\u001b" not in val:
-                            x = json.dumps({"BATCH_SIM":1, "TYPE":"RUNNING_FAST", "MESSAGE":val})
-                            # bypass the queue to send data in real time to front end otherwise
-                            # will backup until processes are complete
-                            await um.notifyUsers(x)
-                            print('OUTPUT:', x)
-
-                    x = json.dumps({"BATCH_SIM":1,"TYPE":"FINISHED_FAST","MESSAGE":"COMPLETE"})
-                    print(x)
-                    q.put(x)
-
-                except Exception as e:
-                    sys.exc_info()
-                    print('fail', e)
-
-            elif msg['TYPE'] == 'END':
-                print('SHUT_DOWN function', message)
-                # get the list to add it to
-                m = [x[1] for x in m_lists if x[0] == ac]
-                if (len(m) > 0):
-                    m_lists.remove([x for x in m_lists if x[0] == ac][0])
-                    # find the process
-                    p = [x for x in processes if x[0] == ac]
-                    processes.remove(p[0])
-                    p = p[0][1]
-                    p.join(timeout=5)
-                    if p.exitcode == None:
-                        p.terminate()
-                        q.close()
-                        q.join_thread()
-                        q = Queue()
-                    # remove the list
-                    del m
-
-            elif msg['TYPE'] == 'GET_YAML_FILENAMES':
-                files = GY.get_yaml_filenames()
-                x = json.dumps({"BATCH_SIM":1, "TYPE":"YAML_FILENAMES", "MESSAGE":files})
-                print(x)
-                q.put(x)
-
-            elif msg['TYPE'] == 'GET_PATH':
-                print(path_icarous)
-                x = json.dumps({"BATCH_SIM":1, "TYPE":"PATH", "MESSAGE":path_icarous})
-                print(x)
-                q.put(x)
-
-            elif msg["TYPE"] == 'GENERATE_Avoid_Specific':
-                G_Avoid.generate_specific(msg["MESSAGE"])
-            elif msg["TYPE"] == 'GENERATE_Avoid_Random':
-                G_Avoid.generate_random(msg["MESSAGE"])
-            elif msg["TYPE"] == 'GENERATE_Avoid_Step':
-                G_Avoid.generate_step(msg["MESSAGE"])
-            elif msg["TYPE"] == 'GENERATE_Merge_Specific':
-                print(msg["MESSAGE"])
-            elif msg["TYPE"] == 'GENERATE_Merge_Random':
-                print(msg["MESSAGE"])
-            elif msg["TYPE"] == 'GENERATE_Merge_Step':
-                print(msg["MESSAGE"])
-
 
         else:
             logger.info('SERVER: Undefined Input Message: {}'.format(message))
