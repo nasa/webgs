@@ -12,13 +12,13 @@ Create a file named domains.ext, and copy the following into it:
     keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
     subjectAltName = @alt_names
     [alt_names]
-    DNS.1 = plotz.larc.nasa.gov
+    DNS.1 = {your domain name}
     DNS.2 = localhost
 
-Change DNS values to match your machine's name, or use localhost as DNS.1 and delete DNS.2 if unnamed. Then save the file.
+Change DNS values to match your domain name, or use localhost as DNS.1 and delete DNS.2 if unnamed. Then save the file.
 
 
-I replaced localhost with my machine name, plotz.larc.nasa.gov in the first and last openssl command. It should work with local host as well. I wanted to make sure I could access webgs from a remote client and localhost usually translates to 127.0.0.1 not 0.0.0.0.
+I replaced localhost with my machine name, {your domain name} in the first and last openssl command. It should work with local host as well. I wanted to make sure I could access webgs from a remote client and localhost usually translates to 127.0.0.1 not 0.0.0.0.
 
 Create Certificate Authority:
 
@@ -50,11 +50,11 @@ On mac add certs to keychain using Keychain Access. This should allow all browse
 
 To start Webgs:
 
-    python3 start_webgs.py -HOST plotz.larc.nasa.gov -CERT localhost.crt -KEY localhost.key
+    python3 start_webgs.py -HOST {your domain name} -CERT localhost.crt -KEY localhost.key
 
 Update -HOST, -CERT and -KEY as needed, -CERT and -KEY default to localhost.crt and localhost.key respectivly, so they are not needed if that is the names you chose.
 
-    python3 start_webgs.py -HOST plotz.larc.nasa.gov
+    python3 start_webgs.py -HOST {your domain name}
 
 
 Or, start with http:
