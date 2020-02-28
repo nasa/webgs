@@ -10,7 +10,7 @@
 [submodule "jQuery-Flight-Indicators"]
 	path = jQuery-Flight-Indicators
 	url = https://github.com/sebmatton/jQuery-Flight-Indicators.git
-[submodule "daa-displays"]
+[submodule "apps/DAA/daa-displays"]
 	path = apps/DAA/daa-displays
 	url = https://github.com/nasa/daa-displays.git
 	ignore = all
