@@ -7,12 +7,12 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 
 ## Installation
 
-Clone the repository.
+Clone the repository.  
 Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>  
 Python3 is also required. <https://www.python.org/downloads/>
 
 The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.  
-Move into the webgs directory and run:
+Move into the webgs directory and run:  
 
     ./install.sh
 
