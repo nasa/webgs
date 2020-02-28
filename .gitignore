@@ -4,12 +4,16 @@ __pycache__/*
 .vscode/*
 .pytest_cache/*
 env/*
+.vscode/settings.json
 
 *.tlog*
 .parm
 
-UserSettings/userSettings.txt
-
+Examples/FlightPlans/*
+Examples/GeoFences/*
+Examples/Parameters/*
+Examples/Traffic/*
+Examples/TestScripts/multiAC*
 
 doc/components.wmf
 doc/WebGS_Design_Diagrams.pptx
@@ -17,21 +21,39 @@ doc/WebGCS_Overview.pptx
 doc/SACR-WebGS-ClassD-4-25-19.pdf
 doc/Project_Documentation_Class-D_WEBGS_R1V0.doc
 
-ServerFiles/*.kml
-ServerFiles/*.mlog
-ServerFiles/__pycache__/*
+SocketServer/*.kml
+SocketServer/*.mlog
+SocketServer/__pycache__/*
+SocketServer/User/__pycache__/*
+SocketServer/GsProcesses/__pycache__/*
+SocketServer/GsProcesses/Geofence/*
+SocketServer/GsProcesses/msg_objects/*
+SocketServer/GsProcesses/Traffic/*
+SocketServer/GsProcesses/Playback/*
 
 Scripts/*.kml
 Scripts/*.txt
 Scripts/*.waypoints
 
-OfflineTiles/*.mbtiles
-
+LogFiles/*.txt
+LogFiles/*.log
+LogFiles/*.tlog
+LogFiles/*.mlog
 
 utils/*.txt
 utils/*.png
-OfflineTiles/npm-debug.log
-temp/*
-.vscode/settings.json
-LogFiles/*.txt
-LogFiles/*.log
+utils/*.mlog
+utils/EncounterModel/__pycache__/*
+
+apps/DAA/daa-displays/*
+
+certs/*.cert
+certs/*.key
+certs/*.pem
+certs/*.srl
+certs/*.csr
+certs/*.crt
+certs/*.ext
+certs/*.cnf
+
+node_modules/*
