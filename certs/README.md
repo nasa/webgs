@@ -17,9 +17,6 @@ Create a file named domains.ext, and copy the following into it:
 
 Change DNS values to match your domain name, or use localhost as DNS.1 and delete DNS.2 if unnamed. Then save the file.
 
-
-I replaced localhost with my machine name, {your domain name} in the first and last openssl command. It should work with local host as well. I wanted to make sure I could access webgs from a remote client and localhost usually translates to 127.0.0.1 not 0.0.0.0.
-
 Create Certificate Authority:
 
     openssl req -x509 -nodes -new -sha256 -days 1024 -newkey rsa:2048 -keyout RootCA.key -out RootCA.pem -subj "/C=US/CN=localhost"
@@ -29,7 +26,6 @@ Create Certificates (uses CA files created above):
 
     openssl req -new -nodes -newkey rsa:2048 -keyout localhost.key -out localhost.csr -subj "/C=US/ST=YourState/L=YourCity/O=Example-Certificates/CN=localhost.local"
     openssl x509 -req -sha256 -days 1024 -in localhost.csr -CA RootCA.pem -CAkey RootCA.key -CAcreateserial -extfile domains.ext -out localhost.crt
-
 
 
 On linux to get chrome to trust the CA:
