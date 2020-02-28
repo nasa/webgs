@@ -41,7 +41,7 @@ There are potentially some compatibility issues with browsers other than Chrome 
 
 ### To connect to the server from another device (only if on the same local network)
 
-If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - {https or http}://<ip adress>:8082 
+If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - {https or http}://<hostname>:8082 
 
 ### Connect WebGS over UDP
 
