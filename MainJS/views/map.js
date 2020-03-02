@@ -336,12 +336,23 @@ function onAcClick(e) {
 export function addMarkerToLayer(id, wp) {
     let this_layer = 'Aircraft ' + id;
     let count = 0
+    let bl = 1 // default streets
     for (let item of layerControl._layers) {
         if (item.name == this_layer) {
             item.layer.addLayer(wp);
             // if first, turn layer on
             if (Object.keys(item.layer._layers).length <= 1) {
-                layerControl._layerControlInputs[count].click()
+                if (baseMaps == 'OSM') {
+                    bl = 5
+                }
+
+                for (let item of document.getElementsByClassName('leaflet-control-layers-selector')) {
+                    if (item.type == 'checkbox') {
+                        item.checked = true
+                    }
+                }
+                layerControl._layerControlInputs[bl].click()
+                console.log(id, layerControl._layerControlInputs[count])
             }
         }
         count += 1

@@ -34,20 +34,73 @@
 # install submodules
 echo "Installing Submodules"
 git submodule update --init --recursive
+if [ $? = 0 ]
+then
+    SUBM=$?
+else
+    SUBM="Submodules did not install properly."
+fi
 
 # install node modules
 # Assumes node and npm are installed, installs packages in package.json
 echo "Installing Node Modules"
 npm install
+if [ $? = 0 ]
+then
+    NPMI=$?
+else
+    NPMI="Node modules did not install properly."
+fi
 
 # install python requirements, installs packages in requirements.txt
-# May need to change pip3 to pip depending on local enviroment
-# This should work, but not really tested
 echo "Installing Python Requirements"
-pip3 install -r requirements.txt
+pip3 -q install --user -r requirements.txt
+if [ $? = 0 ]
+then
+    PY3I=$?
+else
+    PY3I="Python 3 requirements did not install properly."
+fi
 
 # build DAA Displays - check requirements first
 echo "Building DAA Displays"
 cd ./apps/DAA/daa-displays/
-make
+make -j8
 cd ../../../
+echo $PWD
+if [ $? = 0 ]
+then
+    DAAI=$?
+else
+    DAAI="DAA displays did not build correctly."
+fi
+
+# Finished
+echo "********************************************************************************************"
+if [ "$SUBM" = "0" ] && [ "$NPMI" = "0" ] && [ "$PY3I" = "0" ] && [ "$DAAI" = "0" ]
+then
+    echo -e "\e[39m\n"
+    echo "Installation Complete"
+    echo -e "\e[39m\n"
+    echo "To start WebGS run:"
+    echo -e "\t\e[32m'python3 start_webgs.py -DEV True'"
+    echo -e "\e[39mor, "
+    echo -e "\t\e[32m'python3 start_webgs.py -HOST {name or localhost}'"
+    echo -e "\e[39mor, "
+    echo -e "\t\e[32m'python3 start_webgs.py -HOST {name or localhost} -CERT {filename}.crt -KEY {filename}.key'"
+    echo -e "\e[39m\n"
+else
+    echo "There was a problem with the installation."
+    echo -e "\e[39m\n"
+    for i in "$SUBM" "$NPMI" "$PY3I" "$DAAI";
+    do
+        if [ "$i" != 0 ]
+        then
+            echo -e "\t\e[91m$i"
+            echo -e "\e[39m\n"
+        fi
+    done
+
+    echo -e "\e[39mPlease check the output to correct the errors."
+fi
+echo "********************************************************************************************"

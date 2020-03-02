@@ -225,33 +225,6 @@ export function createTrafficPanel(ac, t_id) {
     ac_pan_div.appendChild(pan_label);
     let traffic = getTrafficById(ac, t_id)
 
-    // // add multi ac traffic switch
-    // let sim_buttons = F.addButtonSwitch('multi_ac_t', 'Multi-Ac Traffic', function () {
-
-    //     if (traffic.multi) {
-    //         traffic.multi = false
-    //     } else {
-    //         traffic.multi = true
-    //     }
-    //     changeTrafficIcon(traffic)
-    //     highlightMultiToggle(traffic)
-    // })
-
-    // // add mutation observer to panel trigger highlight when made 'active'
-    // var e = document.getElementById(pan_id)
-    // let observer = new MutationObserver(function (event) {
-    //     highlightMultiToggle(traffic)
-    // })
-    // observer.observe(e, {
-    //     attributes: true,
-    //     attributeFilter: ['class'],
-    //     childList: false,
-    //     characterData: false
-    // })
-
-
-    // ac_pan_div.appendChild(sim_buttons)
-
     // add form
     createTrafficPlanTable(ac, t_id);
 
@@ -289,30 +262,6 @@ export function highlightMultiToggle(t) {
     }
 }
 
-/**
- * @function <a name="changeTrafficIcon">changeTrafficIcon</a>
- * @description Changes traffic icon from default when source is known
- * @param t {Object} Traffic object.
- * @memberof module:traffic
- */
-export function changeTrafficIcon(t) {
-    if (t.multi) {
-        t.source = 'MULTI'
-        t.emit = 254
-        t.multi = true
-    } else {
-        t.source = 'SIM'
-        t.emit = 255
-        t.multi = false
-    }
-
-    for (let ac of AM.getAircraftList()) {
-        removeTrafficMarker(ac.id, t.marker)
-    }
-    let ac = AM.getActiveAc()
-    t.marker = defineTrafficMarker([t.lat, t.lng], t.hdg, ac.id, t.id, t.source, t.callsign);
-    addTrafficToLayer(ac.id, t.marker)
-}
 
 /**
  * @function <a name="createTrafficPlanTable">createTrafficPlanTable</a>
