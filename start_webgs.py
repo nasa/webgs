@@ -45,7 +45,6 @@ x = True
 
 
 def check_apps():
-    # subprocess.run(['ls','-ltr'])
     subprocess.run(['git','submodule', 'update','--recursive', '--remote', '--merge', '--force'])
 
 
@@ -127,22 +126,12 @@ if __name__ == '__main__':
     parser.add_argument("-CERT", required=False,default=['localhost.crt'], nargs='*', help="name of cert file, default: localhost.crt")
     parser.add_argument("-KEY", required=False,default=['localhost.key'], nargs='*', help="name of key file, default: localhost.key")
     parser.add_argument("-DEV", required=False,default=[False], help="Run in Developer Mode (http)")
+    parser.add_argument("-UPDATE", required=False, default=[False], help="Check for submodule updates.")
     args = parser.parse_args()
 
-    # check path, checks system path for correct paths
-    # check_path()
-
-    # check python path
-    # check_python()
-
     # check apps, updates all submodules
-    check_apps()
-
-    # check node modules, installs missing modules
-    # check_node()
-
-    # check daa displays, checks for dist folder if not found runs make
-    # check_daa_displays()
+    if args.UPDATE[0]:
+        check_apps()
 
     # start webgs
     start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0])
@@ -156,3 +145,5 @@ if __name__ == '__main__':
 # python3 start_webgs.py -HOST plotz.larc.nasa.gov -CERT localhost.crt -KEY localhost.key
 # python3 start_webgs.py -HOST plotz.larc.nasa.gov
 # python3 start_webgs.py -DEV True
+# python3 start_webgs.py -DEV True -UPDATE True
+# python3 start_webgs.py -DEV True -UPDATE True

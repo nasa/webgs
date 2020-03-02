@@ -701,7 +701,7 @@ def saveFile(ac, consumer_message, q, master, mlog):
     logger = logging.getLogger()
     dir = os.path.dirname(os.path.realpath(__file__))
     filename = consumer_message[2]
-    path = dir + '/..' + filename
+    path = dir + '/../..' + filename
 
     if consumer_message[1] == 'PARAM':
         try:

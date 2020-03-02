@@ -24,7 +24,8 @@ adjust param file(bob3, Examples/Parameters/icarous_default.parm, x, bob3, Examp
 start startAc(bob4, 1, 37.086699, -76.378911)
 adjust param file(bob4, Examples/Parameters/icarous_default.parm, x, bob4, Examples/Parameters/icarous_default.parm, z)
 
-time wait(20)
+# have to give time for params to load
+time wait(25)
 
 # load wp's
 adjust wp wpLoad(bob1, Examples/FlightPlans/test_flightplan1.txt, x, bob1, Examples/FlightPlans/test_flightplan2.txt, z)

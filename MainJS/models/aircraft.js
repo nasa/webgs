@@ -55,6 +55,7 @@ export class Aircraft {
     constructor(ac_id, aircraft_list, fp) {
         this.id = ac_id;
         this.name = ac_id;
+        this.callsign = ac_id
         this.aircraft_list = aircraft_list;
         this.flightplan = fp;
         this.replan = []
