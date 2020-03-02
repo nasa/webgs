@@ -411,7 +411,7 @@ export function createConnection(ip, port) {
 
             // Use the call sign as the ac name
             if (m.text.includes('CALLSIGN')) {
-                ac.calsign = m.text.split(':')[1]
+                ac.callsign = m.text.split(':')[1]
                 if (ac.name == ac.id) {
                     ac.name = ac.callsign
                 }

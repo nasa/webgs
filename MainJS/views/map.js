@@ -342,7 +342,7 @@ export function addMarkerToLayer(id, wp) {
             item.layer.addLayer(wp);
             // if first, turn layer on
             if (Object.keys(item.layer._layers).length <= 1) {
-                if (baseMaps == 'OSM') {
+                if (MapBox.layers[0].options.id == 'osm') {
                     bl = 5
                 }
 
@@ -352,7 +352,6 @@ export function addMarkerToLayer(id, wp) {
                     }
                 }
                 layerControl._layerControlInputs[bl].click()
-                console.log(id, layerControl._layerControlInputs[count])
             }
         }
         count += 1
