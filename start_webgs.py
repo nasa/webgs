@@ -61,7 +61,7 @@ def check_daa_displays():
     return
 
 
-def start_webgs(args, HOST, DEV, CERT, KEY):
+def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER):
     global pro
     print('args', args, DEV, HOST, CERT, KEY)
 
@@ -75,21 +75,22 @@ def start_webgs(args, HOST, DEV, CERT, KEY):
 
     time.sleep(.5)
 
-    # try to use chrome otherwise use default browser
-    try:
-        b = webbrowser.get(using='google-chrome')
-    except:
-        b = webbrowser
+    if not NOBROWSER:
+        # try to use chrome otherwise use default browser
+        try:
+            b = webbrowser.get(using='google-chrome')
+        except:
+            b = webbrowser
 
-    if DEV:
-        b.open('http://'+HOST+':8082')
-    else:
-        b.open('https://'+HOST+':8082')
+        if DEV:
+            b.open('http://'+HOST+':8082')
+        else:
+            b.open('https://'+HOST+':8082')
 
     # This is used when closing to make sure everything is shutdown
     pro = [ms, hs]
 
-    # optionally start the offline server
+    # optionally start the offline tile server
     if args[0] != 0 and '.mbtiles' in args[0]:
         try:
             ti = subprocess.Popen(
@@ -127,6 +128,7 @@ if __name__ == '__main__':
     parser.add_argument("-KEY", required=False,default=['localhost.key'], nargs='*', help="name of key file, default: localhost.key")
     parser.add_argument("-DEV", required=False,default=[False], help="Run in Developer Mode (http)")
     parser.add_argument("-UPDATE", required=False, default=[False], help="Check for submodule updates.")
+    parser.add_argument("-NOBROWSER", required=False, default=[False], help="Don't auto launch browser.")
     args = parser.parse_args()
 
     # check apps, updates all submodules
@@ -134,7 +136,7 @@ if __name__ == '__main__':
         check_apps()
 
     # start webgs
-    start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0])
+    start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0], args.NOBROWSER[0])
 
     while x:
         signal.signal(signal.SIGINT, kill_webgs)
@@ -145,5 +147,4 @@ if __name__ == '__main__':
 # python3 start_webgs.py -HOST plotz.larc.nasa.gov -CERT localhost.crt -KEY localhost.key
 # python3 start_webgs.py -HOST plotz.larc.nasa.gov
 # python3 start_webgs.py -DEV True
-# python3 start_webgs.py -DEV True -UPDATE True
 # python3 start_webgs.py -DEV True -UPDATE True

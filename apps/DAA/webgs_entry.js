@@ -102,13 +102,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
     const altitudeTape = new daa_altitude_tape_1.AltitudeTape("altitude", {
         top: 100,
-        left: 600
+        left: 825
     }, {
         parent: "daa-disp"
     });
     const verticalSpeedTape = new daa_vertical_speed_tape_1.VerticalSpeedTape("vertical-speed", {
         top: 210,
-        left: 600
+        left: 980
     }, {
         parent: "daa-disp",
         verticalSpeedRange: 2000

@@ -7,14 +7,16 @@ Web GS is a web based ground control station that is compatible with Icarous ver
 
 ## Installation
 
-Clone the repository.  
-Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>  
+Clone the repository.
+Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
 Python3 is also required. <https://www.python.org/downloads/>
 
-The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.  
-Move into the webgs directory and run:  
+The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.
+Move into the webgs directory and run:
 
     ./install.sh
+
+If updating WebGS and having trouble with submodules not loading. You may need to delete WebGS and start from scratch.
 
 Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/settings/MapSettings.js in a text editor, and follow the instructions to update.
 
@@ -41,7 +43,7 @@ There are potentially some compatibility issues with browsers other than Chrome 
 
 ### To connect to the server from another device (only if on the same local network)
 
-If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - {https or http}://<hostname>:8082 
+If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - {https or http}://<hostname>:8082
 
 ### Connect WebGS over UDP
 
@@ -132,5 +134,5 @@ BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
 
 ### Contact
 
-Andrew Peters andrew.peters@nianet.org  
+Andrew Peters andrew.peters@nianet.org
 Cesar Munoz cesar.a.munoz@nasa.gov

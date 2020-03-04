@@ -342,7 +342,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             let ac_sel = document.createElement('select')
             ac_sel.setAttribute('id', 'ac_select')
             ac_sel.setAttribute('autofocus', 'true');
-            ac_sel.setAttribute('style', "margin-left:1150px; margin-top:20px; width:150px")
+            ac_sel.setAttribute('style', "margin-left:1075px; margin-top:10px; width:125px")
             let opt
             for (let ac of C.aircraft_list) {
                 opt = document.createElement('option');
