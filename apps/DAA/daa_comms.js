@@ -355,7 +355,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
             ac_sel.addEventListener('change', function (e) {
                 let ac_id = parseFloat(e.target.value.split(' ')[1])
-                let ac = C.getAircraftById(ac_id)
+                let ac = C.getAircraftById(C, ac_id)
                 for (let a of C.aircraft_list) {
                     a.active = false
                 }
