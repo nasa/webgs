@@ -20,7 +20,7 @@ If updating WebGS and having trouble with submodules not loading. You may need t
 
 Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/settings/MapSettings.js in a text editor, and follow the instructions to update.
 
-DAA Displays are installed as a submodule in the apps/DAA/daa-displays folder by default. Go to: <https://github.com/nasa/daa-displays> for further requirements. The installation script will build the daa-displays automatically. It can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on the daa-displays github page).
+DAA Displays are installed as a submodule in the apps/DAA/daa-displays folder by default. Go to: <https://github.com/nasa/daa-displays> for further requirements. The installation script will build the daa-displays automatically. This behavior can be skipped by running `install.sh -D`. Daa Displays can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on the daa-displays github page).
 
 ## Startup
 By default WebGS uses https. This assumes the proper ssl certs have been generated and loaded into the `/certs' directory. Webgs can also be run in developer mode which uses http and does not require certs. Detailed instructions on creating self signed certificates are located in /certs.README.md.
