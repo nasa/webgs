@@ -5,40 +5,38 @@
 
 repeat 3
 
-
 const x *2
 const y *1
 
-start startAc(bob, 1, 37.086699, -76.378911)
+start startAc(bob, 1, 37.1028, -76.3894)
+# wait for Icarous to start
 time wait(20)
 
-# param file(bob, Examples/Parameters/icarous_custom1.txt)
-adjust param file(bob, Examples/Parameters/icarous_custom1.txt, x, bob, Examples/Parameters/icarous_custom2.txt, y)
+# need to wait for arducopter to get gps lock
+time wait(40)
 
-# time wait(10)
-
-forward start(bob, 127.0.0.1, 14570, 57600)
+# param file(bob, Examples/Parameters/icarous_default.parm)
+# adjust param file(bob, Examples/Parameters/icarous_default.parm, x, bob, Examples/Parameters/icarous_default.parm, y)
 
 adjust wp wpLoad(bob, Examples/FlightPlans/test_flightplan1.txt, y, bob, Examples/FlightPlans/test_flightplan2.txt, y, bob, Examples/FlightPlans/test_flightplan1.txt, y)
 
-# geofence load(bob1, 1, Examples/GeoFences/test_geofence1.xml)
+# geofence load(bob, 1, Examples/GeoFences/test_geofence1.xml)
 
-traffic add(bob, 1000, 37.10175, -76.38752, 0, 45, 10, 3, 45, 10, 255)
-traffic file(bob, 1001, Examples/Traffic/test_traffic1.txt)
+traffic file(bob, 1000, Examples/Traffic/test_traffic1_1.txt)
+
+time wait(1)
+
 long MISSION_START(bob)
 
 # Time must be added to allow the flight to run before the shutdown commands are given
-time wait(40)
+time wait(60)
 
-
-traffic remove(bob, 1000)
-
-time wait(10)
 
 stop bob
 
+
 # This runs three times, starts one aircraft, then adds a single intruder, starts the flight, lets them interact for
-#    a certian time period, removes the intruder, waits, then shuts down the aircraft.
+#    a certian time period, then shuts down the aircraft.
 
 # NOTES:
 # All commands follow the format:
