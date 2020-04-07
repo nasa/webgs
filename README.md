@@ -1,6 +1,6 @@
 # WebGS
 
-Web GS is a web based ground control station that is compatible with Icarous versions greater than 2.1.19 and capable of multi-aircraft simulations.
+WebGS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/icarous) (versions greater than 2.1.19) and capable of multi-aircraft simulations.
 
 ![](screenshots/screenshot1_webgs.png)![](screenshots/screenshot2_webgs.png)
 ![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
@@ -47,36 +47,36 @@ If the web server and socket server are on another device on your local network.
 
 ### Connect WebGS over UDP
 
-Assuming Icarous is configured properly, ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
+Assuming [ICAROUS](https://github.com/nasa/icarous) is configured properly, ensure you are on the same network as the device running [ICAROUS](https://github.com/nasa/icarous). Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
 
     GCS Mode -> 'Connect to Hardware'
     Select Input Type -> IP
-    IP Address -> {the same IP address Icarous is configured to output to}
-    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)
+    IP Address -> {the same IP address ICAROUS is configured to output to}
+    Component Id -> 5 (Default is 5. This is the standard ICAROUS Config. 0 will conect to Autopilot in most configurations.)
 
 Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
 ### Connect WebGS via Serial USB Device
 
-Assuming Icarous is configured properly, ensure you are on the same network as the device running Icarous. Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
+Assuming [ICAROUS](https://github.com/nasa/icarous) is configured properly, ensure you are on the same network as the device running [ICAROUS](https://github.com/nasa/icarous). Typically this will involve changing the IP address of your machine. Start the web server and the socket server. Ensure the Web page is connected to the socket server. In the settings panel, set:
 
     GCS Mode -> 'Connect to Hardware'
     Select Input Type -> USB
-    IP Address -> {the same IP address Icarous is configured to output to}
-    Component Id -> 5 (Default is 5. This is the standard Icarous Config. 0 will conect to Autopilot in most configurations.)
+    IP Address -> {the same IP address ICAROUS is configured to output to}
+    Component Id -> 5 (Default is 5. This is the standard ICAROUS Config. 0 will conect to Autopilot in most configurations.)
 
 Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
 ### To run simulations
 
-Icarous must be installed and properly built. On the settings page ensure
+[ICAROUS](https://github.com/nasa/icarous) must be installed and properly built. On the settings page ensure
 
     GCS Mode is set to 'SITL'
     Path to icarous is set correctly
     Path to Ardupilot is set correctly (if needed)
     SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)
 
-Then either right click on the map or click on the Aircraft button and select 'New Aircraft'. The parameters for Icarous in version 2 are auto loaded and they may need to be changed. This can be done once the aircraft is started.
+Then either right click on the map or click on the Aircraft button and select 'New Aircraft'. The parameters for [ICAROUS](https://github.com/nasa/icarous) in version 2 are auto loaded and they may need to be changed. This can be done once the aircraft is started.
 
 ### To view own-ship perspective flight instruments
 
@@ -84,7 +84,7 @@ After the aircraft has started, click Open DAA Display. This will open the displ
 
 ### Playback
 
-Webgs uses the MAVProxy format for creating .tlog files for each flight. These files along with the Server logs, Icarous outputs, ardupilot outputs, and a text file containing all of the received mavlink messages are stored in the LogFiles directory. To playback a file, change the GCS Mode to Playback. Enter the file name in the text box. (It assumes files will be located in the LogFiles directory.) Click Start Playback. It may take a few seconds to load the file.
+Webgs uses the MAVProxy format for creating .tlog files for each flight. These files along with the Server logs, [ICAROUS](https://github.com/nasa/icarous) outputs, ardupilot outputs, and a text file containing all of the received mavlink messages are stored in the LogFiles directory. To playback a file, change the GCS Mode to Playback. Enter the file name in the text box. (It assumes files will be located in the LogFiles directory.) Click Start Playback. It may take a few seconds to load the file.
 
 Note: I would not recommend fast forwarding at the beginning of the file. If you miss the flight plan messages, a flight plan will not show up on the map.
 
@@ -100,7 +100,7 @@ Webgs is capable of flying scripted scenarios that are repeatable and adjustable
 
 ## Current version
 
-Web GS v1.0.8
+WebGS v1.0.8
 
 ## Notices
 
