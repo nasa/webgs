@@ -231,22 +231,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 
                         band = m['type' + i] % 7
                         if (band === 5) {
-                            ac.ic_bands[type].bands['FAR'].push({
+                            ac.ic_bands[type].bands['RECOVERY'].push({
                                 from: m['min' + i],
                                 to: m['max' + i]
                             })
                         } else if (band === 4) {
-                            ac.ic_bands[type].bands['MID'].push({
-                                from: m['min' + i],
-                                to: m['max' + i]
-                            })
-                        } else if (band === 3) {
                             ac.ic_bands[type].bands['NEAR'].push({
                                 from: m['min' + i],
                                 to: m['max' + i]
                             })
+                        } else if (band === 3) {
+                            ac.ic_bands[type].bands['MID'].push({
+                                from: m['min' + i],
+                                to: m['max' + i]
+                            })
                         } else if (band === 2) {
-                            ac.ic_bands[type].bands['RECOVERY'].push({
+                            ac.ic_bands[type].bands['FAR'].push({
                                 from: m['min' + i],
                                 to: m['max' + i]
                             })

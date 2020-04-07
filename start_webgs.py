@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
 
 # Example:
-# python3 start_webgs.py -HOST plotz.larc.nasa.gov -CERT localhost.crt -KEY localhost.key
-# python3 start_webgs.py -HOST plotz.larc.nasa.gov
+# python3 start_webgs.py -HOST {HOST} -CERT localhost.crt -KEY localhost.key
+# python3 start_webgs.py -HOST {HOST}
 # python3 start_webgs.py -DEV True
 # python3 start_webgs.py -DEV True -UPDATE True

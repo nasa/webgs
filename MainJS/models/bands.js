@@ -54,10 +54,10 @@ export class Bands {
             'type_table': {
                 '0': 'UNKNOWN',
                 '1': 'NONE',
-                '2': 'RECOVERY',
-                '3': 'NEAR',
-                '4': 'MID',
-                '5': 'FAR'
+                '2': 'FAR',
+                '3': 'MID',
+                '4': 'NEAR',
+                '5': 'RECOVERY'
             },
             'type_def': {
                 'FAR': {

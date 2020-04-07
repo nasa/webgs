@@ -88,7 +88,7 @@ export class GCSmode {
         this.sim_type = 'Rotorsim' // either 'Arducopter' or 'RotorSim'
         this.activeSubPanels = [];
         this.radar = false;
-        this.ipAddress = '128.155.128.62';
+        this.ipAddress = '0.0.0.0';
         this.HITLipAddress = '127.0.0.1'
         this.port = '14553';
         this.input_method = 'IP'
