@@ -243,6 +243,9 @@ export function createNewAircraft(name = null, ic = 1, center = null, mode = nul
             ac.lat = center[0]
             ac.lng = center[1]
         }
+    } else {
+        ac.lat = center[0]
+        ac.lng = center[1]
     }
 
     if (name == null || typeof name != 'string') {
@@ -602,7 +605,7 @@ export function sendStartFlight(ac) {
     // send the message
     let message = 'AIRCRAFT ' + ac.id + ' FLIGHT_STARTED ' + ac.id + ' 0 ' + ac.icarous;
     C.sendFullMessage(message);
-
+    console.log(message)
     // redraw the flight plan (new line dashes)
     M.DrawFlightPlan()
 
