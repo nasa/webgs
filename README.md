@@ -4,7 +4,7 @@ WebGS is a web-based ground control station that is compatible with [ICAROUS](ht
 
 <img src="screenshots/screenshot1_webgs.png" width="350"><img src="screenshots/screenshot2_webgs.png" width="350">
 
-![](screenshots/screenshot4_webgs.png)![](screenshots/screenshot3_webgs.png)
+<img src="screenshots/screenshot4_webgs.png" width="350"><img src="screenshots/screenshot3_webgs.png" width="350">
 
 ## Installation
 
