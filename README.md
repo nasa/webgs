@@ -8,8 +8,8 @@ WebGS is a web-based ground control station that is compatible with [ICAROUS](ht
 ## Installation
 
 Clone the repository.
-Make sure you have installed node.js and npm. <https://www.npmjs.com/get-npm>
-Python3 is also required. <https://www.python.org/downloads/>
+Make sure you have installed node.js and [npm](https://www.npmjs.com/get-npm).
+[Python3](https://www.python.org/downloads/)is also required.
 
 The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.
 Move into the webgs directory and run:
@@ -18,18 +18,18 @@ Move into the webgs directory and run:
 
 If updating WebGS and having trouble with submodules not loading. You may need to delete WebGS and start from scratch.
 
-Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open /webgs/MainJS/settings/MapSettings.js in a text editor, and follow the instructions to update.
+Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open `/webgs/MainJS/settings/MapSettings.js` in a text editor, and follow the instructions to update.
 
-DAA Displays are installed as a submodule in the apps/DAA/daa-displays folder by default. Go to: <https://github.com/nasa/daa-displays> for further requirements. The installation script will build the daa-displays automatically. This behavior can be skipped by running `install.sh -D`. Daa Displays can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on the daa-displays github page).
+[DAA-Displays](https://github.com/nasa/daa-displays) is installed as a submodule in the applications folder `/DAA/daa-displays` by default. The installation script will build the daa-displays automatically. This behavior can be skipped by running `install.sh -D`. [DAA-Displays](https://github.com/nasa/daa-displays) can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on <https://github.com/nasa/daa-displays>).
 
 ## Startup
-By default WebGS uses https. This assumes the proper ssl certs have been generated and loaded into the `/certs' directory. Webgs can also be run in developer mode which uses http and does not require certs. Detailed instructions on creating self signed certificates are located in /certs.README.md.
+By default WebGS uses https. This assumes the proper ssl certs have been generated and loaded into the `/certs` directory. Webgs can also be run in developer mode which uses http and does not require certs. Detailed instructions on creating self signed certificates are located in `/certs.README.md`.
 
 To start Webgs:
 
     python3 start_webgs.py -HOST {name or localhost} -CERT {filename}.crt -KEY {filename}.key
 
-Update -HOST, -CERT and -KEY as needed, -CERT and -KEY default to localhost.crt and localhost.key respectivly, so they are not needed if that is the names you chose.
+Update `-HOST`, `-CERT` and `-KEY` as needed, `-CERT` and `-KEY` default to `localhost.crt` and `localhost.key` respectively, so they are not needed if that is the names you chose.
 
     python3 start_webgs.py -HOST {name or localhost}
 
@@ -43,7 +43,7 @@ There are potentially some compatibility issues with browsers other than Chrome 
 
 ### To connect to the server from another device (only if on the same local network)
 
-If the web server and socket server are on another device on your local network. *The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format - {https or http}://<hostname>:8082
+If the web server and socket server are on another device on your local network. The server is not public facing, and will not be seen by anyone outside of the local network. Enter the ip address of the machine running the web server into the browser address bar in format `- {https or http}://<hostname>:8082`
 
 ### Connect WebGS over UDP
 
@@ -52,7 +52,7 @@ Assuming [ICAROUS](https://github.com/nasa/icarous) is configured properly, ensu
     GCS Mode -> 'Connect to Hardware'
     Select Input Type -> IP
     IP Address -> {the same IP address ICAROUS is configured to output to}
-    Component Id -> 5 (Default is 5. This is the standard ICAROUS Config. 0 will conect to Autopilot in most configurations.)
+    Component Id -> 5 (Default is 5. This is the standard ICAROUS Config. 0 will connect to Autopilot in most configurations.)
 
 Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
@@ -63,7 +63,7 @@ Assuming [ICAROUS](https://github.com/nasa/icarous) is configured properly, ensu
     GCS Mode -> 'Connect to Hardware'
     Select Input Type -> USB
     IP Address -> {the same IP address ICAROUS is configured to output to}
-    Component Id -> 5 (Default is 5. This is the standard ICAROUS Config. 0 will conect to Autopilot in most configurations.)
+    Component Id -> 5 (Default is 5. This is the standard ICAROUS Config. 0 will connect to Autopilot in most configurations.)
 
 Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 
@@ -72,7 +72,7 @@ Ensure the Port and Baud Rate are correct. Press connect to aircraft.
 [ICAROUS](https://github.com/nasa/icarous) must be installed and properly built. On the settings page ensure
 
     GCS Mode is set to 'SITL'
-    Path to icarous is set correctly
+    Path to ICAROUS is set correctly
     Path to Ardupilot is set correctly (if needed)
     SIM TYPE -> ArduCopter (Spelling and Capitalization Matter)
 
@@ -84,13 +84,13 @@ After the aircraft has started, click Open DAA Display. This will open the displ
 
 ### Playback
 
-Webgs uses the MAVProxy format for creating .tlog files for each flight. These files along with the Server logs, [ICAROUS](https://github.com/nasa/icarous) outputs, ardupilot outputs, and a text file containing all of the received mavlink messages are stored in the LogFiles directory. To playback a file, change the GCS Mode to Playback. Enter the file name in the text box. (It assumes files will be located in the LogFiles directory.) Click Start Playback. It may take a few seconds to load the file.
+Webgs uses the MAVProxy format for creating `.tlog` files for each flight. These files along with the Server logs, [ICAROUS](https://github.com/nasa/icarous) outputs, ardupilot outputs, and a text file containing all of the received mavlink messages are stored in the LogFiles directory. To playback a file, change the GCS Mode to Playback. Enter the file name in the text box. (It assumes files will be located in the LogFiles directory.) Click Start Playback. It may take a few seconds to load the file.
 
 Note: I would not recommend fast forwarding at the beginning of the file. If you miss the flight plan messages, a flight plan will not show up on the map.
 
 ### Merging .tlog files for multi-aircraft playback
 
-A Python3 script has been included for creating a .mlog file that webgs is capable of playing. It is located in webgs/utils/
+A Python3 script has been included for creating a `.mlog` file that webgs is capable of playing. It is located in webgs/utils/
 
     python3 mergeTlogs.py -h or --help for instructions on how to use it.
 
