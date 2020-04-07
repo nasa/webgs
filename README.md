@@ -2,9 +2,9 @@
 
 WebGS is a web-based ground control station that is compatible with [ICAROUS](https://github.com/nasa/icarous) (versions greater than 2.1.19) and capable of multi-aircraft simulations.
 
-<img src="screenshots/screenshot1_webgs.png" width="350"><img src="screenshots/screenshot2_webgs.png" width="350">
+<a href="screenshots/screenshot1_webgs.png"><img src="screenshots/screenshot1_webgs_small.png"><a href="screenshots/screenshot2_webgs.png"><img src="screenshots/screenshot2_webgs_small.png">
 
-<img src="screenshots/screenshot4_webgs.png" width="350"><img src="screenshots/screenshot3_webgs.png" width="350">
+<a href="screenshots/screenshot4_webgs.png"><img src="screenshots/screenshot4_webgs_small.png"><a href="screenshots/screenshot3_webgs.png"><img src="screenshots/screenshot3_webgs_small.png">
 
 ## Installation
 
