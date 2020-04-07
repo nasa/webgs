@@ -9,7 +9,7 @@ WebGS is a web-based ground control station that is compatible with [ICAROUS](ht
 
 Clone the repository.
 Make sure you have installed node.js and [npm](https://www.npmjs.com/get-npm).
-[Python3](https://www.python.org/downloads/)is also required.
+[Python3](https://www.python.org/downloads/) is also required.
 
 The install script will download the required python and node packages, update the submodules to the latest versions, and build daa-displays.
 Move into the webgs directory and run:
