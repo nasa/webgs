@@ -87,7 +87,7 @@ fi
 
 # install python requirements, installs packages in requirements.txt
 echo "Installing Python Requirements: - This can take some time."
-pip3 -q install -r --user requirements.txt
+pip3 -q install -r requirements.txt --user 
 if [ $? = 0 ]
 then
     echo "Done."
