@@ -483,7 +483,7 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
         }
 
         // create new traffic object
-        let position = new L.LatLng(ac.lat, ac.lng);
+        let position = new L.LatLng(lat, lng);
         let marker = defineTrafficMarker(position, traffic.hdg, ac.id, t_id, source, callsign);
         // update the aircraft
         let time = Date.now()
