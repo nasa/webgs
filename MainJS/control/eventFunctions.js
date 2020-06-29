@@ -1017,6 +1017,11 @@ export function inputLatLng(e) {
 
 }
 
+export function clickCenterMapOnAC(e) {
+    let ac = AM.getActiveAc()
+    M.moveMap(ac.lat,ac.lng)
+}
+
 /**
  * @function <a name="enterLoadWp">enterLoadWp</a>
  * @description Sends message to load wp's from file when enter key is pressed.

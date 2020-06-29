@@ -74,7 +74,8 @@ let osm_attribution = '© <a href="https://www.openstreetmap.org/copyright" targ
 export let zoom = 15
 
 // How close up is the user allowed to zoom
-let maxZoom = 21;
+let maxZoom = 21
+let minZoom = 2
 
 // These are some of the maps provided by Mapbox.
 // Change the ID value and name for use with other tile map providers.
@@ -82,36 +83,42 @@ let maxZoom = 21;
 let satellite = L.tileLayer(mapURL, {
     attribution: attribution,
     maxZoom: maxZoom,
+    minZoom: minZoom,
     id: 'mapbox.satellite',
 })
 
 let dark = L.tileLayer(mapURL, {
     attribution: attribution,
     maxZoom: maxZoom,
+    minZoom: minZoom,
     id: 'mapbox.dark',
 })
 
 let streets = L.tileLayer(mapURL, {
     attribution: attribution,
     maxZoom: maxZoom,
+    minZoom: minZoom,
     id: 'mapbox.streets',
 })
 
 let outdoors = L.tileLayer(mapURL, {
     attribution: attribution,
     maxZoom: maxZoom,
+    minZoom: minZoom,
     id: 'mapbox.outdoors',
 })
 
 let light = L.tileLayer(mapURL, {
     attribution: attribution,
     maxZoom: maxZoom,
+    minZoom: minZoom,
     id: 'mapbox.light',
 })
 
 let OSM = L.tileLayer(osmURL, {
     attribution: osm_attribution,
     maxZoom: 19,
+    minZoom: minZoom,
     id: 'osm'
 })
 

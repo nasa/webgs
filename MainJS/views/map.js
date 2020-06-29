@@ -105,6 +105,14 @@ let mymap = L.map('mapid', {
     }]
 });
 
+let southWest = L.latLng(-89.98155760646617, -180)
+let northEast = L.latLng(89.99346179538875, 180)
+let bounds = L.latLngBounds(southWest, northEast)
+mymap.setMaxBounds(bounds)
+mymap.on('drag', function() {
+    mymap.panInsideBounds(bounds, { animate: false });
+});
+
 mymap.on('click', onMapClick);
 mymap.on('moveend', onMapMove);
 mymap.on('baselayerchange', MapBox.setMapDisplayStyle)

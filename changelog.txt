@@ -1,5 +1,9 @@
 # Change Log
 
+### v1.0.9
+Add center map on aircraft
+Limit pan and zoom bounds to avoid parallel dimension problem
+
 ### v1.0.8
 Using local storage for holding mode values
 Using local storage to reset zoom and center of map to last location

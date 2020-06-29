@@ -652,6 +652,7 @@ export class GCSmode {
         }
 
         btn_div.appendChild(form.addBlockButton('daa_' + ac.id, 'open_daa', 'Open DAA Display', E.clickOpenDAADisplay));
+        btn_div.appendChild(form.addBlockButton('centerOnAC' + ac.id,'centerOnAC', 'Center Map on Aircraft', E.clickCenterMapOnAC))
         let name
         if (ac.status == 0) {
             name = 'pan'
