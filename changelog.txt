@@ -1,8 +1,9 @@
 # Change Log
 
 ### v1.0.9
-Add center map on aircraft
+Add center map on aircraft button to ac panel
 Limit pan and zoom bounds to avoid parallel dimension problem
+Using callsign instead of ICAO address for traffic id (backwards compatable)
 
 ### v1.0.8
 Using local storage for holding mode values
