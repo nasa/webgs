@@ -425,7 +425,11 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
     let ac = AM.getAircraftById(ac_id)
     // find this traffic in traffic_list else create new
     let traffic = ac.traffic_list.filter(function (t) {
-        if (t.id == t_id) {
+        if (typeof t_id == "string") {
+            if (t.name = t_id) {
+                return t
+            }
+        } else if (t.id == t_id) {
             return t
         }
     })

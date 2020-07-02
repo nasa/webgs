@@ -309,16 +309,21 @@ export function createConnection(ip, port) {
 
         } else if (m.TYPE == 'TRAFFIC') {
             // check mode settings
+            console.log(m.ICAO_address, m.callsign)
+            let name  = m.callsign
+            if (m.callsign == '') {
+                name = m.ICAO_address
+            }
             if (MODE.sim && (m.emitter_type == 255)) {
-                T.UpdateTraffic(m.ICAO_address, 'SIM', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 255, m.AIRCRAFT, m.callsign)
+                T.UpdateTraffic(name, 'SIM', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 255, m.AIRCRAFT, m.callsign)
                 T.updateTrafficSummaryPanel()
             }
             if (MODE.adsb && (m.emitter_type == 100)) {
-                T.UpdateTraffic(m.ICAO_address, 'SENSOR', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 0, m.AIRCRAFT, m.callsign)
+                T.UpdateTraffic(name, 'SENSOR', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 0, m.AIRCRAFT, m.callsign)
                 T.updateTrafficSummaryPanel()
             }
             if (MODE.sensor && (m.emitter_type == 0)) {
-                T.UpdateTraffic(m.ICAO_address, 'ADSB', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 100, m.AIRCRAFT, m.callsign)
+                T.UpdateTraffic(name, 'ADSB', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 100, m.AIRCRAFT, m.callsign)
                 T.updateTrafficSummaryPanel()
             }
 

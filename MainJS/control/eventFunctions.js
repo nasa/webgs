@@ -1017,7 +1017,7 @@ export function inputLatLng(e) {
 
 }
 
-export function clickCenterMapOnAC(e) {
+export function clickCenterMapOnAC() {
     let ac = AM.getActiveAc()
     M.moveMap(ac.lat,ac.lng)
 }
