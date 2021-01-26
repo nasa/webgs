@@ -637,6 +637,9 @@ export class GCSmode {
             // }
             // ***************************************************
 
+            // add forward data button
+            btn_div.appendChild(form.addBlockButton(ac.id, 'shutdown', 'Forward Data', E.clickForwardData));
+
         } else if (ac.mode == 'Playback') {
             if (ac.status == 0) {
                 // add form to panel

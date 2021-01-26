@@ -104,6 +104,12 @@ def recvAndLog(master, mlog, forwarding):
             # mlog.write(m)          use this to generate a tlog.raw\
 
             if msg[0] is not None:
+                try:
+                    q = msg[0]._instance_field
+                    # print(q)
+                except:    
+                    msg[0]._instance_field = None
+                
                 master.post_message(msg[0])
                 usec = int(time.time() * 1.0e6)
                 usec = (usec & ~3 | 3)
@@ -112,46 +118,130 @@ def recvAndLog(master, mlog, forwarding):
                 # print(x)
                 # print(msg[0])
                 if forwarding is not None:
-                    forwarding.mav.seq = msg.get_seq()
-                    forwarding.mav.seq = msg.get_srcSystem()
-                    forwarding.mav.seq = msg.get_srcComponent()
-                    if msg[0].name == 'GLOBAL_POSITION_INT':
-                        new_m = forwarding.mav.global_position_int_encode(
-                            msg[0].time_boot_ms, msg[0].lat, msg[0].lon, msg[0].relative_alt, msg[0].relative_alt, msg[0].vx, msg[0].vy, msg[0].vz, msg[0].hdg)
+                    forwarding.mav.seq = msg[0].get_seq()
+                    forwarding.mav.srcSystem = msg[0].get_srcSystem()
+                    forwarding.mav.srcComponent = msg[0].get_srcComponent()
+                    # if msg[0].name == 'GLOBAL_POSITION_INT':
+                    #     # print(msg[0])
+                    #     new_m = forwarding.mav.global_position_int_encode(
+                    #         msg[0].time_boot_ms, 
+                    #         msg[0].lat, 
+                    #         msg[0].lon, 
+                    #         msg[0].relative_alt, 
+                    #         msg[0].relative_alt, 
+                    #         msg[0].vx, 
+                    #         msg[0].vy, 
+                    #         msg[0].vz, 
+                    #         msg[0].hdg)
 
-                        y = new_m.pack(forwarding.mav)
-                        m = y
-                        # print(new_m)
-                        count += 1
-                        if count > 5:
-                            # if using rotorsim we will need to inject vfr_hud messages, and battery message
-                            s = math.sqrt((msg[0].vx / 100) ** 2
-                                          + (msg[0].vy/100)**2)
-                            new_m = forwarding.mav.vfr_hud_encode(
-                                s, 100.0, int(msg[0].hdg * .01), 0, msg[0].relative_alt, msg[0].vz)
-                            # print(new_m)
-                            y = new_m.pack(forwarding.mav)
-                            forwarding.write(y)
+                    #     y = new_m.pack(forwarding.mav)
+                    #     forwarding.write(y)
+                        
+                    #     count += 1
+                    #     if count > 5:
+                    #         # if using rotorsim we will need to inject vfr_hud messages, and battery message
+                    #         s = math.sqrt((msg[0].vx / 100) ** 2 + (msg[0].vy/100)**2)
+                    #         new_m = forwarding.mav.vfr_hud_encode(s, 100.0, int(msg[0].hdg * .01), 0, msg[0].relative_alt, msg[0].vz)
+                    #         y = new_m.pack(forwarding.mav)
+                    #         forwarding.write(y)
 
-                            # need to use the sys_status message for battery remaining
-                            new_m = forwarding.mav.battery_status_encode(0, 0, 3, 2000, [
-                                1258, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535], -1, -1, -1, 60)
-                            # print(new_m)
-                            y = new_m.pack(forwarding.mav)
-                            forwarding.write(y)
-                            count = 0
-                    elif msg[0].name == 'HEARTBEAT':
-                        # inject a heartbeat
-                        new_m = forwarding.mav.heartbeat_encode(
-                            14, 3, 81, 0, 3, 3)
-                        y = new_m.pack(forwarding.mav)
-                        forwarding.write(y)
-                        # inject a sys_status message
-                        new_m = forwarding.mav.sys_status_encode(
-                            56743199, 39918639, 57653199, 550, 24907, 0, 100, 0, 0, 0, 0, 0, 0)
-                        y = new_m.pack(forwarding.mav)
-                        forwarding.write(y)
+                    #         # need to use the sys_status message for battery remaining
+                    #         new_m = forwarding.mav.battery_status_encode(0, 0, 3, 2000, [
+                    #            1258, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535], -1, -1, -1, 60)
+                    #         y = new_m.pack(forwarding.mav)
+                    #         forwarding.write(y)
+                    #         count = 0
 
+                    # elif msg[0].name == 'HEARTBEAT':
+                    #     # inject a heartbeat
+                    #     # new_m = forwarding.mav.heartbeat_encode(14, 3, 81, 0, 3, 3)
+                    #     # print(msg[0])
+                    #     new_m = forwarding.mav.heartbeat_encode(
+                    #         msg[0].type, 
+                    #         msg[0].autopilot, 
+                    #         msg[0].base_mode, 
+                    #         msg[0].custom_mode, 
+                    #         msg[0].system_status, 
+                    #         msg[0].mavlink_version)
+                    #     y = new_m.pack(forwarding.mav)
+                    #     forwarding.write(y)
+                        
+                    #     # inject a sys_status message
+                    #     new_m = forwarding.mav.sys_status_encode(56743199, 39918639, 57653199, 550, 24907, 0, 100, 0, 0, 0, 0, 0, 0)
+                    #     y = new_m.pack(forwarding.mav)
+                    #     forwarding.write(y)
+
+                    # elif msg[0].name == 'MISSION_COUNT':
+                    #     new_m = forwarding.mav.mission_count_encode(
+                    #         msg[0].target_system, 
+                    #         msg[0].target_component, 
+                    #         msg[0].count, 
+                    #         msg[0].mission_type)
+                    #     y = new_m.pack(forwarding.mav)
+                    #     forwarding.write(y)
+
+                    # elif msg[0].name == 'MISSION_ITEM':
+                    #     new_m = forwarding.mav.mission_item_encode(
+                    #         msg[0].target_system,
+                    #         msg[0].target_component,
+                    #         msg[0].seq,
+                    #         msg[0].frame,
+                    #         msg[0].command, 
+                    #         msg[0].current,
+                    #         msg[0].autocontinue,
+                    #         msg[0].param1,
+                    #         msg[0].param2,
+                    #         msg[0].param3,
+                    #         msg[0].param4, 
+                    #         msg[0].x, 
+                    #         msg[0].y, 
+                    #         msg[0].z, 
+                    #         msg[0].mission_type)
+                    #     y = new_m.pack(forwarding.mav)
+                    #     forwarding.write(y)
+
+                    # elif msg[0].name == 'PARAM_VALUE':
+                    #     try:
+                    #         new_m = forwarding.mav.param_value_encode(
+                    #             msg[0].param_id,
+                    #             msg[0].param_value,
+                    #             msg[0].param_type,
+                    #             msg[0].param_count, 
+                    #             msg[0].param_index)
+                    #         y = new_m.pack(forwarding.mav)
+                    #         forwarding.write(y)
+                    #     except:
+                    #         print(msg[0])
+                    
+                    # elif msg[0].name == 'STATUSTEXT':
+                    #     try:
+                    #         new_m = forwarding.mav.statustext_encode(
+                    #             msg[0].severity,
+                    #             str(msg[0].text))
+                    #         y = new_m.pack(forwarding.mav)
+                    #         forwarding.write(y)
+                            
+                    #         if msg[0].text == 'IC:Starting Mission':
+                    #             custom_mode = 1
+                    #         elif msg[0].text == 'IC: Landing':
+                    #             custom_mode = 5
+                    #         else: 
+                    #             return ([None], 0, 0)
+
+                    #         new_m = forwarding.mav.heartbeat_encode(
+                    #             msg[0].type, 
+                    #             msg[0].autopilot, 
+                    #             msg[0].base_mode, 
+                    #             custom_mode, 
+                    #             msg[0].system_status, 
+                    #             msg[0].mavlink_version)
+                    #         y = new_m.pack(forwarding.mav)
+                    #         forwarding.write(y)
+                            
+                    #     except: 
+                    #         print(msg[0])
+                    # else:
+                    #     print(msg[0])
                     forwarding.write(m)
 
                 # Turn this on for message injection into master
@@ -176,6 +266,69 @@ def recvAndLog(master, mlog, forwarding):
                 #         else:
                 #             count1 +=1
 
+                if forwarding != 'NONE' and forwarding is not None:
+                    forwarding.pre_message()
+                    m = forwarding.recv()
+                    fmsg = []
+                    if len(m) > 0:
+
+                        if forwarding.first_byte:
+                            forwarding.auto_mavlink_version(m)
+                        try:
+                            fmsg.append(forwarding.mav.parse_char(m))
+                        except UnicodeDecodeError as e:
+                            print(e)
+                            print(m)
+                            fmsg.append(None)
+
+                        # mlog.write(m)          use this to generate a tlog.raw\
+
+                        if fmsg[0] is not None:
+                            try:
+                                q = fmsg[0]._instance_field
+                                print(q)
+                            except:    
+                                fmsg[0]._instance_field = None
+                            forwarding.post_message(fmsg[0])
+                            usec = int(time.time() * 1.0e6)
+                            usec = (usec & ~3 | 3)
+                            x = bytearray(struct.pack('>Q', usec)) + m
+                            mlog.write(x)
+                            # print(x)
+                            # print(fmsg[0])
+                            if master is not None:
+                                master.mav.seq = fmsg[0].get_seq()
+                                master.mav.srcSystem = fmsg[0].get_srcSystem()
+                                master.mav.srcComponent = fmsg[0].get_srcComponent()
+                                
+                                # if fmsg[0].name == 'PARAM_REQUEST_LIST':
+                                #     # inject a heartbeat
+                                #     new_m = master.mav.param_request_list_encode(
+                                #         fmsg[0].target_system, 
+                                #         fmsg[0].target_component)
+                                #     y = new_m.pack(master.mav)
+                                #     master.write(y)
+
+                                # elif fmsg[0].name == 'MISSION_REQUEST':
+                                #     new_m = master.mav.mission_request_encode(
+                                #         fmsg[0].target_system, 
+                                #         fmsg[0].target_component, 
+                                #         fmsg[0].seq,
+                                #         fmsg[0].mission_type)
+                                #     y = new_m.pack(master.mav)
+                                #     master.write(y)
+
+                                # elif fmsg[0].name == 'MISSION_REQUEST_LIST':
+                                #     new_m = master.mav.mission_request_list_encode(
+                                #         fmsg[0].target_system, 
+                                #         fmsg[0].target_component, 
+                                #         fmsg[0].mission_type)
+                                #     y = new_m.pack(master.mav)
+                                #     master.write(y)
+                                # else:
+                                #     print('FORWARDING: {}'.format(fmsg[0]))
+                                master.write(m)
+                    
             else:
                 if forwarding is not None:
                     forwarding.write(m)
