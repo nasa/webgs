@@ -2,6 +2,8 @@
 
 ### v1.0.10
 update paths to allow windows users to spawn processes
+update forwarding 
+fix ._instance_field missing errors
 
 ### v1.0.9
 Add center map on aircraft button to ac panel
