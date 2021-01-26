@@ -128,11 +128,11 @@ export let layers = [OSM]
 
 // This is the list of map options that will be displayed in the menu.
 export let baseMaps = {
-    "Satellite": satellite,
-    "Streets": streets,
-    "Outdoors": outdoors,
-    "Dark": dark,
-    "Light": light,
+    // "Satellite": satellite,
+    // "Streets": streets,
+    // "Outdoors": outdoors,
+    // "Dark": dark,
+    // "Light": light,
     "OSM": OSM
 }
 

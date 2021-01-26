@@ -1,5 +1,8 @@
 # Change Log
 
+### v1.0.10
+update paths to allow windows users to spawn processes
+
 ### v1.0.9
 Add center map on aircraft button to ac panel
 Limit pan and zoom bounds to avoid parallel dimension problem

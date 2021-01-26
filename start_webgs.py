@@ -55,7 +55,7 @@ def check_daa_displays():
             return
         else:
             try:
-                subprocess.Popen(['./Scripts/makeDAADisplay.sh'])
+                subprocess.Popen(['{}/Scripts/makeDAADisplay.sh'.format(os.environ.get('WEBGS_HOME'))])
             except:
                 print('Unable to make daa-displays')
     return
@@ -67,11 +67,11 @@ def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER):
 
     # launch the servers
     if DEV:
-        ms = subprocess.Popen(["python3", "SocketServer/multiprocess_server.py", "--DEV", "True"],shell=False)
-        hs = subprocess.Popen(['node', './main.js', 'DEV'])
+        ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--DEV", "True"],shell=False)
+        hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), 'DEV'])
     else:
-        ms = subprocess.Popen(["python3", "SocketServer/multiprocess_server.py", "--IP", HOST],shell=False)
-        hs = subprocess.Popen(['node', './main.js', CERT, KEY])
+        ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--IP", HOST],shell=False)
+        hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), CERT, KEY])
 
     time.sleep(.5)
 
@@ -94,7 +94,7 @@ def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER):
     if args[0] != 0 and '.mbtiles' in args[0]:
         try:
             ti = subprocess.Popen(
-                ["tileserver-gl", "OfflineTiles/"+args[0]])
+                ["tileserver-gl", "{}/OfflineTiles/{}".format(os.environ.get('WEBGS_HOME'), args[0])])
             pro.append(ti)
         except FileNotFoundError:
             print(
@@ -130,6 +130,9 @@ if __name__ == '__main__':
     parser.add_argument("-UPDATE", required=False, default=[False], help="Check for submodule updates.")
     parser.add_argument("-NOBROWSER", required=False, default=[False], help="Don't auto launch browser.")
     args = parser.parse_args()
+
+    # set WEBGS_HOME env variable
+    os.environ['WEBGS_HOME'] = os.getcwd()
 
     # check apps, updates all submodules
     if args.UPDATE[0]:

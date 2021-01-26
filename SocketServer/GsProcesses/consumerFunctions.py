@@ -67,7 +67,7 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
     pidA = 0
     if sim_type == 'ArduCopter':
         logger.info("StartAutopilot.sh -v  {} -l {} -s {} -i {} -m {} -p {}".format(v,l,s,i,m,a))
-        pidA = subprocess.Popen(["Scripts/StartAutopilot.sh",
+        pidA = subprocess.Popen(["{}/Scripts/StartAutopilot.sh".format(os.environ.get('WEBGS_HOME')),
                                  "-v", v, "-l", l, "-s", s, "-i", i, "-m", m, '-p', a]).pid
         logger.info('Ardupilot running on pid: {}'.format(pidA))
 
@@ -78,7 +78,7 @@ def requestNewAircraft(msg, BAUD, UDP_PORT_2, HOST):
         print('cpu {}, instance {}, port,{}'.format(c,i,port))
         logger.info('Start Icarous: Scripts/StartIcarous.sh -C {} -I {} -P {}'.format(c,i,p))
 
-        pidI = subprocess.Popen(["Scripts/StartIcarous.sh",
+        pidI = subprocess.Popen(["{}/Scripts/StartIcarous.sh".format(os.environ.get('WEBGS_HOME')),
                                  '-C', c, '-I', i, '-P', p]).pid
 
         logger.info('Icarous running on pid: {}'.format(pidI))
