@@ -39,10 +39,10 @@ import subprocess
 import time
 import signal
 import webbrowser
+import platform
 
 pro = []
 x = True
-
 
 def check_apps():
     subprocess.run(['git','submodule', 'update','--recursive', '--remote', '--merge', '--force'])
@@ -61,18 +61,25 @@ def check_daa_displays():
     return
 
 
-def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER):
+def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER, OPERATING_SYSTEM):
     global pro
     print('args', args, DEV, HOST, CERT, KEY)
 
     # launch the servers
     if DEV:
-        ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--DEV", "True"],shell=False)
-        hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), 'DEV'])
+        if OPERATING_SYSTEM == 'Windows':
+            ms = subprocess.run([sys.executable, "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--DEV", "True"])
+            hs = subprocess.run([sys.executable, 'node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), 'DEV'])
+        else:
+            ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--DEV", "True"],shell=False)
+            hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), 'DEV'])
     else:
-        ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--IP", HOST],shell=False)
-        hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), CERT, KEY])
-
+        if OPERATING_SYSTEM == 'Windows':
+            ms = subprocess.run([sys.executable, "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--IP", HOST])
+            hs = subprocess.run([sys.executable, 'node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), CERT, KEY])
+        else:
+            ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--IP", HOST],shell=False)
+            hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), CERT, KEY])
     time.sleep(.5)
 
     if not NOBROWSER:
@@ -131,6 +138,10 @@ if __name__ == '__main__':
     parser.add_argument("-NOBROWSER", required=False, default=[False], help="Don't auto launch browser.")
     args = parser.parse_args()
 
+    # check the operating system
+    OPERATING_SYSTEM = platform.system()
+    print(OPERATING_SYSTEM)
+
     # set WEBGS_HOME env variable
     os.environ['WEBGS_HOME'] = os.getcwd()
 
@@ -139,7 +150,7 @@ if __name__ == '__main__':
         check_apps()
 
     # start webgs
-    start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0], args.NOBROWSER[0])
+    start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0], args.NOBROWSER[0], OPERATING_SYSTEM)
 
     while x:
         signal.signal(signal.SIGINT, kill_webgs)
