@@ -50,10 +50,7 @@ import * as C from '../control/comms.js';
  * @memberof module:saveFile
  */
 export function save_parameters(ac, filename) {
-    filename = '/Examples/Parameters/' + filename
-    let data = JSON.stringify(ac.parameters)
-    let msg = 'AIRCRAFT ' + ac.id + ' SAVE PARAM ' + filename + ' ' + data
-    C.sendFullMessage(msg)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} SAVE PARAM /Examples/Parameters/${filename} ${JSON.stringify(ac.parameters)}`)
 }
 
 /**
@@ -64,11 +61,7 @@ export function save_parameters(ac, filename) {
  * @memberof module:saveFile
  */
 export function save_waypoints(ac, filename) {
-    filename = '/Examples/FlightPlans/' + filename
-    let wp_string = ac.flightplanToString()
-    let data = 'VEL ' + ac.u_vel + ' WP' + wp_string
-    let msg = 'AIRCRAFT ' + ac.id + ' SAVE WAYPOINTS ' + filename + ' ' + data
-    C.sendFullMessage(msg)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} SAVE WAYPOINTS /Examples/FlightPlans/${filename} 'VEL ${ ac.u_vel} WP ${ac.flightplanToString()}`)
 }
 
 /**
@@ -85,10 +78,7 @@ export function save_waypoints(ac, filename) {
  * @memberof module:saveFile
  */
 export function save_traffic(ac, lat, lng, alt, vel, hdg, emit, filename) {
-    filename = '/Examples/Traffic/' + filename
-    let data = lat + ' ' + lng + ' ' + alt + ' ' + vel + ' ' + hdg + ' ' + emit
-    let msg = 'AIRCRAFT ' + ac.id + ' SAVE TRAFFIC ' + filename + ' ' + data
-    C.sendFullMessage(msg)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} SAVE TRAFFIC /Examples/Traffic/${filename} ${lat}${lng} ${alt} ${vel} ${hdg} ${emit}`)
 }
 
 /**
@@ -100,9 +90,7 @@ export function save_traffic(ac, lat, lng, alt, vel, hdg, emit, filename) {
  * @memberof module:saveFile
  */
 export function save_geofences(ac, filename, data) {
-    filename = '/Examples/GeoFences/' + filename
-    // id, type, num, floor, roof, pid, lat, lng, pid, lat, lng ...
-    let msg = 'AIRCRAFT ' + ac.id + ' SAVE GEOFENCE ' + filename + ' ' + data.join(' ')
+    let msg = `AIRCRAFT ${ac.id} SAVE GEOFENCE /Examples/GeoFences/${filename} ${data.join(' ')}`
     C.sendFullMessage(msg)
 }
 

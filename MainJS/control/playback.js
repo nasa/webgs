@@ -40,12 +40,15 @@
  */
 
 import {
-    MODE
+    MODE, 
+    AM
 } from '../control/entry.js'
+import * as C from '../control/comms.js'
 
-import * as E from './eventFunctions.js'
+import * as FM from '../models/formElements.js'
 
 let last_move = new Date()
+let SKIP_DISTANCE = 30
 
 /**
  * @function <a name="createPlaybackMenu">createPlaybackMenu</a>
@@ -55,87 +58,29 @@ let last_move = new Date()
  */
 export function createPlaybackMenu() {
     let body = document.body
-    let menu = document.createElement('div')
-    menu.setAttribute('id', 'playbackMenu')
-    menu.setAttribute('class', 'playback')
+    let menu = FM.addDiv('playbackMenu','playback')
     body.appendChild(menu)
 
-    let stop = document.createElement('input')
-    stop.setAttribute('id', 'stop')
-    stop.setAttribute('class', 'playbackButtons')
-    stop.setAttribute('type', 'image')
-    stop.setAttribute('src', '../images/stop-svgrepo-com.svg')
-    stop.addEventListener('click', E.sendStopPlayback)
-    menu.appendChild(stop)
+    menu.appendChild(FM.addPlaybackInput('stop', 'playbackButtons', 'image', '../images/stop-svgrepo-com.svg', sendStopPlayback))
+    menu.appendChild(FM.addPlaybackInput('rew', 'playbackButtons', 'image', '../images/rewind-svgrepo-com.svg', sendRewPlayback))
+    menu.appendChild(FM.addPlaybackInput('playpause', 'playbackButtons', 'image', '../images/pause-play-button-svgrepo-com.svg', sendPlayPlayback))
+    menu.appendChild(FM.addPlaybackInput('ff', 'playbackButtons', 'image', '../images/fast-forward-svgrepo-com.svg', sendFFPlayback))
+    menu.appendChild(FM.addPlaybackInput( 'skip', 'playbackButtons', 'image', '../images/fast-forward-button-svgrepo-com.svg', sendSkipPlayback))
 
-    setInterval(checkLastMove, 2000)
-    window.addEventListener('mousemove', mouseTracker)
-
-    let rew = document.createElement('input')
-    rew.setAttribute('id', 'rew')
-    rew.setAttribute('class', 'playbackButtons')
-    rew.setAttribute('type', 'image')
-    rew.setAttribute('src', '../images/rewind-svgrepo-com.svg')
-    rew.addEventListener('click', E.sendRewPlayback)
-    menu.appendChild(rew)
-
-    let play = document.createElement('input')
-    play.setAttribute('id', 'playpause')
-    play.setAttribute('class', 'playbackButtons')
-    play.setAttribute('type', 'image')
-    play.setAttribute('src', '../images/pause-play-button-svgrepo-com.svg')
-    play.addEventListener('click', E.sendPlayPlayback)
-    menu.appendChild(play)
-
-    let ff = document.createElement('input')
-    ff.setAttribute('id', 'ff')
-    ff.setAttribute('class', 'playbackButtons')
-    ff.setAttribute('type', 'image')
-    ff.setAttribute('src', '../images/fast-forward-svgrepo-com.svg')
-    ff.addEventListener('click', E.sendFFPlayback)
-    menu.appendChild(ff)
-
-    let skip = document.createElement('input')
-    skip.setAttribute('id', 'skip')
-    skip.setAttribute('class', 'playbackButtons')
-    skip.setAttribute('type', 'image')
-    skip.setAttribute('src', '../images/fast-forward-button-svgrepo-com.svg')
-    skip.addEventListener('click', E.sendSkipPlayback)
-    menu.appendChild(skip)
-
-
-    let container = document.createElement('div')
-    container.setAttribute('class', 'prog_container')
+    let container = FM.addDiv('prog_container','prog_container')
     menu.appendChild(container)
 
-    let bar = document.createElement('div')
-    bar.setAttribute('id', 'bar')
-    bar.setAttribute('class', 'statusBar')
+    let bar = FM.addDiv('bar','statusBar')
     container.appendChild(bar)
+    bar.appendChild(FM.addDiv('prog','progBar'))
+    bar.appendChild(FM.addDiv('dot','dot'))
 
-    let total_time = document.createElement('div')
-    total_time.setAttribute('id', 'total_time')
-    total_time.setAttribute('class', 'total_time')
-    container.appendChild(total_time)
-
-
-
-    let prog = document.createElement('div')
-    prog.setAttribute('id', 'prog')
-    prog.setAttribute('class', 'progBar')
-    bar.appendChild(prog)
-
-    let dot = document.createElement('div')
-    dot.setAttribute('class', 'dot')
-    bar.appendChild(dot)
+    container.appendChild(FM.addDiv('total_time','total_time'))
 
     MODE.playerActive = true
 
-    // let current_time = document.createElement('div')
-    // current_time.setAttribute('id', 'current_time')
-    // current_time.setAttribute('class', 'current_time')
-    // dot.appendChild(current_time)
-
+    setInterval(checkLastMove, 2000)
+    window.addEventListener('mousemove', mouseTracker)
 }
 
 /**
@@ -185,4 +130,90 @@ function mouseTracker() {
         menu.setAttribute('class', ' playback show')
         last_move = now
     }
+}
+
+
+export function clickLoadPlaybackFile() {
+    let fr = document.querySelector("#playback_file__file_set")
+    let file = fr.files
+    console.log(file[0].name)
+    MODE.filename = file[0].name
+    let n = document.getElementById('name_display')
+    n.innerText = file[0].name
+}
+
+/**
+ * @function <a name="sendStartPlayback">sendStartPlayback</a>
+ * @description Sends message to start playback, and creates the menu. Or, alerts user that playback is already running.
+ * @param none
+ * @memberof module:eventFunctions
+ */
+export function sendStartPlayback() {
+    let menu = document.getElementById('playbackMenu')
+    if (!menu) {
+
+        C.sendFullMessage(`AIRCRAFT None PLAYBACK START ${MODE.filename}`)
+        // show playback button menu
+        createPlaybackMenu()
+    } else {
+        FM.alertBannerRed('Playback already running. Press Stop to play a new file.')
+    }
+}
+
+/**
+ * @function <a name="sendPlayPlayback">sendPlayPlayback</a>
+ * @description Sends play message to server.
+ * @param none
+ * @memberof module:eventFunctions
+ */
+export function sendPlayPlayback() {
+    C.sendFullMessage('AIRCRAFT None PLAYBACK PLAY')
+}
+
+/**
+ * @function <a name="sendStopPlayback">sendStopPlayback</a>
+ * @description Sends stop message to server. Removes all aircraft and the playback menu.
+ * @param none
+ * @memberof module:eventFunctions
+ */
+export function sendStopPlayback() {
+    // has to be the same as ac shutdown, need to remove everything
+    C.sendFullMessage('AIRCRAFT -1 SHUTDOWN -1 PLAYBACK')
+    MODE.playerActive = false
+    // check mode
+    for (let ac of AM.aircraft_list) {
+        acShutdown(ac)
+    }
+    // remove playback controls
+    FM.removeElement(document.getElementById('playbackMenu'))
+}
+
+/**
+ * @function <a name="sendRewPlayback">sendRewPlayback</a>
+ * @description Sends rewind message to server.
+ * @param none
+ * @memberof module:eventFunctions
+ */
+export function sendRewPlayback() {
+    C.sendFullMessage('AIRCRAFT None PLAYBACK REW')
+}
+
+/**
+ * @function <a name="sendFFPlayback">sendFFPlayback</a>
+ * @description Sends fast forward message to server.
+ * @param none
+ * @memberof module:eventFunctions
+ */
+export function sendFFPlayback() {
+    C.sendFullMessage('AIRCRAFT None PLAYBACK FF')
+}
+
+/**
+ * @function <a name="sendSkipPlayback">sendSkipPlayback</a>
+ * @description Sends skip message to server.
+ * @param none
+ * @memberof module:eventFunctions
+ */
+export function sendSkipPlayback() {
+    C.sendFullMessage(`AIRCRAFT None PLAYBACK SKIP ${SKIP_DISTANCE}`)
 }

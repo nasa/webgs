@@ -61,9 +61,9 @@ def check_daa_displays():
     return
 
 
-def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER, OPERATING_SYSTEM):
+def start_webgs(args, HOST, DEV, CERT, KEY, CA, NOBROWSER, OPERATING_SYSTEM):
     global PROCESS_LIST
-    print('args', args, DEV, HOST, CERT, KEY)
+    print('args', args, DEV, HOST, CERT, KEY, CA)
 
     # launch the servers
     if DEV:
@@ -79,9 +79,12 @@ def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER, OPERATING_SYSTEM):
             ms = subprocess.run([sys.executable, os.path.join(os.environ.get('WEBGS_HOME'),"SocketServer","multiprocess_server.py"), "--IP", HOST],shell=False)
         else:
             ms = subprocess.Popen(["python3", os.path.join(os.environ.get('WEBGS_HOME'),"SocketServer","multiprocess_server.py"), "--IP", HOST],shell=False)
-
-        hs = subprocess.Popen(['node', os.path.join(os.environ.get('WEBGS_HOME'),'main.js'), CERT, KEY])
-    
+        
+        if CA is 'none':
+            hs = subprocess.Popen(['node', os.path.join(os.environ.get('WEBGS_HOME'),'main.js'), CERT, KEY])
+        else:
+            hs = subprocess.Popen(['node', os.path.join(os.environ.get('WEBGS_HOME'),'main.js'), CERT, KEY, CA])
+            
     time.sleep(.5)
 
     if not NOBROWSER:
@@ -135,6 +138,7 @@ if __name__ == '__main__':
     parser.add_argument("-HOST", required=False,default=['0.0.0.0'], nargs='*', help="host name, default: 0.0.0.0")
     parser.add_argument("-CERT", required=False,default=['localhost.crt'], nargs='*', help="name of cert file, default: localhost.crt")
     parser.add_argument("-KEY", required=False,default=['localhost.key'], nargs='*', help="name of key file, default: localhost.key")
+    parser.add_argument("-CA", required=False,default=['none'], nargs='*', help="name of ca file, default: none")
     parser.add_argument("-DEV", required=False,default=[False], help="Run in Developer Mode (http)")
     parser.add_argument("-UPDATE", required=False, default=[False], help="Check for submodule updates.")
     parser.add_argument("-NOBROWSER", required=False, default=[False], help="Don't auto launch browser.")
@@ -156,7 +160,7 @@ if __name__ == '__main__':
         check_apps()
 
     # start webgs
-    start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0], args.NOBROWSER[0], OPERATING_SYSTEM)
+    start_webgs(args.O, args.HOST[0], args.DEV[0], args.CERT[0], args.KEY[0], args.CA[0], args.NOBROWSER[0], OPERATING_SYSTEM)
 
     while x:
         signal.signal(signal.SIGINT, kill_webgs)
@@ -164,6 +168,7 @@ if __name__ == '__main__':
 
 
 # Example:
+# python3 start_webgs.py -HOST {HOST} -CERT localhost.crt -KEY localhost.key -CA RootCA.pem
 # python3 start_webgs.py -HOST {HOST} -CERT localhost.crt -KEY localhost.key
 # python3 start_webgs.py -HOST {HOST}
 # python3 start_webgs.py -DEV True

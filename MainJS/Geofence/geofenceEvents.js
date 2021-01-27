@@ -49,6 +49,7 @@ import * as S from '../control/saveFile.js'
 
 import * as M from '../views/map.js'
 import * as F from '../views/form.js'
+import * as FM from '../models/formElements.js'
 
 import * as G from './geofence.js'
 
@@ -120,15 +121,15 @@ export function clickPointMarker() {
     let ac_id = this.options.aircraft
 
     let ac = AM.getAircraftById(ac_id)
-    let pan_id = 'ac_geofence_pan_' + f_id + '_' + ac_id
+    let pan_id = `ac_geofence_pan_${f_id}_${ac_id}`
 
     // make gf and ac panel active
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
     G.makeGfPanelActive(pan_id)
 
     // highlight row associated with this marker
     F.removeHighlight()
-    document.getElementById('row_geofence_' + ac_id + '_' + f_id + '_' + p_id).classList.add('highlight')
+    document.getElementById(`row_geofence_${ac_id}_${f_id}_${p_id}`).classList.add('highlight')
 }
 
 /**
@@ -186,7 +187,6 @@ export function addGF(ac, center) {
     if (ac.gf_list.length == 0) {
         f_id = 1
     } else {
-        // f_id = ac.gf_list[ac.gf_list.length - 1].id + 1
         let id_list = []
         for (let i of ac.gf_list) {
             id_list.push(i.id)
@@ -212,17 +212,14 @@ export function addGF(ac, center) {
     fence.addPoint(point)
     ac.gf_list.push(fence)
 
-    // update the map
-    // G.addGfToLayer(ac.id, point.marker)
-
     // create and show the panel
     G.createGfPlanPanel(ac, f_id)
     G.createGfSummaryPanel()
-    G.makeGfPanelActive('ac_geofence_pan_' + f_id + '_' + ac.id)
+    G.makeGfPanelActive(`ac_geofence_pan_${f_id}_${ac.id}`)
 
     // show the summary button
     if (MODE.mode != 'Playback') {
-        let s_btn = document.getElementById('gf_summary_pan_btn_' + ac.id)
+        let s_btn = document.getElementById(`gf_summary_pan_btn_${ac.id}`)
         s_btn.classList.replace('hide', 'show')
     }
 }
@@ -244,7 +241,7 @@ export function resizeGFForm() {
             // get the table
             let id = par.id.split('_')
             let gf_id = id[id.length - 2]
-            let table = document.getElementById('ac_geofence_table_' + gf_id + '_' + ac.id).parentNode
+            let table = document.getElementById(`ac_geofence_table_${gf_id}_${ac.id}`).parentNode
             let h = 0
             // get the sum of the heights of the children
             for (let item of par.childNodes) {
@@ -253,8 +250,8 @@ export function resizeGFForm() {
             // subtract the height of the form
             h = h - table.clientHeight
             // adjust the min/max height of the form to fit the remaining space in the panel
-            table.style.maxHeight = (par.clientHeight - h - (par.clientHeight * .05)).toString() + 'px'
-            table.style.minHeight = (par.clientHeight - h - (par.clientHeight * .05)).toString() + 'px'
+            table.style.maxHeight = `${(par.clientHeight - h - (par.clientHeight * .05))}px`
+            table.style.minHeight = `${(par.clientHeight - h - (par.clientHeight * .05))}px`
         }
     }
 }
@@ -280,39 +277,23 @@ export function clickSubmitGf() {
             }
         }
     }
-
     ac.gf_submitted.push(f)
+
     // build the message
-    let message = 'LOAD_GEOFENCE AC_ID ' + ac.id +
-        ' F_ID ' + f.seq +
-        ' TYPE ' + f.type +
-        ' FLOOR ' + f.floor +
-        ' ROOF ' + f.roof
+    let message = `LOAD_GEOFENCE AC_ID ${ac.id} F_ID ${f.seq} TYPE ${f.type} FLOOR ${f.floor} ROOF ${f.roof}`
 
     if (!checkCounterClockwise(f.point_list)) {
         f.point_list = f.point_list.reverse()
     }
 
     for (let p of f.point_list) {
-        message = message + ' ' + p.lat.toString() + ' ' + p.lng.toString()
+        message = `${message} ${p.lat} ${p.lng}`
     }
 
-    // send the message
     C.sendMessage(message)
-
-    // update fence and status
     f.submitted = true;
     G.updateFenceSummaryPanel()
-
-    // show loading panel
-    G.createLoadingPanel('sendgeofence', ac, f)
-    G.makeGfPanelActive('loading_ac_sendgeofence')
-
-    // redraw the fence lines
-    G.drawGeofences()
-
-    C.sendMessage('REQUEST_FENCE ' + ac.id)
-
+    C.sendMessage(`REQUEST_FENCE ${ac.id}`)
 }
 
 function checkCounterClockwise(point_list) {
@@ -365,7 +346,7 @@ export function contextRemoveFence() {
     let f_id = this.contextmenu._showLocation.relatedTarget.options.fence
     let ac = AM.getAircraftById(ac_id)
     let f = G.getFenceById(f_id, ac)
-    let pan = document.getElementById('ac_geofence_pan_' + f.id + '_' + ac.id)
+    let pan = document.getElementById(`ac_geofence_pan_${f.id}_${ac.id}`)
     removeGf(ac, f, pan)
 }
 
@@ -381,7 +362,7 @@ export function clickRemoveGf() {
     let ac_id = id_list[id_list.length - 1]
     let ac = AM.getAircraftById(ac_id)
     let f = G.getFenceById(f_id, ac)
-    let pan = document.getElementById('ac_geofence_pan_' + f.id + '_' + ac.id)
+    let pan = document.getElementById(`ac_geofence_pan_${f.id}_${ac.id}`)
     removeGf(ac, f, pan)
 }
 
@@ -395,9 +376,8 @@ export function clickRemoveGf() {
  */
 export function removeGf(ac, f, pan) {
     // remove the panel
-    if (pan) {
-        pan.parentNode.removeChild(pan)
-    }
+    FM.removeElement(pan)
+
     // remove all points from the map
     f.point_list.forEach(el => {
         G.removeGfMarker(ac.id, el.marker)
@@ -429,7 +409,7 @@ export function removeGf(ac, f, pan) {
  */
 export function enterLoadFence(e) {
     if (e.key == 'Enter') {
-        C.sendMessage('LOAD_GF_FILE ' + e.srcElement.value)
+        C.sendMessage(`LOAD_GF_FILE ${e.srcElement.value}`)
     }
 }
 
@@ -475,7 +455,6 @@ export function clickLoadFence() {
                         } else if (j.tagName == 'lon') {
                             lng = j.innerHTML
                         }
-
                     }
                     point = [lat, lng]
                     points.push(point)
@@ -510,9 +489,6 @@ export function clickLoadFence() {
 }
 
 
-
-
-
 /**
  * @function <a name="enterSaveFence">enterSaveFence</a>
  * @description Listens for the user to press enter then calls save_geofences from the save module
@@ -525,11 +501,6 @@ export function enterSaveFence(e) {
         let id_list = e.target.id.split('_')
         let ac = AM.getAircraftById(id_list[3])
         let f = G.getFenceById(id_list[2], ac)
-        // id, type, num, floor, roof, pid, lat, lng, pid, lat, lng ...
-        // let type = 0 // check this might be backwords
-        // if (f.type == 'EX') {
-        //     type = 1
-        // }
         let data = [parseInt(f.id) - 1, f.type, f.point_list.length, f.floor, f.roof]
         for (let item of f.point_list) {
             data = data.concat([item.id, item.lat, item.lng])
@@ -563,7 +534,7 @@ export function clickShowGfSummary() {
         btn.classList.replace('show', 'hide')
 
         // show the hide button
-        let h_btn_in = document.getElementById('gf_summary_hide_' + ac.prev_panel + '_btn_' + id)
+        let h_btn_in = document.getElementById(`gf_summary_hide_${ac.prev_panel}_btn_${id}`)
         h_btn_in.classList.replace('hide', 'show')
 
     } else if (btn.innerHTML == 'Hide GeoFence Panel') {
@@ -571,12 +542,11 @@ export function clickShowGfSummary() {
         btn.classList.replace('show', 'hide')
 
         // show the show button
-        let s_btn_in = document.getElementById('gf_summary_' + ac.prev_panel + '_btn_' + id)
+        let s_btn_in = document.getElementById(`gf_summary_${ac.prev_panel}_btn_${id}`)
         s_btn_in.classList.replace('hide', 'show')
     }
-
     // refresh the main panel
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 }
 
 /**
@@ -623,8 +593,8 @@ export function toggleGFType() {
     let f = G.getFenceById(id_list[id_list.length - 3], ac)
 
     let here_ = false;
-    let on = document.getElementById('include_' + f.id + '_' + ac.id + '_on')
-    let off = document.getElementById('include_' + f.id + '_' + ac.id + '_off')
+    let on = document.getElementById(`include_${f.id}_${ac.id}_on`)
+    let off = document.getElementById(`include_${f.id}_${ac.id}_off`)
     on.classList.forEach(function (item) {
         if (item == 'highlight_f') {
             on.classList.remove('highlight_f');
@@ -659,7 +629,7 @@ export function contextAddPoint(e) {
     let ac = AM.getActiveAc()
     let f = G.getActiveFence(ac)
     if (f != 'Fence Not Found') {
-        let row = document.getElementById('row_geofence_' + ac.id + '_' + f.id + '_' + (f.point_list.length - 1))
+        let row = document.getElementById(`row_geofence_${ac.id}_${f.id}_${f.point_list.length - 1}`)
         addRow(ac, center, row)
     } else {
         console.log(f)
@@ -712,7 +682,7 @@ export function addRow(ac, center, row = null, p = null) {
     if (row != null) {
         table = row.parentNode.parentNode
     } else if (p != null) {
-        table = document.getElementById('ac_geofence_table_' + f_id + '_' + ac.id)
+        table = document.getElementById(`ac_geofence_table_${f_id}_${ac.id}`)
     } else {
         console.log('you suck')
         return
@@ -730,8 +700,8 @@ export function addRow(ac, center, row = null, p = null) {
     G.drawGeofences()
 
     // add row to table
-    let new_row = F.addRowToTable(ac_id + '_' + f_id, 'geofence', row_num, clickAddRow, clickRemoveRow, center, 0);
-    new_row.setAttribute('id', 'row_geofence_' + ac_id + '_' + f_id + '_' + row_num)
+    let new_row = F.addRowToTable(`${ac_id}_${f_id}`, 'geofence', row_num, clickAddRow, clickRemoveRow, center, 0);
+    new_row.setAttribute('id', `row_geofence_${ac_id}_${f_id}_${row_num}`)
     table.firstChild.appendChild(new_row)
 
     // make sure row values are set correctly
@@ -739,7 +709,7 @@ export function addRow(ac, center, row = null, p = null) {
 
     // highlight the row
     F.removeHighlight()
-    document.getElementById('row_geofence_' + ac_id + '_' + f_id + '_' + row_num).classList.add('highlight')
+    document.getElementById(`row_geofence_${ac_id}_${f_id}_${row_num}`).classList.add('highlight')
 }
 
 /**
@@ -796,12 +766,12 @@ export function removeRow(ac, f, p) {
         f.point_list = f.point_list.filter(el => el.id != p.id)
 
         // Remove all rows from table
-        let table = document.getElementById('ac_geofence_table_' + f.id + '_' + ac.id)
+        let table = document.getElementById(`ac_geofence_table_${f.id}_${ac.id}`)
         let rows = table.getElementsByClassName('fp_row')
 
         if (rows.length > 1) {
             for (let i = rows.length - 1; i >= 0; i--) {
-                rows[i].parentNode.removeChild(rows[i]);
+                FM.removeElement(rows[i])
             }
         }
         rows = table.getElementsByClassName('fp_row')
@@ -810,7 +780,7 @@ export function removeRow(ac, f, p) {
         f.point_list.forEach((el, ind) => {
             el.id = ind
             el.marker.options.point = ind
-            F.updateTable(table, el.ac_id + '_' + el.f_id, 'geofence', ind, clickAddRow, clickRemoveRow)
+            F.updateTable(table, `${el.ac_id}_${el.f_id}`, 'geofence', ind, clickAddRow, clickRemoveRow)
         });
         // make sure row values are set correctly
         setGfRowValues(ac, f)
@@ -830,8 +800,8 @@ export function removeRow(ac, f, p) {
 export function setGfRowValues(ac, f) {
     f.point_list.forEach((el, ind) => {
         // set lat lng values
-        let la = document.getElementById('LAT_geofence_' + ac.id + '_' + f.id + '_' + el.id)
-        let ln = document.getElementById('LNG_geofence_' + ac.id + '_' + f.id + '_' + el.id)
+        let la = document.getElementById(`LAT_geofence_${ac.id}_${f.id}_${el.id}`)
+        let ln = document.getElementById(`LNG_geofence_${ac.id}_${f.id}_${ el.id}`)
         la.value = el.lat
         ln.value = el.lng
     });
@@ -858,13 +828,10 @@ export function getValuesFromRowId(row_id) {
 
 
 export function gfInMessage(m, ac) {
-    console.log(m)
     if (m.FILE == 'True') {
         let fence = G.getActiveFence(ac)
         // console.log(fence)
-        let pan = document.getElementById('ac_geofence_pan_' + fence.id + '_' + ac.id)
-        // console.log('ac_geofence_pan_' + fence.id + '_' + ac.id)
-        // console.log(pan)
+        let pan = document.getElementById(`ac_geofence_pan_${fence.id}_${ac.id}`)
         if (pan != null) {
             // console.log(fence.id)
             FE.removeGf(ac, fence, pan)
@@ -894,7 +861,7 @@ export function gfInMessage(m, ac) {
             // check if this fence exists
             d = G.getFenceBySeq(i.id, ac)
             if (d != 'GeoFence not found') {
-                removeGf(ac, d, document.getElementById('ac_geofence_pan_' + d.id + '_' + ac.id))
+                removeGf(ac, d, document.getElementById(`ac_geofence_pan_${d.id}_${ac.id}`))
             }
         }
         addGF(ac, i.Vertices[0])
@@ -907,7 +874,7 @@ export function gfInMessage(m, ac) {
         // add the verticies
         for (let x = 1; x < n; x++) {
             center = i.Vertices[x]
-            row = 'row_geofence_' + ac.id + '_' + f.id + '_' + (x - 1)
+            row = `row_geofence_${ac.id}_${f.id}_${x - 1}`
             // console.log(x)
             addRow(ac, center, null, row)
         }
@@ -915,21 +882,18 @@ export function gfInMessage(m, ac) {
             f.submitted = true
             f.seq = i.id
             // should not have planning panel
-            let pan1 = document.getElementById('ac_geofence_pan_' + f.id + '_' + ac.id)
-            if (pan1) {
-                pan1.parentNode.removeChild(pan1)
-            }
+            FM.removeElement(document.getElementById(`ac_geofence_pan_${f.id}_${ac.id}`))
             G.clearSubpanelsFromList(ac)
 
         } else {
             // make sure floor and roof inputs are updated
-            let floor = document.getElementById('gf_floor_GF Floor_' + f.id + '_' + ac.id)
-            let roof = document.getElementById('gf_roof_GF Roof_' + f.id + '_' + ac.id)
+            let floor = document.getElementById(`gf_floor_GF Floor_${f.id}_${ac.id}`)
+            let roof = document.getElementById(`gf_roof_GF Roof_${f.id}_${ac.id}`)
             floor.value = f.floor
             roof.value = f.roof
             // make sure inc/exc toggle is updated
-            let inc = document.getElementById('include_' + f.id + '_' + ac.id + '_on')
-            let exc = document.getElementById('include_' + f.id + '_' + ac.id + '_off')
+            let inc = document.getElementById(`include_${f.id}_${ac.id}_on`)
+            let exc = document.getElementById(`include_${f.id}_${ac.id}_off`)
             if (f.type == 0) {
                 inc.classList.add('highlight_f')
                 exc.classList.remove('highlight_f')
@@ -944,7 +908,7 @@ export function gfInMessage(m, ac) {
     G.drawGeofences()
     G.updateFenceSummaryPanel()
     // make the correct panel active
-    F.makePanelActive('ac_pan_' + ac.id)
+    F.makePanelActive(`ac_pan_${ac.id}`)
     // Re draw the flight plan
     M.DrawFlightPlan();
 }

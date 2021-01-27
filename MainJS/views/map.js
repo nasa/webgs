@@ -39,18 +39,16 @@
  *
  */
 
-import {
-    AM,
-    MODE
-} from '../control/entry.js'
+import { AM, MODE } from '../control/entry.js'
+
 import * as E from '../control/eventFunctions.js'
 
 import * as W from '../models/waypoint.js'
 
 import * as F from '../views/form.js'
 
-
 import * as MapBox from '../settings/MapSettings.js'
+
 import * as G from '../Geofence/geofence.js'
 
 
@@ -206,7 +204,7 @@ export function setCenter(lat, lng) {
  */
 export function addNewLayerGroup(ac) {
     let layer = new L.layerGroup()
-    let x = layerControl.addOverlay(layer, 'Aircraft ' + ac.id).addTo(mymap)
+    let x = layerControl.addOverlay(layer, `Aircraft ${ac.id}`).addTo(mymap)
 }
 
 /**
@@ -314,7 +312,7 @@ function onMarkerClick(e) {
     let ac = AM.getAircraftById(id);
 
     // make active
-    F.makePanelActive('ac_' + ac.id);
+    F.makePanelActive(`ac_${ac.id}`);
 
     // Only move the marker if the plan has not been submitted
     if (ac.status == 0) {
@@ -327,7 +325,7 @@ function onMarkerClick(e) {
         }
         // highlight row
         F.removeHighlight()
-        let h_row = document.getElementById('row_fp_' + ac.id + '_' + row);
+        let h_row = document.getElementById(`row_fp_${ac.id}_${row}`)
         h_row.setAttribute('class', 'fp_row highlight')
     }
 
@@ -337,12 +335,12 @@ function onAcClick(e) {
     console.log(e)
     let id = e.target.options.aircraft;
     let ac = AM.getAircraftById(id);
-    F.makePanelActive('ac_' + ac.id)
+    F.makePanelActive(`ac_${ac.id}`)
 }
 
 
 export function addMarkerToLayer(id, wp) {
-    let this_layer = 'Aircraft ' + id;
+    let this_layer = `Aircraft ${id}`
     let count = 0
     let bl = 0 
     for (let item of layerControl._layers) {
@@ -368,7 +366,7 @@ export function addMarkerToLayer(id, wp) {
 
 
 export function removeMarkerFromLayer(id, wp) {
-    let this_layer = 'Aircraft ' + id;
+    let this_layer = `Aircraft ${id}`
     for (let item of layerControl._layers) {
         if (item.name == this_layer) {
             item.layer.removeLayer(wp)
@@ -399,17 +397,17 @@ export function AddNewWaypointClick(e) {
     ac.flightplan.push(wp);
 
     // decide what to do depending on ac status
-    let table = document.getElementById('ac_fp_table_' + ac.id);
+    let table = document.getElementById(`ac_fp_table_${ac.id}`);
     if (ac.status >= 2) {
         //not sure what to do here
-        //connection.send('AC_ID ' + ac.id + ' New WP: '+ e.latlng.lat.toString() + ' ' + e.latlng.lng.toString())
     } else if (ac.status == 1) {
         // simulate hitting edit flight plan and adding a new row
         ac.status = 0;
-        F.makePanelActive('ac_pan_' + ac.id);
+        F.makePanelActive(`ac_pan_${ac.id}`);
         F.updateTable(table, ac.id, 'fp', ac.flightplan.length - 1, E.clickAddRowButton, E.clickRemoveRowButton);
         let count = table.getElementsByClassName('fp_row').length;
         setRowValue(ac.id, 'fp', count - 1, e.latlng.lat.toString(), e.latlng.lng.toString(), ac.u_alt);
+
     } else if (ac.status == 0) {
         // add row
         F.updateTable(table, ac.id, 'fp', ac.flightplan.length - 1, E.clickAddRowButton, E.clickRemoveRowButton);
@@ -443,7 +441,7 @@ function RemoveWaypoint(e) {
 export function RemoveRowAndWp(ac) {
     // don't remove if there is only 1 wp
     if (ac.flightplan.length > 1) {
-        let this_layergroup = 'Aircraft ' + ac.id;
+        let this_layergroup = `Aircraft ${ac.id}`;
 
         // remove the last wp from the list
         let wp = ac.flightplan.pop();
@@ -456,7 +454,7 @@ export function RemoveRowAndWp(ac) {
         }
 
         // Remove all rows from table
-        let table = document.getElementById("ac_fp_table_" + ac.id);
+        let table = document.getElementById(`ac_fp_table_${ac.id}`);
         let rows = table.getElementsByClassName('fp_row');
 
         // don't remove last row
@@ -556,7 +554,7 @@ export function removeACShutdown(ac) {
     }
 
     // remove the layer
-    removeLayer('Aircraft ' + ac.id)
+    removeLayer(`Aircraft ${ac.id}`)
     DrawFlightPlan()
 }
 
@@ -581,7 +579,7 @@ export function DrawFlightPlan() {
         })
         ac.acMarker.on('click', onAcClick);
         if (MODE.label) {
-            ac.acMarker.bindTooltip('AC: ' + ac.name.toString(), {
+            ac.acMarker.bindTooltip(`AC: ${ac.name.toString()}`, {
                 permanent: true,
                 direction: 'right',
                 offset: L.point(20, -10),
@@ -746,7 +744,7 @@ function onMapClick(e) {
                 // update the row value
                 let row_num = id_list[id_list.length - 1];
                 // get the current alt value in the box
-                let alt = document.getElementById('ALT_fp_' + ac.id + '_' + row_num).value
+                let alt = document.getElementById(`ALT_fp_${ac.id}_${row_num}`).value
                 setRowValue(ac.id, 'fp', row_num, e.latlng.lat.toString(), e.latlng.lng.toString(), alt);
 
                 // move marker from last position to new position
@@ -761,9 +759,9 @@ function onMapClick(e) {
 // updates wp values position
 export function setRowValue(id_ac, type, row_num, lat, lng, alt) {
     // set the values for the inputs
-    document.getElementById('LAT_' + type + '_' + id_ac + '_' + row_num).value = lat;
-    document.getElementById('LNG_' + type + '_' + id_ac + '_' + row_num).value = lng;
-    document.getElementById('ALT_' + type + '_' + id_ac + '_' + row_num).value = alt;
+    document.getElementById(`LAT_${type}_${id_ac}_${row_num}`).value = lat;
+    document.getElementById(`LNG_${type}_${id_ac}_${row_num}`).value = lng;
+    document.getElementById(`ALT_${type}_${id_ac}_${row_num}`).value = alt;
 
     let ac = AM.getAircraftById(id_ac);
     let wp = ac.flightplan[parseFloat(row_num)];
@@ -799,7 +797,7 @@ export function UpdatePosition(ac, lat, lng) {
         })
         ac.acMarker.on('click', onAcClick);
         if (MODE.label) {
-            ac.acMarker.bindTooltip('AC: ' + ac.name.toString(), {
+            ac.acMarker.bindTooltip(`AC: ${ac.name.toString()}`, {
                 permanent: true,
                 direction: 'right',
                 offset: L.point(20, 2),

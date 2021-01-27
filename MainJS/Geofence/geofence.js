@@ -48,6 +48,7 @@ import * as E from '../control/eventFunctions.js';
 
 import * as map from '../views/map.js';
 import * as form from '../views/form.js';
+import * as FM from '../models/formElements.js'
 
 import * as GE from './geofenceEvents.js'
 
@@ -294,16 +295,16 @@ export function getPointById(p_id, f) {
  */
 export function addGfButtons(btn_div, ac_id, f_id) {
     // add Gf button
-    btn_div.appendChild(form.addBlockButton(ac_id, 'fence', 'Add GeoFence', GE.clickAddGf))
+    btn_div.appendChild(FM.addBlockButton(ac_id, 'fence', 'Add GeoFence', GE.clickAddGf))
 
     // show Gf summary button
     createGfSummaryPanel()
-    btn_div.appendChild(form.addBlockButton(ac_id, 'gf_summary_' + f_id, 'Show Geofence Summary', GE.clickShowGfSummary))
+    btn_div.appendChild(FM.addBlockButton(ac_id, `gf_summary_${f_id}`, 'Show Geofence Summary', GE.clickShowGfSummary))
     let s_btn = btn_div.lastChild.lastChild
     s_btn.classList.add('show')
 
     // hide Gf summary button
-    btn_div.appendChild(form.addBlockButton(ac_id, 'gf_summary_hide_' + f_id, 'Hide GeoFence Panel', GE.clickShowGfSummary))
+    btn_div.appendChild(FM.addBlockButton(ac_id, `gf_summary_hide_${f_id}`, 'Hide GeoFence Panel', GE.clickShowGfSummary))
     let h_btn = btn_div.lastChild.lastChild
     h_btn.classList.add('hide')
 
@@ -322,79 +323,12 @@ export function createGfSummaryPanel() {
     if (document.getElementById('ac_geofence_summary') == null) {
         // create the panel
         let option_div = document.getElementById('option_div')
-        let pan_id = 'ac_geofence_summary'
-        let pan = document.createElement('div')
-        pan.setAttribute('class', 'panel-body wrapper geofence hide sub')
-        pan.setAttribute('id', pan_id)
-        option_div.appendChild(pan)
+        option_div.appendChild(FM.addDiv('ac_geofence_summary','panel-body wrapper geofence hide sub'))
     }
     // add the info
     updateFenceSummaryPanel()
 }
 
-/**
- * @function <a name="createLoadingPanel">createLoadingPanel</a>
- * @description Creates a div and adds it to the dom, adds loading content, adds spinner, redraws fences
- * @param type {string} Loading panel type
- * @param ac {Object} Aircraft Object
- * @memberof module:GeoFence
- */
-export function createLoadingPanel(type, ac, f) {
-    let loading_div;
-    if (document.getElementById('type') == null) {
-        // create the panel
-        let option_div = document.getElementById('option_div')
-        let pan_id = 'loading_ac_' + type
-        let pan = document.createElement('div')
-        pan.setAttribute('class', 'panel-body wrapper loading geofence hide sub')
-        pan.setAttribute('id', pan_id)
-        pan.setAttribute('ac', ac.id)
-        pan.setAttribute('fence', f.id)
-        option_div.appendChild(pan)
-
-        // create a div
-        loading_div = document.createElement('div');
-        loading_div.setAttribute('id', 'loading_ac_' + type);
-        pan.appendChild(loading_div);
-
-    }
-
-    // add the info
-    addLoadingContent(type, loading_div)
-    form.addSpinner('ac_' + type)
-    drawGeofences()
-}
-
-/**
- * @function <a name="addLoadingContent">addLoadingContent</a>
- * @description adds information to the loading div
- * @param type {string} type of loading panel, used in id
- * @param parent {Object} HTML Div parent node for this content
- * @memberof module:GeoFence
- */
-function addLoadingContent(type, parent) {
-    // remove all children from parent
-    for (let item of parent.childNodes) {
-        item.parentNode.removeChild(item)
-    }
-
-    // add a title
-    let h4 = document.createElement('H5');
-    h4.setAttribute('id', 'loading_p1');
-    h4.innerHTML = 'Loading... '
-    parent.appendChild(h4)
-
-    // add content
-    let p1;
-    if (type == 'sendgeofence') {
-        p1 = document.createElement('p')
-        p1.setAttribute('id', 'sendgeofence')
-        p1.innerHTML = 'Contacting Aircraft.'
-        parent.appendChild(p1)
-    }
-
-    parent.appendChild(p1)
-}
 
 /**
  * @function <a name="updateFenceSummaryPanel">updateFenceSummaryPanel</a>
@@ -405,48 +339,35 @@ function addLoadingContent(type, parent) {
 export function updateFenceSummaryPanel() {
     // get the summary panel
     let pan = document.getElementById('ac_geofence_summary')
-
-    // remove current info
-    let children = pan.childNodes
-    for (let i = children.length - 1; i >= 0; i--) {
-        pan.removeChild(children[i])
-    }
+    FM.removeChildren(pan)
 
     // add the new info
-    let title = document.createElement('h5')
-    title.innerHTML = 'GF Summary'
-    let ul = document.createElement('ul')
-    ul.setAttribute('class', 'gf_summary_list')
+    let title = FM.addHFive('gf_sum','GF Summary')
+
+    let ul = FM.addUnorderedList('gf_sum_list','gf_summary_list')
     let li;
     let stuff;
-    let p;
     for (let ac of AM.getAircraftList()) {
         for (let i of ac.gf_list) {
             li = document.createElement('li')
 
-            // add content
-            p = document.createElement('p')
-            p.setAttribute('class', 'f_p')
-            stuff = 'AC: ' + ac.name +
-                ' GF: ' + i.id + ' ' +
-                'Type' + i.type +
-                '<br />' +
-                'Fence loaded on aircraft: ' + i.submitted
-            p.innerHTML = stuff
-            li.appendChild(p)
+            stuff = `AC: ${ac.name} GF: ${i.id} Type: ${i.type} <br />
+                Fence loaded on aircraft: ${i.submitted}`
+
+            li.appendChild(FM.addParagraph('', stuff, 'f_p'))
 
             if (!i.submitted) {
                 // add edit gf button
-                let edit_btn = form.addBlockButton(i.id + '_' + ac.id, 'edit', 'edit', function (e) {
+                let edit_btn = FM.addBlockButton(`${i.id}_${ac.id}`, 'edit', 'edit', function (e) {
                     i.submitted = false
-                    makeGfPanelActive('ac_geofence_pan_' + i.id + '_' + ac.id)
+                    makeGfPanelActive(`ac_geofence_pan_${i.id}_${ac.id}`)
                 })
                 edit_btn.firstChild.innerHTML = '<img src="../MainJS/Geofence/images/Edit-01.svg" />'
                 edit_btn.setAttribute('class', 'f_-')
                 li.appendChild(edit_btn)
             }
             // add remove gf button
-            let btn = form.addBlockButton(i.id + '_' + ac.id, '-', '-', GE.clickRemoveGf)
+            let btn = FM.addBlockButton(`${i.id}_${ac.id}`, '-', '-', GE.clickRemoveGf)
             btn.setAttribute('class', 'f_-')
             li.appendChild(btn)
 
@@ -472,34 +393,23 @@ export function createGfPlanPanel(ac, f_id) {
     let option_div = document.getElementById('option_div')
 
     // add panel
-    let pan_id = 'ac_geofence_pan_' + f_id + '_' + ac.id
-    let ac_pan_div = document.createElement('div')
-    ac_pan_div.setAttribute('class', 'panel-body wrapper geofence hide sub')
-    ac_pan_div.setAttribute('id', pan_id)
+    let ac_pan_div = FM.addDiv( `ac_geofence_pan_${f_id}_${ac.id}`, 'panel-body wrapper geofence hide sub')
     option_div.appendChild(ac_pan_div)
 
     // add label
-    let pan_label = document.createElement('h5')
-    pan_label.innerHTML = ' GeoFence: ' + f_id
-    ac_pan_div.appendChild(pan_label)
+    ac_pan_div.appendChild(FM.addHFive('',` GeoFence: ${f_id}`))
 
     // add inputs
-    let in_div = document.createElement('div')
-    in_div.setAttribute('id', 'gf_input_div')
+    let in_div = FM.addDiv('gf_input_div')
     ac_pan_div.appendChild(in_div)
 
-    let floor_in = form.addNumberInput(f_id + '_' + ac.id, 'gf_floor', 'GF Floor', 1, 6, f.floor, GE.inputFloor)
-    let roof_in = form.addNumberInput(f_id + '_' + ac.id, 'gf_roof', 'GF Roof', 1, 6, f.roof, GE.inputRoof)
-    in_div.appendChild(floor_in)
-    in_div.appendChild(roof_in)
-
-    // add type toggle
-    let tog = form.addButtonSwitch('include_' + f_id + '_' + ac.id, 'Include/Exclude', GE.toggleGFType)
-    in_div.appendChild(tog)
+    in_div.appendChild(FM.addNumberInput(`${f_id}_${ac.id}`, 'gf_floor', 'GF Floor', 1, 6, f.floor, GE.inputFloor))
+    in_div.appendChild(FM.addNumberInput(`${f_id}_${ac.id}`, 'gf_roof', 'GF Roof', 1, 6, f.roof, GE.inputRoof))
+    in_div.appendChild(FM.addButtonSwitch(`include_${f_id}_${ac.id}`, 'Include/Exclude', GE.toggleGFType))
 
     // highlight the correct button
-    let inc = document.getElementById('include_' + f.id + '_' + ac.id + '_on')
-    let exc = document.getElementById('include_' + f.id + '_' + ac.id + '_off')
+    let inc = document.getElementById(`include_${f_id}_${ac.id}_on`)
+    let exc = document.getElementById(`include_${f_id}_${ac.id}_off`)
     if (f.type == 0) {
         inc.classList.add('highlight_f')
         exc.classList.remove('highlight_f')
@@ -512,20 +422,11 @@ export function createGfPlanPanel(ac, f_id) {
     createGfTable(ac, f_id)
 
     // create div for btns
-    let btn_div = document.createElement('div')
-    btn_div.setAttribute('class', 'g_btndiv')
-
-    // add load from file input
-    btn_div.appendChild(form.addFileLoadButton(f.id, 'gf_file_' + ac.id + '_', "Load GF File", GE.clickLoadFence))
-
-    // add save to file input
-    btn_div.appendChild(form.addTextInput('gf_file_' + f.id + '_' + ac.id, "Save GF To File", MODE.save_gf_default, GE.enterSaveFence))
-
-    // add submit gf button
-    btn_div.appendChild(form.addBlockButton(f_id + '_' + ac.id, 'submit_geofence', 'Submit Geofence', GE.clickSubmitGf))
-
-    // add remove gf button
-    btn_div.appendChild(form.addBlockButton(f_id + '_' + ac.id, 'remove_geofence', 'Remove Geofence', GE.clickRemoveGf))
+    let btn_div = FM.addDiv('','g_btndiv')
+    btn_div.appendChild(FM.addFileLoadButton(f.id, `gf_file_${ac.id}_`, "Load GF File", GE.clickLoadFence))
+    btn_div.appendChild(FM.addTextInput(`gf_file_${f_id}_${ac.id}`, "Save GF To File", MODE.save_gf_default, GE.enterSaveFence))
+    btn_div.appendChild(FM.addBlockButton(`${f_id}_${ac.id}`, 'submit_geofence', 'Submit Geofence', GE.clickSubmitGf))
+    btn_div.appendChild(FM.addBlockButton(`${f_id}_${ac.id}`, 'remove_geofence', 'Remove Geofence', GE.clickRemoveGf))
 
     ac_pan_div.appendChild(btn_div)
 }
@@ -540,13 +441,12 @@ export function createGfPlanPanel(ac, f_id) {
  */
 export function createGfTable(ac, f_id) {
     // build the table
-    let table = document.createElement("TABLE");
-    table.setAttribute('id', "ac_geofence_table_" + f_id + '_' + ac.id);
-    table.setAttribute('class', "table geofence_table")
-    let div = document.createElement('div')
-    div.setAttribute('class', 'fence_plan')
+    let table = FM.addTable(`ac_geofence_table_${f_id}_${ac.id}`,'table geofence_table')
+
+    let div = FM.addDiv('','fence_plan')
     div.appendChild(table)
-    document.getElementById('ac_geofence_pan_' + f_id + '_' + ac.id).appendChild(div);
+
+    document.getElementById(`ac_geofence_pan_${f_id}_${ac.id}`).appendChild(div);
 
     let header = table.createTHead();
     let rowh = header.insertRow(0);
@@ -561,7 +461,7 @@ export function createGfTable(ac, f_id) {
     let row_num = 0;
     let f = getFenceById(f_id, ac)
     let p = f.point_list[0]
-    let new_row = form.addRowToTable(ac.id + '_' + f_id, 'geofence', row_num, GE.clickAddRow, GE.clickRemoveRow, [p.lat, p.lng], 0);
+    let new_row = form.addRowToTable(`${ac.id}_${f_id}`, 'geofence', row_num, GE.clickAddRow, GE.clickRemoveRow, [p.lat, p.lng], 0);
 
     // append the row to the table
     table.firstChild.appendChild(new_row)
@@ -607,9 +507,8 @@ export function makeGfPanelActive(pan_id) {
     // update the summary info
     updateFenceSummaryPanel()
 
-
     // refresh the form
-    form.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    form.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 }
 
 /**
@@ -696,12 +595,6 @@ export function drawGeofences() {
             // add the first point as last point to close the loop
             line.push(fence.point_list[0].marker._latlng)
 
-            // select color based on ac
-            // yellow - fcfc83
-            // green - 4dfaac
-            // red - fa3535
-            // blue - 356dfa
-            // purple - bb73ff
 
             let color = 'orange'
             let a = AM.getActiveAc()

@@ -47,10 +47,10 @@ import {
 
 import * as C from '../control/comms.js'
 import * as S from '../control/saveFile.js'
-import * as P from '../control/playback.js'
 
 import * as A from '../models/aircraft.js'
 import * as W from '../models/waypoint.js'
+import * as FM from '../models/formElements.js'
 
 import * as M from '../views/map.js'
 import * as F from '../views/form.js'
@@ -80,18 +80,13 @@ export function loadBody() {
     }
 
     // create div for traffic, geofence, and other info to be displayed
-    let option_display = document.createElement('div')
-    option_display.setAttribute('class', 'option_display')
-    option_display.setAttribute('id', 'option_div')
+    let option_display = FM.addDiv('option_div','option_display')
     document.body.appendChild(option_display)
 
     // create sub-divs
-    let sub_display
     for (let i = 1; i < 7; i++) {
-        sub_display = document.createElement('div')
-        sub_display.setAttribute('class', 'option_sub_' + i)
-        sub_display.setAttribute('id', 'option_div_sub_' + i)
-        option_display.appendChild(sub_display)
+        option_display.appendChild(FM.addDiv(`option_div_sub_${i}`,`option_sub_${i}`))
+
     }
 
     // Get ip from address bar
@@ -102,7 +97,7 @@ export function loadBody() {
     MODE.protocol = location.protocol
     MODE.ipAddress = ip
 
-    console.log('Attempting to connect to: ', ip)
+    console.log(`Attempting to connect to: ${ip}`)
 
     // connect with socket server
     C.createConnection(ip, '8083')
@@ -115,11 +110,12 @@ export function loadBody() {
     F.makePanelActive('settings')
 
     setTimeout(function () {
+        // check server os
         C.sendFullMessage('CHECK_OS')
         // check path to icarous
-        C.sendFullMessage('CHECK_PATH ' + MODE.ic_path)
+        C.sendFullMessage(`CHECK_PATH ${MODE.ic_path}`)
         // check path to ardupilot
-        C.sendFullMessage('CHECK_PATH_A ' + MODE.ardu_path)
+        C.sendFullMessage(`CHECK_PATH_A ${MODE.ardu_path}`)
     }, 2000)
 
     // check local storage
@@ -266,18 +262,7 @@ export function createNewAircraft(name = null, ic = 1, center = null, mode = nul
 
     if (mode != 'HITL') {
         // let the server know a new aircraft has been created
-        let out_message = 'AIRCRAFT ' + ac.id +
-            ' NEW_AIRCRAFT ' +
-            ac.id + ' ' +
-            ac.lat + ' ' +
-            ac.lng + ' ' +
-            ac.alt + ' ' +
-            ac.hdg + ' ' +
-            ac.icarous + ' ' +
-            MODE.sim_type + ' ' +
-            MODE.ic_path + ' ' +
-            MODE.ardu_path;
-        C.sendFullMessage(out_message);
+        C.sendFullMessage(`AIRCRAFT ${ac.id} NEW_AIRCRAFT ${ac.id} ${ac.lat} ${ac.lng} ${ac.alt} ${ac.hdg} ${ac.icarous} ${MODE.sim_type} ${MODE.ic_path} ${MODE.ardu_path}`);
     }
 
     // add a button to the menu
@@ -286,13 +271,13 @@ export function createNewAircraft(name = null, ic = 1, center = null, mode = nul
     // build the panel and wait for heartbeat to make it active
     F.createFlightPlanPanel(ac);
     F.createLoadingPanel('startup', ac)
-    F.makePanelActive('loading_startup_' + ac.id)
+    F.makePanelActive(`loading_startup_${ac.id}`)
 
     // request info from ac
     refreshDisplay(ac)
 
     // add a layer to the map
-    M.addNewLayerGroup(ac);
+    M.addNewLayerGroup(ac)
 }
 
 /**
@@ -314,10 +299,7 @@ export function clickSummary(e) {
  */
 export function clickSettings(e) {
     // remove any old panel
-    let old = document.getElementById('settings');
-    while (old.hasChildNodes()) {
-        old.removeChild(old.firstChild)
-    }
+    FM.removeChildren(document.getElementById('settings'))
 
     // build the new one
     F.createSettingsPanel();
@@ -337,26 +319,23 @@ export function clickLoadFile(e) {
         let file_name = this.files[0].name
 
         // remove any old panel for this file
-        let old = document.getElementById('file_load_' + file_name);
-        if (old != null) {
-            old.parentNode.removeChild(old);
-        }
+        FM.removeElement(document.getElementById(`file_load_${file_name}`))
 
         // create and make new panel active
-        F.createFilePanel('file_load_' + file_name);
+        F.createFilePanel(`file_load_${file_name}`);
 
         fr.onload = function (e) {
             console.log(fr.result)
-            document.getElementById('contents_' + file_name).textContent = fr.result;
+            document.getElementById(`contents_${file_name}`).textContent = fr.result;
         };
         fr.readAsText(this.files[0]);
 
         // this clears the input and allows the same file to be loaded twice
         document.getElementById('filechoice').value = ''
-        F.makePanelActive('file_load_' + file_name);
+        F.makePanelActive(`file_load_${file_name}`);
 
     } else {
-        F.alertBannerRed('Fly By File only works in SITL Mode')
+        FM.alertBannerRed('Fly By File only works in SITL Mode')
     }
 }
 
@@ -374,7 +353,7 @@ export function clickCancel() {
  */
 export function clickACPanelShow() {
     let ac = getACFromElementId(this.id)
-    F.makePanelActive('ac_pan_' + ac.id);
+    F.makePanelActive(`ac_pan_${ac.id}`)
 }
 
 /**
@@ -384,17 +363,17 @@ export function clickACPanelShow() {
  * @memberof module:eventFunctions
  */
 export function clickChangeParameters() {
-    let ac = getACFromElementId(this.id);
+    let ac = getACFromElementId(this.id)
     C.sendMessage('UPDATE_PARAM_LIST')
 
     // create loading panel
     F.createLoadingPanel('paramupdate', ac)
     // make panel active
-    F.makePanelActive('loading_paramupdate_' + ac.id)
+    F.makePanelActive(`loading_paramupdate_${ac.id}`)
     setTimeout(function () {
         console.log('Getting Parameters')
         F.updateParamPanel(ac)
-        F.makePanelActive('ac_param_pan_' + ac.id)
+        F.makePanelActive(`ac_param_pan_${ac.id}`)
     }, 1000)
 }
 
@@ -405,7 +384,7 @@ export function clickChangeParameters() {
  * @memberof module:eventFunctions
  */
 export function onInputHighlight(e) {
-    e.path[0].classList.add('highlight_param');
+    e.path[0].classList.add('highlight_param')
 }
 
 /**
@@ -432,12 +411,8 @@ export function clickSubmitChanges() {
                     'value': ac.parameters[j].value,
                     'type': ac.parameters[j.type]
                 });
-                if (confirm('Are you sure you want to change ' + name + ' from ' + ac.parameters[j].value + ' to ' + i.value + '?')) {
-                    // format message
-                    let message = 'CHANGE_PARAM ' + name + ' ' + i.value + ' ' + ac.parameters[j].type;
-
-                    // send change message to server
-                    C.sendMessage(message);
+                if (confirm(`Are you sure you want to change ${name} from ${ac.parameters[j].value} to ${i.value}?`)) {
+                    C.sendMessage(`CHANGE_PARAM ${name} ${i.value} ${ac.parameters[j].type}`)
                     C.sendMessage('UPDATE_PARAM_LIST')
                 } else {
                     console.log('Change param canceled')
@@ -445,9 +420,8 @@ export function clickSubmitChanges() {
             }
         }
     }
-
     // go back to building flight plan
-    F.makePanelActive('ac_pan_' + ac.id);
+    F.makePanelActive(`ac_pan_${ac.id}`);
 }
 
 /**
@@ -458,12 +432,11 @@ export function clickSubmitChanges() {
  */
 export function clickReloadParameters() {
     let ac = getACFromElementId(this.id)
-    let message = 'UPDATE_PARAM_LIST';
-    C.sendMessage(message)
+    C.sendMessage('UPDATE_PARAM_LIST')
 
     setTimeout(function () {
         F.updateParamPanel(ac)
-        F.alertBannerGreen('Updated Param List')
+        FM.alertBannerGreen('Updated Param List')
     }, 500)
 }
 
@@ -475,8 +448,8 @@ export function clickReloadParameters() {
  */
 export function clickCancelChanges() {
     // go back to building flight plan
-    let ac = getACFromElementId(this.id);
-    F.makePanelActive('ac_pan_' + ac.id);
+    let ac = getACFromElementId(this.id)
+    F.makePanelActive(`ac_pan_${ac.id}`)
 }
 
 
@@ -488,17 +461,10 @@ export function clickCancelChanges() {
  */
 export function clickSubmitFlightPlan() {
     let ac = getACFromElementId(this.id);
-    ac.u_vel = document.getElementById('VEL_Velocity: m/s _' + ac.id).value;
-
+    ac.u_vel = document.getElementById(`VEL_Velocity: m/s _${ac.id}`).value
     let wp_string = ac.flightplanToString()
 
-    let message = 'LOAD_FLIGHT_PLAN AC_ID ' + ac.id +
-        ' VEL ' + ac.u_vel +
-        ' ' + MODE.sim_type +
-        ' WP' + wp_string
-
-    // send message to server
-    C.sendMessage(message);
+    C.sendMessage(`LOAD_FLIGHT_PLAN AC_ID ${ac.id} VEL ${ac.u_vel} ${MODE.sim_type} WP ${wp_string}`);
 
     // Update ac
     ac.status = 1;
@@ -507,7 +473,7 @@ export function clickSubmitFlightPlan() {
     F.createInfoPanel(ac)
     F.setPanelInfo(ac, 'pre_flight_info_div_')
     F.createLoadingPanel('sendwaypoints', ac)
-    F.makePanelActive('loading_sendwaypoints_' + ac.id)
+    F.makePanelActive(`loading_sendwaypoints_${ac.id}`)
 
     // redraw the flight plan
     M.DrawFlightPlan();
@@ -522,13 +488,7 @@ export function clickSubmitFlightPlan() {
  * @memberof module:eventFunctions
  */
 export function scriptSubmitFlightPlan(ac, vel, wp_string) {
-    let message = 'AIRCRAFT ' + ac.id + ' LOAD_FLIGHT_PLAN AC_ID ' + ac.id +
-        ' VEL ' + vel +
-        ' ' + MODE.sim_type +
-        ' WP' + wp_string
-
-    // send message to server
-    C.sendFullMessage(message);
+    C.sendFullMessage(`AIRCRAFT ${ac.id} LOAD_FLIGHT_PLAN AC_ID ${ac.id} VEL ${vel} ${MODE.sim_type} WP ${wp_string}`)
 
     // Update ac
     ac.status = 1;
@@ -537,7 +497,7 @@ export function scriptSubmitFlightPlan(ac, vel, wp_string) {
     F.createInfoPanel(ac)
     F.setPanelInfo(ac, 'pre_flight_info_div_')
     F.createLoadingPanel('sendwaypoints', ac)
-    F.makePanelActive('loading_sendwaypoints_' + ac.id)
+    F.makePanelActive(`loading_sendwaypoints_${ac.id}`)
 
     // redraw the flight plan (new dash width)
     M.DrawFlightPlan();
@@ -553,9 +513,7 @@ export function clickSendStartFlight() {
     let ac = AM.getActiveAc()
     ac.status = 2;
 
-    // send the message
-    let message = 'AIRCRAFT ' + ac.id + ' FLIGHT_STARTED ' + ac.id + ' 0 ' + ac.icarous;
-    C.sendFullMessage(message);
+    C.sendFullMessage(`AIRCRAFT ${ac.id} FLIGHT_STARTED ${ac.id} 0 ${ac.icarous}`)
 
     // redraw the flight plan (new line dashes)
     M.DrawFlightPlan()
@@ -563,17 +521,15 @@ export function clickSendStartFlight() {
     // show the loading panel
     F.createInFlightPanel(ac)
     F.setPanelInfo(ac, 'flight_info_div_')
-    F.createLoadingPanel('startflight', ac);
-    F.makePanelActive('loading_startflight_' + ac.id);
+    F.createLoadingPanel('startflight', ac)
+    F.makePanelActive(`loading_startflight_${ac.id}`)
 }
 
 export function clickSendStartIcarous() {
     let ac = AM.getActiveAc()
-    ac.status = 2;
+    ac.status = 2
 
-    // send the message
-    let message = 'AIRCRAFT ' + ac.id + ' FLIGHT_STARTED ' + ac.id + ' 1 ' + ac.icarous;
-    C.sendFullMessage(message);
+    C.sendFullMessage(`AIRCRAFT ${ac.id} FLIGHT_STARTED ${ac.id} 1 ${ac.icarous}`)
 
     // redraw the flight plan (new line dashes)
     M.DrawFlightPlan()
@@ -581,16 +537,15 @@ export function clickSendStartIcarous() {
     // show the loading panel
     F.createInFlightPanel(ac)
     F.setPanelInfo(ac, 'flight_info_div_')
-    F.createLoadingPanel('startflight', ac);
-    F.makePanelActive('loading_startflight_' + ac.id);
+    F.createLoadingPanel('startflight', ac)
+    F.makePanelActive(`loading_startflight_${ac.id}`)
 }
 
 export function clickResetIcarous() {
     let ac = AM.getActiveAc()
     ac.status = 1
-    let message = 'AIRCRAFT ' + ac.id + ' RESET_ICAROUS ' + ac.id
-    C.sendFullMessage(message)
-    F.makePanelActive('ac_info_pan_' + ac.id)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} RESET_ICAROUS ${ac.id}`)
+    F.makePanelActive(`ac_info_pan_${ac.id}`)
 }
 
 
@@ -603,18 +558,16 @@ export function clickResetIcarous() {
 export function sendStartFlight(ac) {
     ac.status = 2;
 
-    // send the message
-    let message = 'AIRCRAFT ' + ac.id + ' FLIGHT_STARTED ' + ac.id + ' 0 ' + ac.icarous;
-    C.sendFullMessage(message);
-    console.log(message)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} FLIGHT_STARTED ${ac.id} 0 ${ac.icarous}`)
+
     // redraw the flight plan (new line dashes)
     M.DrawFlightPlan()
 
     // show the loading panel
     F.createInFlightPanel(ac)
     F.setPanelInfo(ac, 'flight_info_div_')
-    F.createLoadingPanel('startflight', ac);
-    F.makePanelActive('loading_startflight_' + ac.id);
+    F.createLoadingPanel('startflight', ac)
+    F.makePanelActive(`loading_startflight_${ac.id}`)
 }
 
 
@@ -625,11 +578,10 @@ export function sendStartFlight(ac) {
  * @memberof module:eventFunctions
  */
 export function clickEditFlightPlan() {
-    let ac = getACFromElementId(this.id);
-    ac.status = 0;
-    let message = 'NO_FLIGHT_PLAN_LOADED ' + ac.id;
-    C.sendMessage(message);
-    F.makePanelActive('ac_pan_' + ac.id);
+    let ac = getACFromElementId(this.id)
+    ac.status = 0
+    C.sendMessage(`NO_FLIGHT_PLAN_LOADED ${ac.id}`)
+    F.makePanelActive(`ac_pan_${ac.id}`)
 }
 
 /**
@@ -666,12 +618,10 @@ export function acShutdown(ac, originator = true) {
     let ac_list = AM.aircraft_list
     if (originator) {
         if (ac.mode == 'SITL' && ac_list.length > 0) {
-            let message = 'AIRCRAFT ' + ac.id + ' SHUTDOWN ' + ac.id;
-            C.sendFullMessage(message);
+            C.sendFullMessage(`AIRCRAFT ${ac.id} SHUTDOWN ${ac.id}`)
         } else if (ac.mode == 'HITL' && ac_list.length > 0) {
-            let message = 'AIRCRAFT ' + ac.id + ' HITL_DISCONNECT ' + ac.id;
-            C.sendFullMessage(message);
-        } // playback - message already sent
+            C.sendFullMessage(`AIRCRAFT ${ac.id} HITL_DISCONNECT ${ac.id}`)
+        } 
     }
     // remove ac from menu
     let menu_li = document.getElementsByClassName('menu_li');
@@ -679,7 +629,7 @@ export function acShutdown(ac, originator = true) {
         let id = menu_li[i].childNodes[0].childNodes[0].id.split('_')
         id = id[id.length - 1]
         if (id == ac.id) {
-            menu_li[i].parentNode.removeChild(menu_li[i])
+            FM.removeElement(menu_li[i])
         }
     }
 
@@ -695,7 +645,7 @@ export function acShutdown(ac, originator = true) {
         let id = panels[i].id.split('_');
         id = id[id.length - 1]
         if (id == ac.id) {
-            panels[i].parentNode.removeChild(panels[i]);
+            FM.removeElement(panels[i])
         }
     }
 
@@ -719,10 +669,9 @@ export function clickStopFlight() {
     // send message
     let ac = getACFromElementId(this.id);
     ac.status = 1; // needs to be 3
-    let message = 'FLIGHT_STOPPED ' + ac.id;
-    C.sendMessage(message);
+    C.sendMessage(`FLIGHT_STOPPED ${ac.id}`);
     // TODO: create post flight panel
-    F.makePanelActive('ac_info_pan_' + ac.id);
+    F.makePanelActive(`ac_info_pan_${ac.id}`);
 }
 
 /**
@@ -783,7 +732,7 @@ export function clickAddRowButton() {
     ac.flightplan.push(wp);
 
     // update the table
-    let table = document.getElementById('ac_fp_table_' + ac.id)
+    let table = document.getElementById(`ac_fp_table_${ac.id}`)
     F.updateTable(table, ac.id, 'fp', ac.flightplan.length - 1, clickAddRowButton, clickRemoveRowButton);
 
     // redraw the flight plan
@@ -840,8 +789,8 @@ export function changeModeSelection(e) {
     // remove all ac
     let ac_list = AM.aircraft_list
     if (ac_list.length > 0) {
-        F.alertBannerRed("Cannot change mode while aircraft are active. Please shut down all processes.")
-        F.makePanelActive('ac_pan_' + ac_list[0].id)
+        FM.alertBannerRed("Cannot change mode while aircraft are active. Please shut down all processes.")
+        F.makePanelActive(`ac_pan_${ac_list[0].id}`)
         return
     }
 
@@ -853,7 +802,7 @@ export function changeModeSelection(e) {
     } else if (e.target.value == 'Playback') {
         MODE.makeModePlayback()
     } else {
-        F.alertBannerRed('This should not happen.', e.target.value)
+        FM.alertBannerRed('This should not happen.', e.target.value)
     }
 
     // update the panel
@@ -940,9 +889,9 @@ export function highlightCurrentSettings() {
 
     for (let i in name_list) {
         if (MODE[name_list[i].split('_')[0]]) {
-            document.getElementById(name_list[i] + '_on').classList.add('highlight')
+            document.getElementById(`${name_list[i]}_on`).classList.add('highlight')
         } else {
-            document.getElementById(name_list[i] + '_off').classList.add('highlight')
+            document.getElementById(`${name_list[i]}_off`).classList.add('highlight')
         }
     }
 }
@@ -956,8 +905,8 @@ export function highlightCurrentSettings() {
  */
 export function clickToggleButton(name) {
     let here_ = false;
-    let on = document.getElementById(name + '_on')
-    let off = document.getElementById(name + '_off')
+    let on = document.getElementById(`${name}_on`)
+    let off = document.getElementById(`${name}_off`)
 
     on.classList.forEach(function (item) {
         if (item == 'highlight') {
@@ -1031,7 +980,7 @@ export function clickCenterMapOnAC() {
  */
 export function enterLoadWp(e) {
     if (e.key == 'Enter') {
-        C.sendMessage('LOAD_WP_FILE ' + e.srcElement.value)
+        C.sendMessage(`LOAD_WP_FILE ${e.srcElement.value}`)
     }
 }
 
@@ -1056,7 +1005,7 @@ export function clickLoadWPFile(e) {
         // add options for other file types
         if (!lines[0].includes('QGC WPL 110')) {
             console.log(lines[0])
-            F.alertBannerRed('Invalid file format.')
+            FM.alertBannerRed('Invalid file format.')
             return
         }
         lines.splice(0, 1)
@@ -1108,19 +1057,9 @@ export function clickLoadWPFile(e) {
     }
 
     fr.readAsText(this.files[0])
-    document.getElementById('wp_load' + ac.id + '_file_' + ac.id).value = ''
+    document.getElementById(`wp_load${ac.id}_file_${ac.id}`).value = ''
 
 }
-
-export function clickLoadPlaybackFile() {
-    let fr = document.querySelector("#playback_file__file_set")
-    let file = fr.files
-    console.log(file[0].name)
-    MODE.filename = file[0].name
-    let n = document.getElementById('name_display')
-    n.innerText = file[0].name
-}
-
 
 
 /**
@@ -1145,13 +1084,9 @@ export function enterSaveWp(e) {
  */
 export function enterLoadParamsFile(e) {
     if (e.key == 'Enter') {
-        let ac = AM.getActiveAc()
-        let filename = '/Examples/Parameters/' + e.srcElement.value
-        C.sendMessage('LOAD_PARAM_FILE ' + filename)
-
+        C.sendMessage(`LOAD_PARAM_FILE /Examples/Parameters/${e.srcElement.value}`)
         // wait for a bit and let this happen
         setTimeout(console.log('waiting'), 2000)
-
         // reload params from aircraft
         C.sendMessage('UPDATE_PARAM_LIST')
     }
@@ -1196,30 +1131,27 @@ export function updatePanels(ac) {
 export function sendConnectToAc() {
     // check IP/USB radio buttons
     let rad = document.getElementsByClassName('radio_input_method')
-    let dev
+    let dev, port, baud, comp, name, t
     for (let item of rad) {
         if (item.value == 'IP' && item.checked) {
+            t = 'IP'
             dev = document.getElementById('HITLipAddress_input').value
-            let port = document.getElementById('port_input').value
-            let baud = document.getElementById('baud_input').value
-            let comp = document.getElementById('component_input').value
-            let name = AM.aircraft_list.length + 1
-            let msg = 'AIRCRAFT None HITL ' + name + ' BAUD ' + baud + ' IP ' + dev + ' PORT ' + port + ' COMP ' + comp
-            C.sendFullMessage(msg)
-            createNewAircraftHITL()
+            port = document.getElementById('port_input').value
+            baud = document.getElementById('baud_input').value
+            comp = document.getElementById('component_input').value
+            name = AM.aircraft_list.length + 1
+            
         } else if (item.value == 'USB' && item.checked) {
+            t = 'USB'
             dev = document.getElementById('usbport_input').value
-            let port = document.getElementById('port_input').value
-            let baud = document.getElementById('baud_input').value
-            let comp = document.getElementById('component_input').value
-            let name = AM.aircraft_list.length + 1
-            let msg = 'AIRCRAFT None HITL ' + name + ' BAUD ' + baud + ' USB ' + dev + ' PORT ' + port + ' COMP ' + comp
-            C.sendFullMessage(msg)
-            C.sendFullMessage(msg)
-            createNewAircraftHITL()
+            port = document.getElementById('port_input').value
+            baud = document.getElementById('baud_input').value
+            comp = document.getElementById('component_input').value
+            name = AM.aircraft_list.length + 1
         }
     }
-
+    C.sendFullMessage(`AIRCRAFT None HITL ${name} BAUD ${baud} ${t} ${dev} PORT ${port} COMP ${comp}`)
+    createNewAircraftHITL()
 }
 
 
@@ -1243,7 +1175,7 @@ export function sendDisconnectFromAc() {
 export function setPathToIcarous(e) {
     if (e.key == 'Enter') {
         MODE.ic_path = e.srcElement.value
-        C.sendFullMessage('CHECK_PATH ' + MODE.ic_path)
+        C.sendFullMessage(`CHECK_PATH ${MODE.ic_path}`)
         setLocalStorage(MODE.ic_path, 'ic_path')
     }
 }
@@ -1257,7 +1189,7 @@ export function setPathToIcarous(e) {
 export function setPathToArdupilot(e) {
     if (e.key == 'Enter') {
         MODE.ardu_path = e.srcElement.value
-        F.alertBannerGreen("ArduPilot path set to: " + MODE.ardu_path)
+        FM.alertBannerGreen(`ArduPilot path set to: ${MODE.ardu_path}`)
         setLocalStorage(MODE.ardu_path, 'ardu_path')
     }
 }
@@ -1265,7 +1197,7 @@ export function setPathToArdupilot(e) {
 export function setSimType(e) {
     if (e.key == 'Enter') {
         MODE.sim_type = e.srcElement.value
-        F.alertBannerGreen("Sim type set to: " + MODE.sim_type)
+        FM.alertBannerGreen(`Sim type set to: ${MODE.sim_type}`)
         setLocalStorage(MODE.sim_type, 'sim_type')
     }
 }
@@ -1277,18 +1209,11 @@ export function setSimType(e) {
  * @memberof module:eventFunctions
  */
 export function clickOpenDAADisplay() {
-    let url = MODE.protocol + '//' + MODE.ipAddress + ':8082/apps/DAA/index.html'
-    window.open(url, '_blank')
+    window.open(`${MODE.protocol}//${ MODE.ipAddress}:8082/apps/DAA/index.html`, '_blank')
 }
 
 export function clickOpenGraphDisplay() {
-    let url = MODE.protocol + '//' + MODE.ipAddress + ':8082/apps/Graphing/graph.html'
-    window.open(url, '_blank')
-}
-
-export function clickOpenBatchDisplay() {
-    let url = MODE.protocol + '//' + MODE.ipAddress + ':8082/apps/batch_sim/batch.html'
-    window.open(url, '_blank')
+    window.open(`${MODE.protocol}//${MODE.ipAddress}:8082/apps/Graphing/graph.html`, '_blank')
 }
 
 
@@ -1302,17 +1227,18 @@ export function clickForwardData() {
     let ac = AM.getActiveAc()
 
     // check if the panel exists
-    if (!document.getElementById('forwarding_' + ac.id)) {
+    if (!document.getElementById(`forwarding_${ac.id}`)) {
         F.createForwardingSubPanel()
     }
-    let pan_id = 'forwarding_' + ac.id
+    let pan_id = `forwarding_${ac.id}`
     //check if it is already active
     if (!ac.activeSubPanels.includes(pan_id)) {
         ac.activeSubPanels.push(pan_id)
     }
     F.updateForwardingSubPanel()
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 }
+
 
 /**
  * @function <a name="submitForwardData">submitForwardData</a>
@@ -1323,18 +1249,16 @@ export function clickForwardData() {
 export function submitForwardData() {
     let ac = AM.getActiveAc()
     // get values
-    let ip = document.getElementById('forward_ip_' + ac.id + '_input').value
-    let port = document.getElementById('forward_port_' + ac.id + '_input').value
-    let baud = document.getElementById('forward_baud_' + ac.id + '_input').value
+    let ip = document.getElementById(`forward_ip_${ac.id}_input`).value
+    let port = document.getElementById(`forward_port_${ac.id}_input`).value
+    let baud = document.getElementById(`forward_baud_${ac.id}_input`).value
     // set ac values
     ac.f_ip = ip
     ac.f_port = port
     ac.f_baud = baud
     ac.forwarding = true
-    // send the message
 
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' FORWARD ' + ip + ' ' + port + ' ' + baud)
-    // change the panel to summary
+    C.sendFullMessage(`AIRCRAFT ${ac.id} FORWARD ${ip} ${port} ${baud}`)
     F.updateForwardingSubPanel()
 }
 
@@ -1347,8 +1271,9 @@ export function scriptForwardData(name, ip, port, baud) {
     ac.forwarding = true
     // send the message
 
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' FORWARD ' + ip + ' ' + port + ' ' + baud)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} FORWARD ${ip} ${port} ${baud}`)
 }
+
 
 /**
  * @function <a name="hideForwardData">hideForwardData</a>
@@ -1363,7 +1288,7 @@ export function hideForwardData() {
             ac.activeSubPanels.splice(ac.activeSubPanels.indexOf(item), 1)
         }
     }
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 }
 
 
@@ -1376,91 +1301,9 @@ export function hideForwardData() {
 export function removeForwardData() {
     let ac = AM.getActiveAc()
     ac.forwarding = false
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' FORWARD STOP')
+    C.sendFullMessage(`AIRCRAFT ${ac.id} FORWARD STOP`)
     hideForwardData()
 }
-
-
-/**
- * @function <a name="sendStartPlayback">sendStartPlayback</a>
- * @description Sends message to start playback, and creates the menu. Or, alerts user that playback is already running.
- * @param none
- * @memberof module:eventFunctions
- */
-export function sendStartPlayback() {
-    let menu = document.getElementById('playbackMenu')
-    if (!menu) {
-
-        C.sendFullMessage('AIRCRAFT None PLAYBACK START ' + MODE.filename)
-        // show playback button menu
-        P.createPlaybackMenu()
-    } else {
-        F.alertBannerRed('Playback already running. Press Stop to play a new file.')
-    }
-}
-
-/**
- * @function <a name="sendPlayPlayback">sendPlayPlayback</a>
- * @description Sends play message to server.
- * @param none
- * @memberof module:eventFunctions
- */
-export function sendPlayPlayback() {
-    C.sendFullMessage('AIRCRAFT None PLAYBACK PLAY')
-}
-
-/**
- * @function <a name="sendStopPlayback">sendStopPlayback</a>
- * @description Sends stop message to server. Removes all aircraft and the playback menu.
- * @param none
- * @memberof module:eventFunctions
- */
-export function sendStopPlayback() {
-    // has to be the same as ac shutdown, need to remove everything
-    C.sendFullMessage('AIRCRAFT -1 SHUTDOWN -1 PLAYBACK')
-    MODE.playerActive = false
-    // check mode
-    for (let ac of AM.aircraft_list) {
-        acShutdown(ac)
-    }
-    // remove playback controls
-    let menu = document.getElementById('playbackMenu')
-    if (menu) {
-        menu.parentElement.removeChild(menu)
-    }
-}
-
-/**
- * @function <a name="sendRewPlayback">sendRewPlayback</a>
- * @description Sends rewind message to server.
- * @param none
- * @memberof module:eventFunctions
- */
-export function sendRewPlayback() {
-    C.sendFullMessage('AIRCRAFT None PLAYBACK REW')
-}
-
-/**
- * @function <a name="sendFFPlayback">sendFFPlayback</a>
- * @description Sends fast forward message to server.
- * @param none
- * @memberof module:eventFunctions
- */
-export function sendFFPlayback() {
-    C.sendFullMessage('AIRCRAFT None PLAYBACK FF')
-}
-
-/**
- * @function <a name="sendSkipPlayback">sendSkipPlayback</a>
- * @description Sends skip message to server.
- * @param none
- * @memberof module:eventFunctions
- */
-export function sendSkipPlayback() {
-    let skipDistance = 30
-    C.sendFullMessage('AIRCRAFT None PLAYBACK SKIP ' + skipDistance)
-}
-
 
 
 // These can be removed before release
@@ -1482,31 +1325,31 @@ export function testFunction() {
 
 export function refreshDisplayAll() {
     for (let ac of AM.aircraft_list) {
-        C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
-        C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_FENCE ' + ac.id)
-        C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_REPLAN ' + ac.id)
-        C.sendFullMessage('AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST')
+        C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_WAYPOINTS ${ac.id}`);
+        C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_FENCE ${ac.id}`)
+        C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_REPLAN ${ac.id}`)
+        C.sendFullMessage(`AIRCRAFT ${ac.id} UPDATE_PARAM_LIST`)
     }
 }
 
 export function refreshDisplay(ac) {
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_FENCE ' + ac.id)
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_REPLAN ' + ac.id)
-    C.sendFullMessage('AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST')
+    C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_WAYPOINTS ${ac.id}`);
+    C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_FENCE ${ac.id}`)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_REPLAN ${ac.id}`)
+    C.sendFullMessage(`AIRCRAFT ${ac.id} UPDATE_PARAM_LIST`)
 }
 
 
 export function wpInMessage(m, ac) {
     // console.log(m)
     // clear the rows from the table
-    let table = document.getElementById('ac_fp_table_' + ac.id)
+    let table = document.getElementById(`ac_fp_table_${ac.id}`)
     let rows = document.getElementsByClassName('fp_row')
     let rcl;
     for (let i = rows.length - 1; i >= 0; i--) {
         rcl = rows[i].id.split('_')
         if (rcl[2] == ac.id.toString()) {
-            rows[i].parentNode.removeChild(rows[i])
+            FM.removeElement(rows[i])
         }
     }
     rows = document.getElementsByClassName('fp_rows')
@@ -1534,7 +1377,7 @@ export function wpInMessage(m, ac) {
     try {
         if (vel > 0) {
             ac.u_vel = vel
-            v = document.getElementById('VEL_Velocity: m/s _' + ac.id)
+            v = document.getElementById(`VEL_Velocity: m/s _${ac.id}`)
             v.value = vel
         }
     } catch (e) {
@@ -1576,11 +1419,12 @@ export function wpInMessage(m, ac) {
         }
     }
     // make the correct panel active
-    F.makePanelActive('ac_pan_' + ac.id)
+    F.makePanelActive(`ac_pan_${ac.id}`)
 
     // Re draw the flight plan
     M.DrawFlightPlan();
 }
+
 
 /**
  * @function <a name="createAircraft">createAircraft</a>
@@ -1636,7 +1480,7 @@ export function createAircraft(id, mode) {
     // create panels
     F.createFlightPlanPanel(ac);
     F.createLoadingPanel('startup', ac)
-    F.makePanelActive('ac_pan_' + ac.id)
+    F.makePanelActive(`ac_pan_${ac.id}`)
 
     // check for loaded wp's, fences, replan and params
     refreshDisplay(ac)
@@ -1646,6 +1490,6 @@ export function createAircraft(id, mode) {
     // will hide any created after the initial ac sometimes
     M.addNewLayerGroup(ac);
 
-    console.log('created ac ' + ac.id, ac)
+    console.log(`created ac ${ac.id}`, ac)
     return ac
 }

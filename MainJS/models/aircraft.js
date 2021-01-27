@@ -92,7 +92,7 @@ export class Aircraft {
 
         this.clicked = false;
 
-        this.status = 0; //  0 = planning, 1 = pre-flight, 2 = in-flight, 3 = post-flight
+        this.status = 0; // 0 = planning, 1 = pre-flight, 2 = in-flight, 3 = post-flight
         this.mode = '' // sitl, hitl, playback
         this.flightmode = 'UNKNOWN' // stablized, guided,... armed/disarmed
         this.icflightmode = 'UNKNOWN'
@@ -134,7 +134,7 @@ export class Aircraft {
         this.large = null
 
         this.forwarding = false; // forwarding raw data to somewhere else
-        this.f_ip = '146.165.72.2'
+        this.f_ip = '0.0.0.0'
         this.f_port = '14550'
         this.f_baud = '56700'
 
@@ -148,12 +148,10 @@ export class Aircraft {
     }
 
     flightplanToString() {
-        // let out = ' ' + ac.flightplan[0].latlng.lat.toString() + ' ' + ac.flightplan[0].latlng.lng.toString() + ' ' + ac.flightplan[0].alt.toString() + ' '
-        let out = ' '
+        let out = ''
         for (let item of this.flightplan) {
-            out = out + item.latlng.lat.toString() + ' ' + item.latlng.lng.toString() + ' ' + item.alt.toString() + ' '
+            out = `${out}${item.latlng.lat.toString()} ${item.latlng.lng.toString()} ${item.alt.toString()} `
         }
         return out
     }
-
 }

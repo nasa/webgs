@@ -44,9 +44,12 @@ import {
 } from '../control/entry.js'
 
 import * as E from '../control/eventFunctions.js';
+import * as P from '../control/playback.js'
+
 import * as form from '../views/form.js';
 import * as map from '../views/map.js';
 
+import * as FM from '../models/formElements.js'
 
 import * as I from '../Indicators/indicators.js';
 import * as GF from '../Geofence/geofence.js';
@@ -195,19 +198,19 @@ export class GCSmode {
         if (MODE.mode == 'SITL') {
 
             // Path to icarous
-            set_pan.appendChild(form.addTextInput('ic_path', "Path To Icarous", MODE.ic_path, E.setPathToIcarous))
+            set_pan.appendChild(FM.addTextInput('ic_path', "Path To Icarous", MODE.ic_path, E.setPathToIcarous))
 
             // Path to Ardupilot
-            set_pan.appendChild(form.addTextInput('ardu_path', "Path To Ardupilot", MODE.ardu_path, E.setPathToArdupilot))
+            set_pan.appendChild(FM.addTextInput('ardu_path', "Path To Ardupilot", MODE.ardu_path, E.setPathToArdupilot))
 
             // add button for Icarous settings
-            set_pan.appendChild(form.addTextInput('sim_type', 'SIM TYPE: RotorSim/ArduCopter', MODE.sim_type, E.setSimType));
+            set_pan.appendChild(FM.addTextInput('sim_type', 'SIM TYPE: RotorSim/ArduCopter', MODE.sim_type, E.setSimType));
 
             // add button test
-            // set_pan.appendChild(form.addBlockButton('ic', 'test_settings', '!!! TEST !!!', E.testFunction));
+            // set_pan.appendChild(FM.addBlockButton('ic', 'test_settings', '!!! TEST !!!', E.testFunction));
 
             // Allow multiple aircraft to be created
-            let multi_buttons = form.addButtonSwitch('multi_toggle', 'Multiple Aircraft', function () {
+            let multi_buttons = FM.addButtonSwitch('multi_toggle', 'Multiple Aircraft', function () {
                 E.clickToggleButton('multi_toggle');
             })
             set_pan.appendChild(multi_buttons)
@@ -215,65 +218,60 @@ export class GCSmode {
             // ***************************************************
 
             // transmit adsb position
-            let Tadsb_buttons = form.addButtonSwitch('Tadsb_toggle', 'Transmit ADSB', function () {
+            let Tadsb_buttons = FM.addButtonSwitch('Tadsb_toggle', 'Transmit ADSB', function () {
                 E.clickToggleButton('Tadsb_toggle');
             })
             set_pan.appendChild(Tadsb_buttons)
 
             // allow adsb traffic
-            let adsb_buttons = form.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
+            let adsb_buttons = FM.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
                 E.clickToggleButton('adsb_toggle');
             })
             set_pan.appendChild(adsb_buttons)
 
             // allow sim traffic
-            let sim_buttons = form.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
+            let sim_buttons = FM.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
                 E.clickToggleButton('sim_toggle');
             })
             set_pan.appendChild(sim_buttons)
 
             // allow sensor traffic
-            let sensor_buttons = form.addButtonSwitch('sensor_toggle', 'Sensor Traffic Display', function () {
+            let sensor_buttons = FM.addButtonSwitch('sensor_toggle', 'Sensor Traffic Display', function () {
                 E.clickToggleButton('sensor_toggle');
             })
             set_pan.appendChild(sensor_buttons)
 
             // allow ic bands and radius
-            let bands_buttons = form.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
+            let bands_buttons = FM.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
                 E.clickToggleButton('bands_toggle');
             })
             set_pan.appendChild(bands_buttons)
 
             // allow merging rings display
-            let ring_buttons = form.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
+            let ring_buttons = FM.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
                 E.clickToggleButton('ring_toggle');
             })
             set_pan.appendChild(ring_buttons)
 
             // allow aircraft and traffic label display
-            let label_buttons = form.addButtonSwitch('label_toggle', 'Label Display', function () {
+            let label_buttons = FM.addButtonSwitch('label_toggle', 'Label Display', function () {
                 E.clickToggleButton('label_toggle');
             })
             set_pan.appendChild(label_buttons)
 
-            // // open graph page
-            // set_pan.appendChild(form.addBlockButton('graph', 'graph_page', 'Open Graph Page', E.clickOpenGraphDisplay));
-
-            // // open batch sim
-            // set_pan.appendChild(form.addBlockButton('batch', 'batch_page', 'Open Batch Sim Page', E.clickOpenBatchDisplay));
+            // open graph page
+            set_pan.appendChild(FM.addBlockButton('graph', 'graph_page', 'Open Graph Page', E.clickOpenGraphDisplay));
 
             // // ***************************************************
             // // add radar buttons
-            // let radar_buttons = form.addButtonSwitch('radar_toggle', 'Show Radar Control Buttons', function () {
+            // let radar_buttons = FM.addButtonSwitch('radar_toggle', 'Show Radar Control Buttons', function () {
             //     E.clickToggleButton('radar_toggle');
             // })
             // set_pan.appendChild(radar_buttons)
             // // ***************************************************
 
             // Display the current center of the map
-            let center_display = document.createElement('p')
-            center_display.innerHTML = 'Current center: '
-            set_pan.appendChild(center_display)
+            set_pan.appendChild(FM.addParagraph('current_center', 'Current center: '))
 
             // add user inputs for lat and lng
             let lat = map.getCenter()[0]
@@ -281,8 +279,8 @@ export class GCSmode {
             if (lat && lng) {
                 E.setLocalStorage([lat, lng], 'center')
             }
-            let lat_div = form.addNumberInput(0, 'center_in', 'Lat:', 0.001, 6, lat, E.inputLatLng)
-            let lng_div = form.addNumberInput(0, 'center_in', 'Lng:', 0.001, 6, lng, E.inputLatLng)
+            let lat_div = FM.addNumberInput(0, 'center_in', 'Lat:', 0.001, 6, lat, E.inputLatLng)
+            let lng_div = FM.addNumberInput(0, 'center_in', 'Lng:', 0.001, 6, lng, E.inputLatLng)
             lat_div.setAttribute('class', 'in_latlng')
             lng_div.setAttribute('class', 'in_latlng')
 
@@ -293,83 +291,80 @@ export class GCSmode {
 
         } else if (MODE.mode == 'HITL') {
 
-            let r1 = form.addRadioButtonGroup('input_method', 'Connect to hardware via IP or USB Device. Select input type:', ['IP', 'USB'], MODE.input_method, E.onRadioInputSetMode)
+            let r1 = FM.addRadioButtonGroup('input_method', 'Connect to hardware via IP or USB Device. Select input type:', ['IP', 'USB'], MODE.input_method, E.onRadioInputSetMode)
             set_pan.appendChild(r1)
 
             // ip input
-            let ip_input = form.addTextInput('HITLipAddress', 'IP Address', MODE.HITLipAddress, E.onInputSetMode);
+            let ip_input = FM.addTextInput('HITLipAddress', 'IP Address', MODE.HITLipAddress, E.onInputSetMode);
             set_pan.appendChild(ip_input);
 
             // usb port
-            let usb_input = form.addTextInput('usbport', 'USB Port', MODE.usbport, E.onInputSetMode);
+            let usb_input = FM.addTextInput('usbport', 'USB Port', MODE.usbport, E.onInputSetMode);
             set_pan.appendChild(usb_input);
 
             // port
-            let port_input = form.addTextInput('port', 'Port', MODE.port, E.onInputSetMode);
+            let port_input = FM.addTextInput('port', 'Port', MODE.port, E.onInputSetMode);
             set_pan.appendChild(port_input);
 
             // baud rate
-            let baud_input = form.addTextInput('baud', 'Baud Rate', MODE.baud, E.onInputSetMode);
+            let baud_input = FM.addTextInput('baud', 'Baud Rate', MODE.baud, E.onInputSetMode);
             set_pan.appendChild(baud_input);
 
             // add component id input
-            let comp_input = form.addTextInput('component', 'Component Id', MODE.component, E.onInputSetMode);
+            let comp_input = FM.addTextInput('component', 'Component Id', MODE.component, E.onInputSetMode);
             set_pan.appendChild(comp_input);
 
             // add submit button
-            let submit_btn = form.addBlockButton('submit', 'hitl', 'Connect To Aircraft', E.sendConnectToAc)
+            let submit_btn = FM.addBlockButton('submit', 'hitl', 'Connect To Aircraft', E.sendConnectToAc)
             set_pan.appendChild(submit_btn)
 
             // add disconnect button
-            let disconnect_btn = form.addBlockButton('disconnect', 'hitl', 'Disconect From Aircraft', E.sendDisconnectFromAc)
+            let disconnect_btn = FM.addBlockButton('disconnect', 'hitl', 'Disconect From Aircraft', E.sendDisconnectFromAc)
             set_pan.appendChild(disconnect_btn)
 
-
-            let p3 = document.createElement('p')
-            p3.innerHTML = '<br />Traffic Display Settings'
-            set_pan.appendChild(p3)
+            set_pan.appendChild(FM.addParagraph('traffic_disp_settings','<br />Traffic Display Settings'))
 
             // these are ok, but are repeated so need to put in a function
             // ***************************************************
             // allow adsb traffic
-            let adsb_buttons = form.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
+            let adsb_buttons = FM.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
                 E.clickToggleButton('adsb_toggle');
             })
             set_pan.appendChild(adsb_buttons)
 
             // allow sim traffic
-            let sim_buttons = form.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
+            let sim_buttons = FM.addButtonSwitch('sim_toggle', 'Sim Traffic Display', function () {
                 E.clickToggleButton('sim_toggle');
             })
             set_pan.appendChild(sim_buttons)
 
             // allow sensor traffic
-            let sensor_buttons = form.addButtonSwitch('sensor_toggle', 'Sensor Traffic Display', function () {
+            let sensor_buttons = FM.addButtonSwitch('sensor_toggle', 'Sensor Traffic Display', function () {
                 E.clickToggleButton('sensor_toggle');
             })
             set_pan.appendChild(sensor_buttons)
 
             // allow ic bands and radius
-            let bands_buttons = form.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
+            let bands_buttons = FM.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
                 E.clickToggleButton('bands_toggle');
             })
             set_pan.appendChild(bands_buttons)
 
             // allow merging rings display
-            let ring_buttons = form.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
+            let ring_buttons = FM.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
                 E.clickToggleButton('ring_toggle');
             })
             set_pan.appendChild(ring_buttons)
 
             // allow aircraft and traffic label display
-            let label_buttons = form.addButtonSwitch('label_toggle', 'Label Display', function () {
+            let label_buttons = FM.addButtonSwitch('label_toggle', 'Label Display', function () {
                 E.clickToggleButton('label_toggle');
             })
             set_pan.appendChild(label_buttons)
 
             // // ***************************************************
             // // add radar buttons
-            // let radar_buttons = form.addButtonSwitch('radar_toggle', 'Show Radar Control Buttons', function () {
+            // let radar_buttons = FM.addButtonSwitch('radar_toggle', 'Show Radar Control Buttons', function () {
             //     E.clickToggleButton('radar_toggle');
             // })
             // set_pan.appendChild(radar_buttons)
@@ -377,46 +372,42 @@ export class GCSmode {
 
 
             // will use icarous preset values
-            let simac_btn = form.addBlockButton('new_ac', 'sitl', 'Add Simulated Aircraft', E.createNewSimAircraftHitl)
+            let simac_btn = FM.addBlockButton('new_ac', 'sitl', 'Add Simulated Aircraft', E.createNewSimAircraftHitl)
             set_pan.appendChild(simac_btn)
 
 
         } else if (MODE.mode == 'Playback') {
             // allow adsb traffic
-            let adsb_buttons = form.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
+            let adsb_buttons = FM.addButtonSwitch('adsb_toggle', 'ADSB Traffic Display', function () {
                 E.clickToggleButton('adsb_toggle');
             })
             set_pan.appendChild(adsb_buttons)
 
             // allow ic bands and radius
-            let bands_buttons = form.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
+            let bands_buttons = FM.addButtonSwitch('bands_toggle', 'Icarous Band/Radius Display', function () {
                 E.clickToggleButton('bands_toggle');
             })
             set_pan.appendChild(bands_buttons)
 
             // allow merging rings display
-            let ring_buttons = form.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
+            let ring_buttons = FM.addButtonSwitch('ring_toggle', 'Merging Ring Display', function () {
                 E.clickToggleButton('ring_toggle');
             })
             set_pan.appendChild(ring_buttons)
 
             // allow aircraft and traffic label display
-            let label_buttons = form.addButtonSwitch('label_toggle', 'Label Display', function () {
+            let label_buttons = FM.addButtonSwitch('label_toggle', 'Label Display', function () {
                 E.clickToggleButton('label_toggle');
             })
             set_pan.appendChild(label_buttons)
 
             // Filename
-            let p = document.createElement('P')
-            p.innerText = 'File must be located in the webgs/LogFiles/ directory.'
-            set_pan.appendChild(p)
-            set_pan.appendChild(form.addFileLoadButton('set', 'playback_file_', 'Load File', E.clickLoadPlaybackFile))
-            let name_display = document.createElement('P')
-            name_display.setAttribute('id', 'name_display')
-            set_pan.appendChild(name_display)
+            set_pan.appendChild(FM.addParagraph('file_info','File must be located in the webgs/LogFiles/ directory.'))
+            set_pan.appendChild(FM.addFileLoadButton('set', 'playback_file_', 'Load File', P.clickLoadPlaybackFile))
+            set_pan.appendChild(FM.addParagraph('name_display',''))
 
             // add start button
-            let startPlayback_btn = form.addBlockButton('startPlayback', 'playback', 'Start Playback', E.sendStartPlayback)
+            let startPlayback_btn = FM.addBlockButton('startPlayback', 'playback', 'Start Playback', P.sendStartPlayback)
             set_pan.appendChild(startPlayback_btn)
 
         } else {
@@ -454,27 +445,23 @@ export class GCSmode {
         }
 
         // create div for buttons
-        let btn_div = document.createElement('DIV')
-        btn_div.setAttribute('class', 'btndiv')
-
+        let btn_div = FM.addDiv('fp_btndiv','btndiv')
+        
         ac.prev_panel = 'pan'
 
-        let ac_pan_div = document.getElementById('ac_pan_' + ac.id)
+        let ac_pan_div = document.getElementById(`ac_pan_${ac.id}`)
 
         if (ac.mode == 'SITL') {
 
             if (ac.status == 0) {
                 // add load wp from file input
-                btn_div.appendChild(form.addFileLoadButton(ac.id, 'wp_load' + ac.id, 'Load WP File', E.clickLoadWPFile))
+                btn_div.appendChild(FM.addFileLoadButton(ac.id, `wp_load${ac.id}`, 'Load WP File', E.clickLoadWPFile))
 
                 // save wp's to file
-                btn_div.appendChild(form.addTextInput('wp_file_save_' + ac.id, "Save WP's To File", MODE.save_wp_default, E.enterSaveWp))
+                btn_div.appendChild(FM.addTextInput(`wp_file_save_${ac.id}`, "Save WP's To File", MODE.save_wp_default, E.enterSaveWp))
 
                 // add form to panel
-                let fp_form = document.createElement('FORM');
-                fp_form.setAttribute('id', 'ac_fp_form_' + ac.id);
-                fp_form.setAttribute('class', 'myform')
-                ac_pan_div.appendChild(fp_form)
+                ac_pan_div.appendChild(FM.addForm(`ac_fp_form_${ac.id}`, 'myform'))
 
                 // create form elements
                 form.createFlightPlanTable(ac);
@@ -482,29 +469,29 @@ export class GCSmode {
                 // ***************************************************
                 // add radar buttons
                 if (MODE.radar) {
-                    btn_div.appendChild(form.addBlockButton(ac.id, 'r_on', 'Turn Radar On', E.clickTurnRadarOn));
-                    btn_div.appendChild(form.addBlockButton(ac.id, 'r_off', 'Turn Radar Off', E.clickTurnRadarOff));
+                    btn_div.appendChild(FM.addBlockButton(ac.id, 'r_on', 'Turn Radar On', E.clickTurnRadarOn));
+                    btn_div.appendChild(FM.addBlockButton(ac.id, 'r_off', 'Turn Radar Off', E.clickTurnRadarOff));
                 }
 
                 // ***************************************************
 
                 // add submit button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'submit_fp', 'Submit Flight Plan', E.clickSubmitFlightPlan));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'submit_fp', 'Submit Flight Plan', E.clickSubmitFlightPlan));
 
                 // add change aircraft parameters button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'change_parameters', 'Change Aircraft Parameters', E.clickChangeParameters));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'change_parameters', 'Change Aircraft Parameters', E.clickChangeParameters));
 
             } else if (ac.status == 1) {
                 ac.prev_panel = 'info_pan'
 
                 // add edit flight plan button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'edit_fp', 'Edit Flight Plan', E.clickEditFlightPlan));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'edit_fp', 'Edit Flight Plan', E.clickEditFlightPlan));
 
                 // add a start flight button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'start', 'Start Flight', E.clickSendStartFlight));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'start', 'Start Flight', E.clickSendStartFlight));
 
                 // add a start flight button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
 
             } else if (ac.status == 2) {
                 ac.prev_panel = 'inFlight_pan'
@@ -512,13 +499,13 @@ export class GCSmode {
 
                 // add a stop flight button
                 // Not sure what we should do with this RTL/Land Immidiatley/Power off Midair
-                // btn_div.appendChild(form.addBlockButton(ac.id, 'stop_flight', 'Stop Flight', E.clickStopFlight));
+                // btn_div.appendChild(FM.addBlockButton(ac.id, 'stop_flight', 'Stop Flight', E.clickStopFlight));
 
                 // add a start flight button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
 
                 // add reset icarous button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'reset_icarous', 'Reset Icarous', E.clickResetIcarous))
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'reset_icarous', 'Reset Icarous', E.clickResetIcarous))
 
             } else if (ac.status == 3) {
                 console.log('Build post flight panel.')
@@ -551,26 +538,23 @@ export class GCSmode {
             // ***************************************************
 
             // add forward data button
-            btn_div.appendChild(form.addBlockButton(ac.id, 'shutdown', 'Forward Data', E.clickForwardData));
+            btn_div.appendChild(FM.addBlockButton(ac.id, 'shutdown', 'Forward Data', E.clickForwardData));
 
             // add shutdown button
-            btn_div.appendChild(form.addBlockButton(ac.id, 'shutdown', 'Shutdown', E.clickShutdown));
+            btn_div.appendChild(FM.addBlockButton(ac.id, 'shutdown', 'Shutdown', E.clickShutdown));
 
         } else if (ac.mode == 'HITL') {
 
             if (ac.status == 0) {
 
                 // add load wp from file
-                btn_div.appendChild(form.addFileLoadButton(ac.id, 'wp_load' + ac.id, 'Load WP File', E.clickLoadWPFile))
+                btn_div.appendChild(FM.addFileLoadButton(ac.id, `wp_load${ac.id}`, 'Load WP File', E.clickLoadWPFile))
 
                 // save wp's to file
-                btn_div.appendChild(form.addTextInput('wp_file_save_' + ac.id, "Save WP's To File", MODE.save_wp_default, E.enterSaveWp))
+                btn_div.appendChild(FM.addTextInput(`wp_file_save_${ac.id}`, "Save WP's To File", MODE.save_wp_default, E.enterSaveWp))
 
                 // add form to panel
-                let fp_form = document.createElement('FORM');
-                fp_form.setAttribute('id', 'ac_fp_form_' + ac.id);
-                fp_form.setAttribute('class', 'myform')
-                ac_pan_div.appendChild(fp_form)
+                ac_pan_div.appendChild(FM.addForm(`ac_fp_form_${ac.id}`, 'myform'))
 
                 // create form elements
                 form.createFlightPlanTable(ac);
@@ -578,35 +562,35 @@ export class GCSmode {
                 // ***************************************************
                 // add radar buttons
                 if (MODE.radar) {
-                    btn_div.appendChild(form.addBlockButton(ac.id, 'r_on', 'Turn Radar On', E.clickTurnRadarOn));
-                    btn_div.appendChild(form.addBlockButton(ac.id, 'r_off', 'Trun Radar Off', E.clickTurnRadarOff));
+                    btn_div.appendChild(FM.addBlockButton(ac.id, 'r_on', 'Turn Radar On', E.clickTurnRadarOn));
+                    btn_div.appendChild(FM.addBlockButton(ac.id, 'r_off', 'Trun Radar Off', E.clickTurnRadarOff));
                 }
 
                 // ***************************************************
 
                 // add submit button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'submit_fp', 'Submit Flight Plan', E.clickSubmitFlightPlan));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'submit_fp', 'Submit Flight Plan', E.clickSubmitFlightPlan));
 
                 // add change aircraft parameters button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'change_parameters', 'Change Aircraft Parameters', E.clickChangeParameters));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'change_parameters', 'Change Aircraft Parameters', E.clickChangeParameters));
 
             } else if (ac.status == 1) {
                 // add edit flight plan button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'edit_fp', 'Edit Flight Plan', E.clickEditFlightPlan));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'edit_fp', 'Edit Flight Plan', E.clickEditFlightPlan));
 
                 // add a start flight button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'start', 'Start Flight', E.clickSendStartFlight));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'start', 'Start Flight', E.clickSendStartFlight));
 
                 // add a start flight button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
 
             } else if (ac.status == 2) {
 
                 // add a start flight button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'start', 'Start Icarous', E.clickSendStartIcarous));
 
                 // add reset icarous button
-                btn_div.appendChild(form.addBlockButton(ac.id, 'reset_icarous', 'Reset Icarous', E.clickResetIcarous))
+                btn_div.appendChild(FM.addBlockButton(ac.id, 'reset_icarous', 'Reset Icarous', E.clickResetIcarous))
 
             } else if (ac.status == 3) {
                 console.log('Build post flight panel.')
@@ -637,17 +621,14 @@ export class GCSmode {
             //     btn_div = Traffic.addSimTrafficButtons(btn_div, ac.id, t)
             // }
             // ***************************************************
-
+	    
             // add forward data button
-            btn_div.appendChild(form.addBlockButton(ac.id, 'shutdown', 'Forward Data', E.clickForwardData));
+            btn_div.appendChild(FM.addBlockButton(ac.id, 'forward', 'Forward Data', E.clickForwardData));
 
         } else if (ac.mode == 'Playback') {
             if (ac.status == 0) {
                 // add form to panel
-                let fp_form = document.createElement('FORM');
-                fp_form.setAttribute('id', 'ac_fp_form_' + ac.id);
-                fp_form.setAttribute('class', 'myform')
-                ac_pan_div.appendChild(fp_form)
+                ac_pan_div.appendChild(FM.addForm(`ac_fp_form_${ac.id}`, 'myform'))
 
                 // create form elements
                 form.createFlightPlanTable(ac);
@@ -655,8 +636,9 @@ export class GCSmode {
 
         }
 
-        btn_div.appendChild(form.addBlockButton('daa_' + ac.id, 'open_daa', 'Open DAA Display', E.clickOpenDAADisplay));
-        btn_div.appendChild(form.addBlockButton('centerOnAC' + ac.id,'centerOnAC', 'Center Map on Aircraft', E.clickCenterMapOnAC))
+        btn_div.appendChild(FM.addBlockButton(`daa_${ac.id}`, 'open_daa', 'Open DAA Display', E.clickOpenDAADisplay));
+        btn_div.appendChild(FM.addBlockButton(`centerOnAC${ac.id}`,'centerOnAC', 'Center Map on Aircraft', E.clickCenterMapOnAC))
+        
         let name
         if (ac.status == 0) {
             name = 'pan'
@@ -667,7 +649,7 @@ export class GCSmode {
         } else if (ac.status == 3) {
             name = 'postFlight_pan'
         }
-        btn_div.setAttribute('id', 'btn_div_' + name + '_' + ac.id)
+        btn_div.setAttribute('id', `btn_div_${name}_${ac.id}`)
         return btn_div
     }
 

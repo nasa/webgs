@@ -6,6 +6,10 @@ Limit GS Mode options based on server os
 Change windows default host to '127.0.0.1'
 Update forwarding 
 Fix mavlink '._instance_field missing' errors
+Update node security settings
+Update map settings
+Reduce alert banner font size
+Refactor form elements and some code cleanup
 
 ### v1.0.9
 Add center map on aircraft button to ac panel

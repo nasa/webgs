@@ -56,13 +56,11 @@ let providerURL = 'https://www.mapbox.com'
 let providerName = 'Mapbox'
 
 // enter the url for the map api here
-let mapURL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + token
+let mapURL = `https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=${token}`
 
 
 // Auto updated by the variables above. This must be included on the map.
-let attribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> ' +
-    'contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-    'Imagery © <a href="' + providerURL + '">' + providerName + '</a>'
+let attribution = `Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="${providerURL}">${providerName}</a>`
 
 // Open street maps are free, but are slower to load.
 let osmURL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'

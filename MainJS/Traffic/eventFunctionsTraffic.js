@@ -49,6 +49,7 @@ import * as S from '../control/saveFile.js'
 
 import * as M from '../views/map.js'
 import * as F from '../views/form.js'
+import * as FM from '../models/formElements.js'
 
 import * as T from './traffic.js'
 
@@ -175,13 +176,13 @@ export function addT(ac, center) {
 
     // update the ac
     clearSubpanelsFromList(ac)
-    ac.activeSubPanels.push('ac_traffic_pan_' + t_id + '_' + ac.id)
+    ac.activeSubPanels.push(`ac_traffic_pan_${t_id}_${ac.id}`)
 
     // make it active
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 
     // show the summary button
-    let s_btn = document.getElementById('t_summary_pan_btn_' + ac.id)
+    let s_btn = document.getElementById(`t_summary_pan_btn_${ac.id}`)
     if (s_btn) {
         s_btn.classList.replace('hide', 'show')
     }
@@ -204,7 +205,7 @@ export function resizeTrafficForm() {
             // get the table
             let id = par.id.split('_')
             let t_id = id[id.length - 2]
-            let table = document.getElementById('ac_traffic_table_' + t_id + '_' + ac.id)
+            let table = document.getElementById(`ac_traffic_table_${t_id}_${ac.id}`)
 
             // get the sum of the heights of the children
             let h = 0
@@ -215,8 +216,8 @@ export function resizeTrafficForm() {
             h = h - table.clientHeight
 
             // adjust the min/max height of the form to fit the remaining space in the panel
-            table.style.maxHeight = (par.clientHeight - h - (par.clientHeight * .02)).toString() + 'px'
-            table.style.minHeight = (par.clientHeight - h - (par.clientHeight * .02)).toString() + 'px'
+            table.style.maxHeight = `${(par.clientHeight - h - (par.clientHeight * .02))}px`
+            table.style.minHeight = `${(par.clientHeight - h - (par.clientHeight * .02))}px`
         }
     }
 }
@@ -252,36 +253,22 @@ export function clickStartTraffic() {
     // prep the message
     let lat = traffic.marker._latlng.lat
     let lng = traffic.marker._latlng.lng
-    let range = 0;
-    let bearing = document.getElementById('BER_T_' + t_id + '_Bearing: deg. _' + ac.id).value;
-    let altitude = document.getElementById('ALT_T_' + t_id + '_Altitude: MSL _' + ac.id).value;
-    let heading = document.getElementById('BER_T_' + t_id + '_Bearing: deg. _' + ac.id).value;
-    let gs = document.getElementById('VEL_T_' + t_id + '_Velocity: m/s _' + ac.id).value;
-    let vs = 0;
+    let range = 0
+    let bearing = document.getElementById(`BER_T_${t_id}_Bearing: deg. _${ac.id}`).value
+    let altitude = document.getElementById(`ALT_T_${t_id}_Altitude: MSL _${ac.id}`).value
+    let heading = document.getElementById(`BER_T_${t_id}_Bearing: deg. _${ac.id}`).value
+    let gs = document.getElementById(`VEL_T_${t_id}_Velocity: m/s _${ac.id}`).value
+    let vs = 0
     let emit = 255
 
-    let msg = 'ADD_TRAFFIC ' + t_id +
-        ' ' + lat +
-        ' ' + lng +
-        ' ' + range +
-        ' ' + bearing +
-        ' ' + altitude +
-        ' ' + gs +
-        ' ' + heading +
-        ' ' + vs +
-        ' ' + emit +
-        ' ' + t_id
-
-    // send message
-
-    C.sendFullMessage(msg);
+    C.sendFullMessage(`ADD_TRAFFIC ${t_id} ${lat} ${lng} ${range} ${bearing} ${altitude} ${gs} ${heading} ${vs} ${emit} ${t_id}`);
 
     // update the ac
     clearSubpanelsFromList(ac)
     ac.activeSubPanels.push('ac_traffic_summary')
 
     // return to prev_panel
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id);
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`);
     T.updateTrafficSummaryPanel()
 
     T.removeTrafficMarker(ac.id, traffic.marker)
@@ -335,17 +322,16 @@ export function removeTraffic(ac, t) {
                 T.removeTrafficMarker(a.id, tr.marker)
 
                 // update ac
-                a.activeSubPanels = a.activeSubPanels.filter(el => el != 'ac_traffic_pan_' + tr.id + '_' + a.id)
+                a.activeSubPanels = a.activeSubPanels.filter(el => el != `ac_traffic_pan_${tr.id}_${a.id}`)
 
                 // remove panel
-                t_panel = document.getElementById('ac_traffic_pan_' + tr.id + '_' + a.id)
-                t_panel.parentNode.removeChild(t_panel)
+                FM.removeElement(document.getElementById(`ac_traffic_pan_${tr.id}_${a.id}`))
 
                 // remove from traffic list
                 T.removeTrafficFromList(a, tr.id)
 
                 // send message to server to remove traffic
-                C.sendFullMessage('REMOVE_TRAFFIC ' + tr.id)
+                C.sendFullMessage(`REMOVE_TRAFFIC ${tr.id}`)
 
                 // update summary panel
                 T.updateTrafficSummaryPanel()
@@ -378,7 +364,7 @@ export function clickShowTrafficSummary() {
         btn.classList.replace('show', 'hide')
 
         // show the hide button
-        let h_btn_in = document.getElementById('t_summary_hide_' + ac.prev_panel + '_btn_' + id)
+        let h_btn_in = document.getElementById(`t_summary_hide_${ac.prev_panel}_btn_${id}`)
         h_btn_in.classList.replace('hide', 'show')
 
     } else if (btn.innerHTML == 'Hide Traffic Panel') {
@@ -386,11 +372,11 @@ export function clickShowTrafficSummary() {
         btn.classList.replace('show', 'hide')
 
         // show the show button
-        let s_btn_in = document.getElementById('t_summary_' + ac.prev_panel + '_btn_' + id)
+        let s_btn_in = document.getElementById(`t_summary_${ac.prev_panel}_btn_${id}`)
         s_btn_in.classList.replace('hide', 'show')
     }
     // refresh the main panel
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 }
 
 /**
@@ -408,16 +394,16 @@ export function clickTrafficMarker() {
     if (traffic.inFlight == false) {
         // hide any active traffic panels
         clearSubpanelsFromList(ac)
-        ac.activeSubPanels.push('ac_traffic_pan_' + t_id + '_' + id)
-        F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+        ac.activeSubPanels.push(`ac_traffic_pan_${t_id}_${id}`)
+        F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 
         // highlight row associated with this marker
         F.removeHighlight()
-        document.getElementById('row_traffic_' + ac.id + '_' + t_id).classList.add('highlight')
+        document.getElementById(`row_traffic_${ac.id}_${t_id}`).classList.add('highlight')
     } else {
         clearSubpanelsFromList(ac)
         ac.activeSubPanels.push('ac_traffic_summary')
-        F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+        F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 
         // find the row in the summary panel
         let tp = document.getElementsByClassName('t_p')
@@ -452,7 +438,7 @@ export function makeTrafficPanelActive(pan_id) {
     ac.activeSubPanels.push(pan_id)
 
     // make the panel active
-    F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+    F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
 
 }
 
@@ -482,7 +468,7 @@ export function inputTraficBearing(e) {
                     t = T.getTrafficById(ac, t_id)
 
                     // get the bearing
-                    in_val = document.getElementById('BER_T_' + t.id + '_Bearing: deg. _' + ac.id).value
+                    in_val = document.getElementById(`BER_T_${t.id}_Bearing: deg. _${ac.id}`).value
                     if (in_val > 360 || in_val < 0) {
                         F.alertBannerRed('Input bearing must be between 0 and 360 degrees.')
                         return
@@ -520,11 +506,11 @@ export function enterSaveTraffic(e) {
         }
 
         let ac = AM.getActiveAc()
-        let lat = document.getElementById('LAT_traffic_' + ac.id + '_' + t_id).value
-        let lng = document.getElementById('LNG_traffic_' + ac.id + '_' + t_id).value
-        let alt = document.getElementById('ALT_T_' + t_id + '_Altitude: MSL _' + ac.id).value;
-        let hdg = document.getElementById('BER_T_' + t_id + '_Bearing: deg. _' + ac.id).value;
-        let vel = document.getElementById('VEL_T_' + t_id + '_Velocity: m/s _' + ac.id).value;
+        let lat = document.getElementById(`LAT_traffic_${ac.id}_${t_id}`).value
+        let lng = document.getElementById(`LNG_traffic_${ac.id}_${t_id}`).value
+        let alt = document.getElementById(`ALT_T_${t_id}_Altitude: MSL _${ac.id}`).value;
+        let hdg = document.getElementById(`BER_T_${t_id}_Bearing: deg. _${ac.id}`).value;
+        let vel = document.getElementById(`VEL_T_${t_id}_Velocity: m/s _${ac.id}`).value;
         let t = T.getTrafficById(ac, t_id)
         let emit = t.emit
 

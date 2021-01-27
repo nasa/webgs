@@ -40,12 +40,8 @@
 
 
 
-import {
-    AircraftManager
-} from '../models/aircraft_manager.js'
-import {
-    GCSmode
-} from '../models/gcsmode.js'
+import { AircraftManager } from '../models/aircraft_manager.js'
+import { GCSmode } from '../models/gcsmode.js'
 
 export let AM = new AircraftManager()
 export let MODE = new GCSmode()

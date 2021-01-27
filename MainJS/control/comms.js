@@ -49,6 +49,7 @@ import * as F from '../views/form.js'
 import * as M from '../views/map.js'
 
 import * as W from '../models/waypoint.js'
+import * as FM from '../models/formElements.js'
 
 import * as E from '../control/eventFunctions.js'
 import * as P from '../control/playback.js'
@@ -73,16 +74,16 @@ let comms_timeout = 10
 export function createConnection(ip, port) {
     // Connection Setup
     if (MODE.protocol == 'https:') {
-        window.connection = new WebSocket('wss://' + ip + ':' + port);
+        window.connection = new WebSocket(`wss://${ip}:${port}`);
     } else if (MODE.protocol == 'http:') {
-        window.connection = new WebSocket('ws://' + ip + ':' + port)
+        window.connection = new WebSocket(`ws://${ip}:${port}`)
     }
     connection.onopen = function (event) {
         // check local user settings
         E.checkLocalStorage()
 
-        console.log('Connection Established: ws://' + ip + ':' + port)
-        F.alertBannerGreen('Connection Established: ws://' + ip + ':' + port)
+        console.log(`Connection Established: ws://${ip}:${ port}`)
+        FM.alertBannerGreen(`Connection Established: ws://${ip}:${port}`)
 
         MODE.con_status = 'Connection Status: Connected'
 
@@ -99,17 +100,17 @@ export function createConnection(ip, port) {
     };
 
     connection.onclose = function (event) {
-        console.log('Closing Connection: ws://' + ip + ':' + port)
+        console.log(`Closing Connection: ws://${ip}:${port}`)
         if (event.code == 1006) {
 
             MODE.con_status = 'Connection Status: Disconnected'
             F.updateSettingsPanel()
 
-            F.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.')
+            FM.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.')
         } else {
             MODE.con_status = 'Connection Status: Disconnected'
             F.updateSettingsPanel()
-            F.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.', event.code)
+            FM.alertBannerRed('Unable to connect. Please check the IP address and port, and then try again.', event.code)
         }
     }
 
@@ -128,13 +129,13 @@ export function createConnection(ip, port) {
 
         if (m.name == 'HITL') {
             if (m.INFO == 'CONNECTION_FAILED') {
-                F.alertBannerRed('Connection Failed. Please check the settings, and try again.')
+                FM.alertBannerRed('Connection Failed. Please check the settings, and try again.')
             }
             console.log(m)
             return
 
         } else if (m.TYPE == 'CONNECTING') {
-            F.alertBannerRed('Waiting for Heartbeat from ac ' + m.AIRCRAFT)
+            FM.alertBannerRed(`Waiting for Heartbeat from ac ${m.AIRCRAFT}`)
             return
 
         } else if (m.name == 'SHUT_DOWN') {
@@ -152,8 +153,8 @@ export function createConnection(ip, port) {
             return
 
         } else if (m.name == 'IC_PLAYBACK') {
-            E.sendStopPlayback()
-            F.alertBannerRed(m.INFO)
+            P.sendStopPlayback()
+            FM.alertBannerRed(m.INFO)
             return
 
         } else if (m.name == 'LOGPLAYER') {
@@ -162,31 +163,31 @@ export function createConnection(ip, port) {
 
         } else if (m.name == 'PATH_ICAROUS' || m.name == 'PATH_ARDUPILOT') {
             if (m.type == 'PASS') {
-                F.alertBannerGreen(m.I)
+                FM.alertBannerGreen(m.I)
             } else {
-                F.alertBannerRed(m.I + m.name)
+                FM.alertBannerRed(`${m.I}${m.name}`)
             }
-        
+
         } else if (m.name = 'SERVER_OS') {
-            F.alertBannerGreen(`Server OS: ${m.I}`)
+            FM.alertBannerGreen(`Server OS: ${m.I}`)
             MODE.server_os = m.I
             F.updateSettingsPanel()
-
+            
         } else if (m.name == 'SAVE') {
             if (MODE.alert) {
                 if (m.INFO == 'FAIL') {
-                    F.alertBannerRed('Save Failed: ' + m.MSG)
+                    FM.alertBannerRed(`Save Failed: ${m.MSG}`)
                 } else if (m.INFO == 'SUCCESS') {
-                    F.alertBannerGreen('Save Succeded: ' + m.MSG)
+                    FM.alertBannerGreen(`Save Succeded: ${m.MSG}`)
                 }
             }
             return
         } else if (m.name == 'LOAD') {
             if (MODE.alert) {
                 if (m.INFO == 'FAIL') {
-                    F.alertBannerRed('Load Failed: ' + m.MSG)
+                    FM.alertBannerRed(`Load Failed: ${m.MSG}`)
                 } else if (m.INFO == 'SUCCESS') {
-                    F.alertBannerGreen('Load Succeded: ' + m.MSG)
+                    FM.alertBannerGreen(`Load Succeded: ${m.MSG}`)
                 }
             }
             return
@@ -284,11 +285,10 @@ export function createConnection(ip, port) {
                     }
 
                     if (ac.parameters.length == 0) {
-                        let msg = 'AIRCRAFT ' + ac.id + ' UPDATE_PARAM_LIST'
-                        sendFullMessage(msg)
+                        sendFullMessage(`AIRCRAFT ${ac.id} UPDATE_PARAM_LIST`)
                     }
 
-                } else if (m.type == 18) {
+                } else if (m.type == 18 || m.type == 0) {
                     let icflightmode = m.custom_mode
                     if (icflightmode == 0) {
                         ac.icflightmode = 'IDLE'
@@ -313,12 +313,12 @@ export function createConnection(ip, port) {
             }
 
         } else if (m.TYPE == 'TRAFFIC') {
-            // check mode settings
-            console.log(m.ICAO_address, m.callsign)
+
             let name  = m.callsign
             if (m.callsign == '') {
                 name = m.ICAO_address
             }
+            // check mode settings
             if (MODE.sim && (m.emitter_type == 255)) {
                 T.UpdateTraffic(name, 'SIM', m.lat, m.lon, m.hor_velocity, m.heading, m.altitude, 255, m.AIRCRAFT, m.callsign)
                 T.updateTrafficSummaryPanel()
@@ -382,11 +382,11 @@ export function createConnection(ip, port) {
             }
 
             for (let i = 1; i <= num; i++) {
-                band = m['type' + i] % 7
+                band = m[`type${i}`] % 7
                 lookup = ac.bands.ic_bands.type_table[band]
                 if (band <= 5) {
-                    ac.bands.ic_bands.type[type].bands[lookup][0].push(m['min' + i])
-                    ac.bands.ic_bands.type[type].bands[lookup][1].push(m['max' + i])
+                    ac.bands.ic_bands.type[type].bands[lookup][0].push(m[`min${i}`])
+                    ac.bands.ic_bands.type[type].bands[lookup][1].push(m[`max${i}`])
 
                 } else {
                     // clear the bands
@@ -410,13 +410,13 @@ export function createConnection(ip, port) {
         } else if (m.TYPE == 'STATUSTEXT') {
 
             if (m.severity >= 4) {
-                F.alertBannerGreen('Aircraft ' + ac.id + ' STATUSTEXT ' + m.severity + ': ' + m.text)
+                FM.alertBannerGreen(`Aircraft ${ac.id} STATUSTEXT ${m.severity}: ${m.text}`)
             } else if (m.severity == 3) {
-                F.alertBannerYellow('Aircraft ' + ac.id + ' STATUSTEXT ' + m.severity + ': ' + m.text)
+                FM.alertBannerYellow(`Aircraft ${ac.id} STATUSTEXT ${m.severity}: ${m.text}`)
             } else if (m.severity == 2) {
-                F.alertBannerOrange('Aircraft ' + ac.id + ' STATUSTEXT ' + m.severity + ': ' + m.text)
+                FM.alertBannerOrange(`Aircraft ${ac.id} STATUSTEXT ${m.severity}: ${m.text}`)
             } else if (m.severity == 1) {
-                F.alertBannerRed('Aircraft ' + ac.id + ' STATUSTEXT ' + m.severity + ': ' + m.text)
+                FM.alertBannerRed(`Aircraft ${ac.id} STATUSTEXT ${m.severity}: ${m.text}`)
             }
 
             // Use the call sign as the ac name
@@ -500,25 +500,29 @@ export function createConnection(ip, port) {
             ac.mission_current = m.seq
             M.DrawFlightPlan()
 
+        } else if (m.TYPE == 'MISSION_CLEAR_ALL') {
+            console.log('Cleared Mission, Refreshing Display.')
+            E.refreshDisplay(ac)
+            
         } else if (m.TYPE == 'WAYPOINTLOAD') {
             // add messages to loading div
             let msg = document.createElement('P')
             msg.innerHTML = m.INFO
             try {
-                document.getElementById('loading_sendwaypoints_' + ac.id).appendChild(msg)
+                document.getElementById(`loading_sendwaypoints_${ac.id}`).appendChild(msg)
             } catch {
                 console.log('Loading Panel Not Found. (This must not be my ac)')
             }
             if (m.INFO == 'LOAD FAILED TIMEOUT REACHED') {
-                F.alertBannerRed('Load Failed: Timout Reached')
+                FM.alertBannerRed('Load Failed: Timout Reached')
                 // go back to planning page
                 ac.status = 0
-                F.makePanelActive('ac_pan_' + ac.id)
+                F.makePanelActive(`ac_pan_${ac.id}`)
                 M.DrawFlightPlan()
             } else if (m.INFO == 'SUCCESS') {
-                sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id)
+                sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_WAYPOINTS ${ac.id}`)
                 // go to info page
-                F.makePanelActive('ac_info_pan_' + ac.id)
+                F.makePanelActive(`ac_info_pan_${ac.id}`)
             }
 
         } else if (m.TYPE == 'STARTFLIGHT') {
@@ -526,18 +530,18 @@ export function createConnection(ip, port) {
             let msg = document.createElement('P')
             msg.innerHTML = m.INFO
             try {
-                document.getElementById('loading_startflight_' + ac.id).appendChild(msg)
+                document.getElementById(`loading_startflight_${ac.id}`).appendChild(msg)
             } catch {
                 console.log('Loading Panel Not Found. (This must not be my ac)')
             }
             if (m.INFO == 'FAIL') {
-                F.alertBannerRed('Start Flight Failed')
+                FM.alertBannerRed('Start Flight Failed')
                 // go back to info
-                F.makePanelActive('ac_info_pan_' + ac.id)
+                F.makePanelActive(`ac_info_pan_${ac.id}`)
 
             } else if (m.INFO == 'SUCCESS') {
                 // go to inFlight page
-                F.makePanelActive('ac_inFlight_pan_' + ac.id)
+                F.makePanelActive(`ac_inFlight_pan_${ac.id}`)
             }
 
         } else if (m.TYPE == 'GEOFENCELOAD') {
@@ -549,7 +553,7 @@ export function createConnection(ip, port) {
                 x.appendChild(msg)
             }
             if (m.INFO == 'FAIL') {
-                F.alertBannerRed('Load Failed: Timeout Reached')
+                FM.alertBannerRed('Load Failed: Timeout Reached')
                 let pan = document.getElementById('loading_ac_sendgeofence')
                 console.log(pan)
                 let id = pan.getAttribute('fence')
@@ -557,27 +561,25 @@ export function createConnection(ip, port) {
                 let f = F.getFenceById(id, ac)
                 f.submitted = false
                 ac.activeSubPanels.splice(ac.activeSubPanels.indexOf('loading_ac_sendgeofence'))
-                ac.activeSubPanels.push('ac_geofence_pan_' + f.id + '_' + ac.id)
-                F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+                ac.activeSubPanels.push(`ac_geofence_pan_${f.id}_${ac.id}`)
+                F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
             } else if (m.INFO == 'SUCCESS') {
                 // remove the loading panel
-                let pan = document.getElementsByClassName('active loading geofence')
-                for (let item of pan) {
-                    item.parentNode.removeChild(item)
-                }
+                FM.removeChildren(document.getElementsByClassName('active loading geofence'))
+
                 // update the ac
                 ac.activeSubPanels.splice(ac.activeSubPanels.indexOf('loading_ac_sendgeofence'))
                 ac.activeSubPanels.push('ac_geofence_summary')
-                F.makePanelActive('ac_' + ac.prev_panel + '_' + ac.id)
+                F.makePanelActive(`ac_${ac.prev_panel}_${ac.id}`)
             }
 
         } else if (m.TYPE == 'BATTERY_STATUS') {
             // update aircraft
-            ac.voltage = parseFloat(m.voltages.slice(0, 2) + '.' + m.voltages.slice(2))
+            ac.voltage = parseFloat(`${m.voltages.slice(0, 2)}.${m.voltages.slice(2)}`)
             ac.current = m.current_battery
             ac.battery_remaining = m.battery_remaining
 
-            let bat = document.getElementById('battery_' + ac.id)
+            let bat = document.getElementById(`battery_${ac.id}`)
             if (bat && ac.battery_remaining >= 50) {
                 bat.setAttribute('class', 'green')
             } else if (bat && ac.battery_remaining >= 20) {
@@ -589,7 +591,7 @@ export function createConnection(ip, port) {
         } else if (m.TYPE == 'RADIO_QUALITY') {
             ac.radio_percent = m.PERCENT
             ac.radio_missing = m.MISSING
-            let radio = document.getElementById('radio_' + ac.id)
+            let radio = document.getElementById(`radio_${ac.id}`)
             if (radio && m.PERCENT >= 90) {
                 radio.setAttribute('class', 'green')
             } else if (radio && m.PERCENT >= 80) {
@@ -601,7 +603,7 @@ export function createConnection(ip, port) {
 
         } else if (m.TYPE == 'GPS_RAW_INT' || m.TYPE == 'GPS_STATUS' || m.TYPE == 'GPS_RAW') {
             ac.satellites_visible = m.satellites_visible
-            let gps = document.getElementById('gps_' + ac.id)
+            let gps = document.getElementById(`gps_${ac.id}`)
             if (gps && m.satellites_visible >= 12) {
                 gps.setAttribute('class', 'green')
             } else if (gps && m.satellites_visible >= 9) {
@@ -632,9 +634,8 @@ export function sendMessage(out_message) {
     } else {
         id = ac.id
     }
-    connection.send('AIRCRAFT ' + id + ' ' + out_message);
-    // console.log('Sent Message: ' + 'AIRCRAFT ' + id + ' ' + out_message);
-    // console.trace()
+    connection.send(`AIRCRAFT ${id} ${out_message}`);
+    // console.log(out_message)
 }
 
 /**
@@ -645,8 +646,7 @@ export function sendMessage(out_message) {
  */
 export function sendFullMessage(out_message) {
     connection.send(out_message)
-    // console.log('Send Full Message: ' + out_message)
-    // console.trace()
+    // console.log(out_message)
 }
 
 
@@ -665,7 +665,7 @@ function periodicEvents_5() {
     // TODO: will error if ac shutdown before loading finishes
     AM.getAircraftList().forEach(function (el) {
         // check start up loading status
-        let loading = document.getElementById('loading_startup_' + el.id)
+        let loading = document.getElementById(`loading_startup_${el.id}`)
         let x = false;
 
         if (loading != null) {
@@ -677,7 +677,7 @@ function periodicEvents_5() {
         }
 
         if (el.hasComms && x) {
-            F.makePanelActive('ac_pan_' + el.id)
+            F.makePanelActive(`ac_pan_${el.id}`)
         }
 
         // Move to loading page if lost comms with ac
@@ -689,27 +689,24 @@ function periodicEvents_5() {
                 ac_id = ac.id
             }
             if (ac_id && el.id == ac_id) {
-                F.makePanelActive('loading_startup_' + el.id)
+                F.makePanelActive(`loading_startup_${el.id}`)
             }
             el.gps_status = false
         }
     })
 }
 
-
-
 function periodicEvents_3() {
     if (MODE.Tadsb && MODE.mode == 'SITL') {
         for (let ac of AM.aircraft_list) {
             for (let t of ac.traffic_list) {
-                if (Date.now() - t.lastUpdate > 2000 && t.inFlight) {
+                if (Date.now() - t.lastUpdate > 3000 && t.inFlight) {
                     TE.removeTraffic(ac, t)
                 }
             }
         }
     }
 }
-
 
 function periodicEvents_1() {
     let m
@@ -719,8 +716,7 @@ function periodicEvents_1() {
         for (let ac of AM.aircraft_list) {
             for (let a of AM.aircraft_list) {
                 if (a.id != ac.id) {
-                    m = 'AIRCRAFT ' + a.id + ' ADSB_VEHICLE ' + ac.id + ' ' + ac.vx + ' ' + ac.vy + ' ' + ac.vz + ' ' + ac.lat + ' ' + ac.lng + ' ' + ac.rel_alt
-                    sendFullMessage(m)
+                    sendFullMessage(`AIRCRAFT ${a.id} ADSB_VEHICLE ${ac.id} ${ac.vx} ${ac.vy} ${ac.vz} ${ac.lat} ${ac.lng} ${ac.rel_alt}`)
                 }
             }
         }

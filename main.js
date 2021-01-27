@@ -44,6 +44,8 @@ const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const https = require('https')
 const fs = require('fs')
+const path = require('path')
+const constants = require('constants')
 
 const app = express()
 
@@ -52,47 +54,42 @@ const args = process.argv.slice(2)
 console.log(args)
 
 // Recomended securty stuff -= https://expressjs.com/en/advanced/best-practice-security.html
-app.use(helmet())
-
+app.use(helmet.hsts({
+    maxAge: 31536000
+}))
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
     extended: false
 }))
 
-
 // parse json
 app.use(bodyParser.json())
-
 
 // use port 8082
 app.set('port', process.env.PORT || 8082)
 
-
 // redirect empty path to main page
 app.get('/', (request, response) => {
-    response.sendFile(__dirname + '/index.html')
+    response.sendFile(path.join(__dirname,'index.html'))
 })
-
 
 // redirect daa-displays to dist folder - need to work with paolo to fix this
 app.get('/apps/DAA/daa-displays/ColladaModels/*', (request, response) => {
     let file = request.originalUrl.split('/')
-    response.sendFile(__dirname + '/apps/DAA/daa-displays/dist/daa-displays/ColladaModels/' + file[file.length - 1])
+    response.sendFile(path.join(__dirname,'/apps/DAA/daa-displays/dist/daa-displays/ColladaModels/',file[file.length - 1]))
 })
 app.get('/apps/DAA/daa-displays/images/*', (request, response) => {
     let file = request.originalUrl.split('/')
-    response.sendFile(__dirname + '/apps/DAA/daa-displays/dist/daa-displays/images/' + file[file.length - 1])
+    response.sendFile(path.join(__dirname,'/apps/DAA/daa-displays/dist/daa-displays/images/',file[file.length - 1]))
 })
 app.get('/apps/DAA/daa-displays/svgs/*', (request, response) => {
     let file = request.originalUrl.split('/')
-    response.sendFile(__dirname + '/apps/DAA/daa-displays/dist/daa-displays/svgs/' + file[file.length - 1])
+    response.sendFile(path.join(__dirname,'/apps/DAA/daa-displays/dist/daa-displays/svgs/',file[file.length - 1]))
 })
-
 
 // opens all routes - may need to limit this later
 app.use(express.static('./'))
-
 
 // start the server in http or https
 if (args.includes('DEV')) {
@@ -100,10 +97,27 @@ if (args.includes('DEV')) {
         console.log('Server Started on Port 8082')
     })
 } else {
-    https.createServer({
-        key: fs.readFileSync(`certs/${args[1]}`),
-        cert: fs.readFileSync(`certs/${args[0]}`)
-    }, app).listen(8082, () => {
+    let cipher_list = 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:AES128-SHA256:AES256-HA256:AES128-SHA:AES256-SHA'
+    let context 
+    if (args[2]) {
+        context = {
+            key: fs.readFileSync(`certs/${args[1]}`),
+            cert: fs.readFileSync(`certs/${args[0]}`),
+            ciphers: cipher_list,
+            secureOptions: constants.SSL_OP_NO_TLSv1 | constants.SSL_OP_NO_TLSv1_1,
+            minVersion: 'TLSv1.2',
+            ca: fs.readFileSync(`certs/${args[2]}`)
+        }
+    } else {
+        context = {
+            key: fs.readFileSync(`certs/${args[1]}`),
+            cert: fs.readFileSync(`certs/${args[0]}`),
+            ciphers: cipher_list,
+            secureOptions: constants.SSL_OP_NO_TLSv1 | constants.SSL_OP_NO_TLSv1_1,
+            minVersion: 'TLSv1.2'
+        }
+    }
+    https.createServer(context, app).listen(8082, () => {
         console.log('Secure Server Started on Port 8082')
     })
 }

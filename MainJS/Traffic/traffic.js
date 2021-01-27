@@ -1,13 +1,13 @@
 /**
  *
  * @module traffic
- * @version 1.0.1
+ * @version 1.0.2
  * @description <b> Traffic Module </b>
  *
  *
  * @example none
  * @author Andrew Peters
- * @date May 2019
+ * @date May 2020
  * @copyright
  * Notices:
  * Copyright 2019 United States Government as represented by the Administrator of the National Aeronautics
@@ -48,6 +48,7 @@ import * as M from '../views/map.js';
 import * as E from '../control/eventFunctions.js';
 
 import * as F from '../views/form.js';
+import * as FM from '../models/formElements.js' 
 
 import * as ET from './eventFunctionsTraffic.js';
 
@@ -186,16 +187,16 @@ export function getTrafficIcon(id, source) {
  */
 export function addSimTrafficButtons(btn_div, id, t) {
     // add a add traffic button
-    btn_div.appendChild(F.addBlockButton(id, 'traffic', 'Add Traffic', ET.clickAddTraffic));
+    btn_div.appendChild(FM.addBlockButton(id, 'traffic', 'Add Traffic', ET.clickAddTraffic));
 
     // show traffic summary panel
     createTrafficSummaryPanel()
-    btn_div.appendChild(F.addBlockButton(id, 't_summary_' + t, 'Show Traffic Summary', ET.clickShowTrafficSummary))
+    btn_div.appendChild(FM.addBlockButton(id, `t_summary_${t}`, 'Show Traffic Summary', ET.clickShowTrafficSummary))
     let s_btn = btn_div.lastChild.lastChild
     s_btn.classList.add('show')
 
     // add hide traffic panel button
-    btn_div.appendChild(F.addBlockButton(id, 't_summary_hide_' + t, 'Hide Traffic Panel', ET.clickShowTrafficSummary))
+    btn_div.appendChild(FM.addBlockButton(id, `t_summary_hide_${t}`, 'Hide Traffic Panel', ET.clickShowTrafficSummary))
     let h_btn = btn_div.lastChild.lastChild
     h_btn.classList.add('hide')
 
@@ -210,36 +211,24 @@ export function addSimTrafficButtons(btn_div, id, t) {
  * @memberof module:traffic
  */
 export function createTrafficPanel(ac, t_id) {
-    let pan_id = 'ac_traffic_pan_' + t_id + '_' + ac.id
+    let pan_id = `ac_traffic_pan_${t_id}_${ac.id}`
 
     let option_div = document.getElementById('option_div')
     // add panel
-    let ac_pan_div = document.createElement('div');
-    ac_pan_div.setAttribute('class', 'panel-body wrapper traffic hide sub');
-    ac_pan_div.setAttribute('id', pan_id);
+    let ac_pan_div = FM.addDiv(pan_id,'panel-body wrapper traffic hide sub')
     option_div.appendChild(ac_pan_div);
 
     // Add label to panel
-    let pan_label = document.createElement('h5');
-    pan_label.innerHTML = ' Traffic: ' + t_id
-    ac_pan_div.appendChild(pan_label);
-    let traffic = getTrafficById(ac, t_id)
+    ac_pan_div.appendChild(FM.addHFive('traffic_label', ` Traffic: ${t_id}`));
 
     // add form
     createTrafficPlanTable(ac, t_id);
 
     // create div for btns
-    let btn_div = document.createElement('div')
-    btn_div.setAttribute('class', 't_btndiv')
-
-    // add save traffic to file
-    btn_div.appendChild(F.addTextInput('t_file_save_' + t_id + '_' + ac.id, "Save To File", MODE.save_traffic_default, ET.enterSaveTraffic))
-
-    // add a add start traffic button
-    btn_div.appendChild(F.addBlockButton(t_id + '_' + ac.id, 'start_traffic', 'Start Traffic', ET.clickStartTraffic));
-
-    // add a remove traffic button
-    btn_div.appendChild(F.addBlockButton(t_id + '_' + ac.id, 'remove_traffic', 'Remove Traffic', ET.clickRemoveTraffic));
+    let btn_div = FM.addDiv('','t_btndiv')
+    btn_div.appendChild(FM.addTextInput(`t_file_save_${t_id}_${ac.id}`, "Save To File", MODE.save_traffic_default, ET.enterSaveTraffic))
+    btn_div.appendChild(FM.addBlockButton(`${t_id}_${ac.id}`, 'start_traffic', 'Start Traffic', ET.clickStartTraffic))
+    btn_div.appendChild(FM.addBlockButton(`${t_id}_${ac.id}`, 'remove_traffic', 'Remove Traffic', ET.clickRemoveTraffic))
 
     ac_pan_div.appendChild(btn_div)
 }
@@ -262,6 +251,30 @@ export function highlightMultiToggle(t) {
     }
 }
 
+/**
+ * @function <a name="changeTrafficIcon">changeTrafficIcon</a>
+ * @description Changes traffic icon from default when source is known
+ * @param t {Object} Traffic object.
+ * @memberof module:traffic
+ */
+export function changeTrafficIcon(t) {
+    if (t.multi) {
+        t.source = 'MULTI'
+        t.emit = 254
+        t.multi = true
+    } else {
+        t.source = 'SIM'
+        t.emit = 255
+        t.multi = false
+    }
+
+    for (let ac of AM.getAircraftList()) {
+        removeTrafficMarker(ac.id, t.marker)
+    }
+    let ac = AM.getActiveAc()
+    t.marker = defineTrafficMarker([t.lat, t.lng], t.hdg, ac.id, t.id, t.source, t.callsign);
+    addTrafficToLayer(ac.id, t.marker)
+}
 
 /**
  * @function <a name="createTrafficPlanTable">createTrafficPlanTable</a>
@@ -271,24 +284,15 @@ export function highlightMultiToggle(t) {
  * @memberof module:traffic
  */
 function createTrafficPlanTable(ac, t_id) {
+    let pan_div = document.getElementById(`ac_traffic_pan_${t_id}_${ac.id}`)
 
-    // add altitude
-    let alt_div = F.addNumberInput(ac.id, 'ALT_T_' + t_id, 'Altitude: MSL ', 1, 8, 50);
-    document.getElementById('ac_traffic_pan_' + t_id + '_' + ac.id).appendChild(alt_div);
-
-    // add velocity
-    let vel_div = F.addNumberInput(ac.id, 'VEL_T_' + t_id, 'Velocity: m/s ', 1, 8, 1);
-    document.getElementById('ac_traffic_pan_' + t_id + '_' + ac.id).appendChild(vel_div);
-
-    // add bearing
-    let ber_div = F.addNumberInput(ac.id, 'BER_T_' + t_id, 'Bearing: deg. ', 1, 8, 0, ET.inputTraficBearing);
-    document.getElementById('ac_traffic_pan_' + t_id + '_' + ac.id).appendChild(ber_div);
+    pan_div.appendChild(FM.addNumberInput(ac.id, `ALT_T_${t_id}`, 'Altitude: MSL ', 1, 8, 50));
+    pan_div.appendChild(FM.addNumberInput(ac.id, `VEL_T_${t_id}`, 'Velocity: m/s ', 1, 8, 1));
+    pan_div.appendChild(FM.addNumberInput(ac.id, `BER_T_${t_id}`, 'Bearing: deg. ', 1, 8, 0, ET.inputTraficBearing));
 
     // build the table
-    let table = document.createElement("TABLE");
-    table.setAttribute('id', "ac_traffic_table_" + t_id + '_' + ac.id);
-    table.setAttribute('class', "table traffic_table")
-    document.getElementById('ac_traffic_pan_' + t_id + '_' + ac.id).appendChild(table);
+    let table = FM.addTable(`ac_traffic_table_${t_id}_${ac.id}`,"table traffic_table")
+    pan_div.appendChild(table)
 
     let header = table.createTHead();
     let rowh = header.insertRow(0);
@@ -316,18 +320,10 @@ function createTrafficPlanTable(ac, t_id) {
 export function createTrafficSummaryPanel() {
     // if there already is a traffic summary panel don't create a new one
     if (document.getElementById('ac_traffic_summary') == null) {
-        // update the ac
-
-
         // create the panel
         let option_div = document.getElementById('option_div')
-        let pan_id = 'ac_traffic_summary'
-        let pan = document.createElement('div');
-        pan.setAttribute('class', 'panel-body wrapper traffic hide sub');
-        pan.setAttribute('id', pan_id);
-        option_div.appendChild(pan);
+        option_div.appendChild(FM.addDiv('ac_traffic_summary','panel-body wrapper traffic hide sub'));
     }
-    // add the info
     updateTrafficSummaryPanel()
 }
 
@@ -340,54 +336,31 @@ export function createTrafficSummaryPanel() {
 export function updateTrafficSummaryPanel() {
     // get the summary panel
     let pan = document.getElementById('ac_traffic_summary')
+    FM.removeChildren(pan)
 
-    // remove the current info
-    let children = pan.childNodes
-    for (let i = children.length - 1; i >= 0; i--) {
-        pan.removeChild(children[i])
-    }
+    
+    let ul = FM.addUnorderedList('','t_summary_list')
 
-
-    // add the new info
-    let title = document.createElement('h5')
-    title.innerHTML = 'Traffic Summary'
-    let ul = document.createElement('ul')
-    ul.setAttribute('class', 't_summary_list')
     let li;
-    let stuff;
     let p;
     for (let ac of AM.getAircraftList()) {
         for (let i of ac.traffic_list) {
             i.lastUpdate = Date.now()
             // update the list
-            li = document.createElement('li')
-            // li.setAttribute('class', 't_summary_list')
-            p = document.createElement('p')
-            stuff = 'AC: ' + ac.name +
-                ' T: ' + i.id + " " +
-                ' Callsign: ' + i.callsign +
-                ' Source: ' + i.source +
-                ' Multi: ' + i.multi +
-                '<br />' +
-                ' Lat ' + parseFloat(i.lat).toPrecision(7) +
-                ' Lng ' + parseFloat(i.lng).toPrecision(7) +
-                ' Alt ' + i.alt +
-                ' Hdg ' + i.hdg +
-                ' Vel ' + i.vel
-            p.innerHTML = stuff
+            li = FM.addListItem()
+            ul.appendChild(li)
+
+            li.appendChild(FM.addParagraph('',`AC: ${ac.name} T: ${i.id} Callsign: ${i.callsign} Source: ${i.source}' Multi: ${i.multi}<br/>
+            Lat ${parseFloat(i.lat).toPrecision(7)} Lng ${parseFloat(i.lng).toPrecision(7)} Alt ${i.alt} Hdg ${i.hdg} Vel ${i.vel}`,'t_p'))
 
             // add a remove traffic button
-            let btn = F.addBlockButton(i.id + '_' + ac.id, '-', '-', ET.clickRemoveTraffic)
-            p.setAttribute('class', 't_p')
+            let btn = FM.addBlockButton(`${i.id}_${ac.id}`, '-', '-', ET.clickRemoveTraffic)
             btn.setAttribute('class', 't_-')
-
-            ul.appendChild(li)
-            li.appendChild(p)
-
+            
             // if traffic has not started add an edit button that goes back to the traffic panel
             if (i.inFlight == false) {
-                let edit_btn = F.addBlockButton(i.id + '_' + ac.id, 'edit', 'edit', function (e) {
-                    ET.makeTrafficPanelActive('ac_traffic_pan_' + i.id + '_' + ac.id)
+                let edit_btn = FM.addBlockButton(`${i.id}_${ac.id}`, 'edit', 'edit', function (e) {
+                    ET.makeTrafficPanelActive(`ac_traffic_pan_${i.id}_${ac.id}`)
                 })
                 edit_btn.firstChild.innerHTML = '<img src="images/Edit-01.svg" />'
                 edit_btn.setAttribute('class', 't_-')
@@ -399,7 +372,7 @@ export function updateTrafficSummaryPanel() {
         }
     }
 
-    pan.appendChild(title)
+    pan.appendChild(FM.addHFive('','Traffic Summary'))
     pan.appendChild(ul)
 }
 
@@ -420,28 +393,25 @@ export function updateTrafficSummaryPanel() {
  * @param ac_id {string} aircraft id
  * @memberof module:traffic
  */
-export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id, callsign) {
+
+function getTrafficByCallsign(ac, callsign) {
+    for (let i of ac.traffic_list) {
+        if (i.callsign == callsign) {
+            return i
+        }
+    }
+    return null
+}
+
+
+export function UpdateTraffic(name, source, lat, lng, vel, hdg, alt, emit, ac_id, callsign) {
 
     let ac = AM.getAircraftById(ac_id)
     // find this traffic in traffic_list else create new
-    let traffic = ac.traffic_list.filter(function (t) {
-        if (typeof t_id == "string") {
-            if (t.name = t_id) {
-                return t
-            }
-        } else if (t.id == t_id) {
-            return t
-        }
-    })
-
-    if (traffic.length == 0) {
-        traffic = -99
-    } else {
-        traffic = traffic[0] // filter returns an array
-    }
+    let traffic = getTrafficByCallsign(ac, name)
 
     if (callsign.length == 0) {
-        callsign = t_id
+        callsign = name
     }
 
     // check for valid inputs may be int not float
@@ -454,7 +424,8 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
     }
 
     // update the existing traffic object
-    if (traffic != -99) {
+    if (traffic) {
+        //console.log(traffic)
         //move the marker
         let marker = traffic.marker
         let position = new L.LatLng(parseFloat(lat), parseFloat(lng));
@@ -478,17 +449,19 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
 
 
     } else {
+        //get next t_id
+        let t_id = ac.id * 1000 + ac.traffic_list.length + 1 
 
         // make sure there is a traffic layer on the map
-        if (!M.checkForLayer('Aircraft ' + ac.id)) {
-            F.alertBannerRed('Layer not found. Unable to add Traffic. ac: ' + ac.id + ' t: ' + t_id)
+        if (!M.checkForLayer(`Aircraft ${ac.id}`)) {
+            FM.alertBannerRed(`Layer not found. Unable to add Traffic. ac: ${ac.id} t: ${t_id}`)
             // ignore the message until the aircraft layer has been created
             return
         }
 
         // create new traffic object
         let position = new L.LatLng(lat, lng);
-        let marker = defineTrafficMarker(position, traffic.hdg, ac.id, t_id, source, callsign);
+        let marker = defineTrafficMarker(position, hdg, ac.id, t_id, source, callsign);
         // update the aircraft
         let time = Date.now()
         addTraffic(ac, t_id, lat, lng, vel, hdg, alt, marker, emit, source, time)
@@ -520,7 +493,7 @@ export function UpdateTraffic(t_id, source, lat, lng, vel, hdg, alt, emit, ac_id
             ac.activeSubPanels = removed
         }
         ac.activeSubPanels.push('ac_traffic_summary')
-        F.makePanelActive('ac_pan_' + ac.id)
+        F.makePanelActive(`ac_pan_${ac.id}`)
     }
 }
 

@@ -29,7 +29,7 @@
 # GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL AS ANY PRIOR RECIPIENT,
 # TO THE EXTENT PERMITTED BY LAW.  RECIPIENT'S SOLE REMEDY FOR ANY SUCH MATTER SHALL
 # BE THE IMMEDIATE, UNILATERAL TERMINATION OF THIS AGREEMENT.
-#
+
 
 from multiprocessing import Process, Queue, Manager
 import multiprocessing
@@ -123,10 +123,11 @@ async def consumer_handler(websocket, path):
                 logger.info('SERVER: Active children: {}'.format(
                             multiprocessing.active_children()))
         elif 'CHECK_OS' in message:
-            q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+platform.system()+'"}')
+            # q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+platform.system()+'"}')
+            q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+'Windows'+'"}')
 
         elif 'CHECK_PATH' in message:
-            if platform.system() is not 'Windows':
+            if platform.system() != 'Windows':
                 complete_path = os.path.join(
                     os.path.expanduser('~'), message[1][1:], 'exe/cpu1/core-cpu1')
                 print(complete_path)
@@ -143,7 +144,7 @@ async def consumer_handler(websocket, path):
                 q.put('{"name":"PATH_ICAROUS", "type":"FAIL", "I":"INVALID OS"}')
 
         elif 'CHECK_PATH_A' in message:
-            if platform.system() is not 'Windows':
+            if platform.system() != 'Windows':
                 complete_path = os.path.join(
                     os.path.expanduser('~'), message[1][1:], 'Tools/autotest/sim_vehicle.py')
                 print(complete_path)

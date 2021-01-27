@@ -629,7 +629,7 @@ table {
     position: absolute;
     top: 50%;
     left: 50%;
-    font-size: 30px;
+    font-size: 24px;
     color: white;
     text-shadow: none;
     transform: translate(-50%, -50%);
@@ -661,7 +661,7 @@ table {
     text-align: center;
     /* padding: 5px 0; */
     margin-left: 5px;
-    font-size: 14px;
+    font-size: 12px;
     color: black;
     text-shadow: none;
 }
@@ -682,7 +682,7 @@ table {
     text-align: center;
     /* padding: 5px 0; */
     margin-left: 5px;
-    font-size: 14px;
+    font-size: 12px;
     color: black;
     text-shadow: none;
 }
@@ -703,7 +703,7 @@ table {
     text-align: center;
     /* padding: 5px 0; */
     margin-left: 5px;
-    font-size: 14px;
+    font-size: 12px;
     color: black;
     text-shadow: none;
 }
@@ -724,7 +724,7 @@ table {
     text-align: center;
     /* padding: 5px 0; */
     margin-left: 5px;
-    font-size: 14px;
+    font-size: 12px;
     color: black;
     text-shadow: none;
 }

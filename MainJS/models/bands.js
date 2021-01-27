@@ -1,11 +1,13 @@
 /**
  *
- * @module Bands
+ * @module BANDS
  * @version 1.0.0
- * @description <b> map settings module </b>
+ * @description <b> Communications Module </b>
  *
+ *
+ * @example none
  * @author Andrew Peters
- * @date Feb 2020
+ * @date May 2020
  * @copyright
  * Notices:
  * Copyright 2019 United States Government as represented by the Administrator of the National Aeronautics
@@ -54,10 +56,10 @@ export class Bands {
             'type_table': {
                 '0': 'UNKNOWN',
                 '1': 'NONE',
-                '2': 'FAR',
-                '3': 'MID',
-                '4': 'NEAR',
-                '5': 'RECOVERY'
+                '2': 'RECOVERY',
+                '3': 'NEAR',
+                '4': 'MID',
+                '5': 'FAR'
             },
             'type_def': {
                 'FAR': {

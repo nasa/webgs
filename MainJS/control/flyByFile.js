@@ -46,8 +46,9 @@ import {
 } from '../control/entry.js'
 
 import * as C from '../control/comms.js'
-
 import * as E from '../control/eventFunctions.js'
+
+import * as FM from '../models/formElements.js'
 
 import * as G from '../Geofence/geofence.js'
 
@@ -117,8 +118,7 @@ export async function flybyfile() {
 
         // check for unknown commands
         if (!command_list.includes(words[0])) {
-            console.log('Line: ' + line_num + ' Unknown Command: ' + words[0])
-            form.alertBannerRed('Line: ' + line_num + ' Unknown Command: ' + words[0])
+            form.alertBannerRed(`Line: ${line_num} Unknown Command: ${words[0]}`)
             return
         }
 
@@ -128,14 +128,12 @@ export async function flybyfile() {
                 try {
                     repeat = parseInt(words[1])
                 } catch (e) {
-                    console.log('Repeat Value not an Int, Line: ', line_num)
-                    form.alertBannerRed('Repeat Value not an Int, Line: ', line_num)
+                    form.alertBannerRed(`Repeat Value not an Int, Line: ${line_num}`)
                 }
 
             }
         } else if (words[0] == 'repeat') {
-            console.log('Line: ' + line_num + ' Unexpected Repeat')
-            form.alertBannerRed('Line: ' + line_num + ' Unexpected Repeat')
+            form.alertBannerRed(`Line: ${line_num} Unexpected Repeat`)
             return
         }
 
@@ -157,19 +155,17 @@ export async function flybyfile() {
                         v.splice(i, 1)
                     }
                 }
-                words[1] = v.join(', ') + ')'
+                words[1] = `${v.join(', ')})`
             }
         }
 
         // deal with adjust
         if (words[0] == 'adjust') {
             if (repeat == 0) {
-                console.log('Unexpected Adjust command, line: ', line_num)
-                form.alertBannerRed('Unexpected Adjust command, line: ', line_num)
+                form.alertBannerRed(`Unexpected Adjust command, line: ${line_num}`)
                 return
             } else if (words.length != 3) {
-                console.log('Adjust command given incorrect number of arguments, line: ', line_num)
-                form.alertBannerRed('Adjust command given incorrect number of arguments, line: ', line_num)
+                form.alertBannerRed(`Adjust command given incorrect number of arguments, line: ${line_num}`)
                 return
             } else {
                 acount++
@@ -180,7 +176,7 @@ export async function flybyfile() {
                 func = command[1].replace('(', ',').replace(')', '').replace(/\s/g, '').split(',')
                 args = func.slice(1, func.length)
 
-                // expand args ex [args, *2]  = [args, args]
+                // expand args ex [args, *2] = [args, args]
                 prev_ind = -1
                 args = args.filter((el, ind) => {
                     if (el.includes('*')) {
@@ -199,14 +195,13 @@ export async function flybyfile() {
                 if (exp_args.length % repeat == 0) {
                     x = exp_args.length / (repeat)
                 } else {
-                    console.log('Adjust inner function given incorrect number of arguments, line: ', line_num)
-                    form.alertBannerRed('Adjust inner function given incorrect number of arguments, line: ', line_num)
+                    form.alertBannerRed(`Adjust inner function given incorrect number of arguments, line: ${line_num}`)
                     return
                 }
 
                 // build the command
                 for (let i = 0; i < repeat; i++) {
-                    fun = func[0] + '(' + exp_args.slice(i * x, ((i + 1) * x)).join(', ') + ')'
+                    fun = `${func[0]}(${exp_args.slice(i * x, ((i + 1) * x)).join(', ')})`
 
                     // allows for multiple adjust commands
                     adjust_list.splice((i * acount + acount) - 1, 0, [com, fun])
@@ -273,12 +268,11 @@ async function scriptLoop(script) {
     }
 
     // turn on banner for fly by file
-    let banner = document.createElement('div')
-    banner.setAttribute('id', 'b_banner')
-    banner.setAttribute('class', 'b_overlay')
-    let b_text = document.createElement('div')
-    b_text.setAttribute('id', 'b_text')
+    let banner = FM.addDiv('b_banner','b_overlay')
+
+    let b_text = FM.addDiv('b_text')
     b_text.innerHTML = 'Fly by File in progress. Completed 0 of 0 flights.'
+
     banner.appendChild(b_text)
     document.body.appendChild(banner)
 
@@ -308,7 +302,7 @@ async function scriptLoop(script) {
     }
 
     // remove the banner
-    banner.parentNode.removeChild(banner)
+    FM.removeElement(banner)
 }
 
 
@@ -346,14 +340,10 @@ function functionSwitch(line, a_list) {
             let message
             ac = AM.getAircraftByName(a_list[1])
             if (a_list[0] == 'file') {
-                message = 'AIRCRAFT ' + ac.id +
-                    ' LOAD_PARAM_FILE ' + '/' + a_list[2]
+                message = `AIRCRAFT ${ac.id} LOAD_PARAM_FILE /${a_list[2]}`
 
             } else if (a_list[0] == 'single') {
-                message = 'AIRCRAFT ' + a_list[1] +
-                    ' CHANGE_PARAM ' + a_list[2] +
-                    ' ' + a_list[3] +
-                    ' ' + a_list[4]
+                message = `AIRCRAFT ${a_list[1]} CHANGE_PARAM ${a_list[2]} ${ a_list[3]} ${ a_list[4]}`
             }
             C.sendFullMessage(message)
             break;
@@ -365,7 +355,7 @@ function functionSwitch(line, a_list) {
             break;
 
         case 'forward':
-            console.log('Forwarding ' + a_list[1] + ' data to ' + a_list[2] + ' on port ' + a_list[3])
+            console.log(`Forwarding ${a_list[1]} data to ${a_list[2]} on port ${a_list[3]}`)
             E.scriptForwardData(a_list[1], a_list[2], a_list[3], a_list[4])
             break;
 
@@ -400,17 +390,17 @@ function functionSwitch(line, a_list) {
                     if (parseFloat(item[8]) == 0.0 || parseFloat(item[9]) == 0.0) {
                         vel = item[5]
                     } else {
-                        wp_string = wp_string + ' ' + item[8] + ' ' + item[9] + ' ' + item[10]
+                        wp_string = `${wp_string}${item[8]} ${item[9]} ${item[10]} `
                     }
                 }
             }
             ac = AM.getAircraftByName(a_list[1])
 
             // send the message
-            E.scriptSubmitFlightPlan(ac, vel, wp_string + ' ')
+            E.scriptSubmitFlightPlan(ac, vel, `${wp_string} `)
 
             // request the wp's from the ac to update the display
-            C.sendFullMessage('AIRCRAFT ' + ac.id + ' REQUEST_WAYPOINTS ' + ac.id);
+            C.sendFullMessage(`AIRCRAFT ${ac.id} REQUEST_WAYPOINTS ${ac.id}`);
 
             break;
 
@@ -419,7 +409,7 @@ function functionSwitch(line, a_list) {
             ac = AM.getAircraftByName(a_list[1])
 
             // load the file
-            C.sendFullMessage('AIRCRAFT ' + ac.id + ' LOAD_GF_FILE ' + '../../' + a_list[3])
+            C.sendFullMessage(`AIRCRAFT ${ac.id} LOAD_GF_FILE ../../${a_list[3]}`)
 
             // submit the fence to ac
 
@@ -428,16 +418,12 @@ function functionSwitch(line, a_list) {
                 try {
 
                     for (let f of ac.gf_list) {
-                        let m = 'LOAD_GEOFENCE AC_ID ' + ac.id +
-                            ' F_ID ' + parseInt(f.id) +
-                            ' TYPE ' + parseInt(f.type) +
-                            ' FLOOR ' + parseInt(f.floor) +
-                            ' ROOF ' + parseInt(f.roof)
+                        let m = `LOAD_GEOFENCE AC_ID ${ac.id} F_ID ${parseInt(f.id)} TYPE ${parseInt(f.type)} FLOOR ${parseInt(f.floor)} ROOF ${parseInt(f.roof)}`
                         for (let p of f.point_list) {
-                            m = m + ' ' + p.lat.toString() + ' ' + p.lng.toString()
+                            m = `${m} ${p.lat} ${p.lng}`
                         }
 
-                        C.sendFullMessage('AIRCRAFT ' + ac.id + ' ' + m)
+                        C.sendFullMessage(`AIRCRAFT ${ac.id} ${m}`)
 
                         // update fence and status
                         f.submitted = true;
@@ -456,7 +442,7 @@ function functionSwitch(line, a_list) {
 
         case 'time':
             // expected format - ['time', 'wait', num]
-            setTimeout(console.log('Wait ' + line[1]), parseInt(line[2]) * 1000)
+            setTimeout(console.log(`Wait ${line[1]}`), parseInt(line[2]) * 1000)
             break;
 
         case 'long':
@@ -470,42 +456,27 @@ function functionSwitch(line, a_list) {
             if (a_list[0] == 'add') {
                 // expected format: a_list - ['add', id, t_id, lat, lng, range, bearing, alt, gs, hdg, vs, emit]
                 let ac = AM.getAircraftByName(a_list[1])
-                // format the message
-                let msg = 'AIRCRAFT ' + ac.id +
-                    ' ADD_TRAFFIC ' + a_list[2] +
-                    ' ' + a_list[3] +
-                    ' ' + a_list[4] +
-                    ' ' + a_list[5] +
-                    ' ' + a_list[6] +
-                    ' ' + a_list[7] +
-                    ' ' + a_list[8] +
-                    ' ' + a_list[9] +
-                    ' ' + a_list[10] +
-                    ' ' + a_list[11] +
-                    ' ' + a_list[2]
-
 
                 // send the message
-                C.sendFullMessage(msg)
+                C.sendFullMessage(`AIRCRAFT ${ac.id} ADD_TRAFFIC ${a_list[2]} ${a_list[3]} ${a_list[4]} ${a_list[5]} ${a_list[6]} ${a_list[7]} ${a_list[8]} ${a_list[9]} ${a_list[10]} ${a_list[11]} ${a_list[2]}`
+                )
 
             } else if (a_list[0] == 'file') {
                 // expected format - [file, id, t_id, filename]
                 let ac = AM.getAircraftByName(a_list[1])
-                let t_id = a_list[2]
-                let filename = '/' + a_list[3]
-                C.sendFullMessage('AIRCRAFT ' + ac.id + ' FILE_TRAFFIC ' + t_id + ' ' + filename)
+                C.sendFullMessage(`AIRCRAFT ${ac.id} FILE_TRAFFIC ${a_list[2]} /${a_list[3]}`)
 
             } else if (a_list[0] === 'remove') {
                 // expected format - [remove, id, t_id]
                 let ac = AM.getAircraftByName(a_list[1])
                 let t_id = a_list[2]
-                C.sendFullMessage('AIRCRAFT ' + ac.id + ' REMOVE_TRAFFIC ' + t_id)
+                C.sendFullMessage(`AIRCRAFT ${ac.id} REMOVE_TRAFFIC ${a_list[2]}`)
             }
             break;
         case 'comment':
             // update banner
             let b_t = document.getElementById('b_text')
-            b_t.innerHTML = 'Fly by File in progress. Completed ' + line[1].toString() + '  of ' + line[2].toString() + ' flights.'
+            b_t.innerHTML =` Fly by File in progress. Completed ${line[1]} of ${line[2]} flights.`
             break;
 
         case 'stop':
