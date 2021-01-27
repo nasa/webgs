@@ -41,7 +41,7 @@ import signal
 import webbrowser
 import platform
 
-pro = []
+PROCESS_LIST = []
 x = True
 
 def check_apps():
@@ -62,24 +62,26 @@ def check_daa_displays():
 
 
 def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER, OPERATING_SYSTEM):
-    global pro
+    global PROCESS_LIST
     print('args', args, DEV, HOST, CERT, KEY)
 
     # launch the servers
     if DEV:
         if OPERATING_SYSTEM == 'Windows':
-            ms = subprocess.run([sys.executable, "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--DEV", "True"])
-            hs = subprocess.run([sys.executable, 'node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), 'DEV'])
+            ms = subprocess.Popen([sys.executable, os.path.join(os.environ.get('WEBGS_HOME'),"SocketServer","multiprocess_server.py"), "--DEV", "True"],shell=False)
         else:
-            ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--DEV", "True"],shell=False)
-            hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), 'DEV'])
+            ms = subprocess.Popen(["python3", os.path.join(os.environ.get('WEBGS_HOME'),"SocketServer","multiprocess_server.py"), "--DEV", "True"],shell=False)
+        
+        hs = subprocess.Popen(['node', os.path.join(os.environ.get('WEBGS_HOME'),'main.js'), 'DEV'])
+
     else:
         if OPERATING_SYSTEM == 'Windows':
-            ms = subprocess.run([sys.executable, "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--IP", HOST])
-            hs = subprocess.run([sys.executable, 'node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), CERT, KEY])
+            ms = subprocess.run([sys.executable, os.path.join(os.environ.get('WEBGS_HOME'),"SocketServer","multiprocess_server.py"), "--IP", HOST],shell=False)
         else:
-            ms = subprocess.Popen(["python3", "{}/SocketServer/multiprocess_server.py".format(os.environ.get('WEBGS_HOME')), "--IP", HOST],shell=False)
-            hs = subprocess.Popen(['node', '{}/main.js'.format(os.environ.get('WEBGS_HOME')), CERT, KEY])
+            ms = subprocess.Popen(["python3", os.path.join(os.environ.get('WEBGS_HOME'),"SocketServer","multiprocess_server.py"), "--IP", HOST],shell=False)
+
+        hs = subprocess.Popen(['node', os.path.join(os.environ.get('WEBGS_HOME'),'main.js'), CERT, KEY])
+    
     time.sleep(.5)
 
     if not NOBROWSER:
@@ -95,25 +97,25 @@ def start_webgs(args, HOST, DEV, CERT, KEY, NOBROWSER, OPERATING_SYSTEM):
             b.open('https://'+HOST+':8082')
 
     # This is used when closing to make sure everything is shutdown
-    pro = [ms, hs]
+    PROCESS_LIST = [ms, hs]
 
     # optionally start the offline tile server
     if args[0] != 0 and '.mbtiles' in args[0]:
         try:
             ti = subprocess.Popen(
                 ["tileserver-gl", "{}/OfflineTiles/{}".format(os.environ.get('WEBGS_HOME'), args[0])])
-            pro.append(ti)
+            PROCESS_LIST.append(ti)
         except FileNotFoundError:
             print(
                 'Failed to launch tile server: Check installation of tileserver-gl and path to files.')
 
-    print(pro)
+    print(PROCESS_LIST)
     return
 
 
 def kill_webgs(signum, frame):
     global x
-    for item in pro:
+    for item in PROCESS_LIST:
         if item.poll() is None:
             print('Closing: ', item, signum)
             item.send_signal(signum)
@@ -145,6 +147,10 @@ if __name__ == '__main__':
     # set WEBGS_HOME env variable
     os.environ['WEBGS_HOME'] = os.getcwd()
 
+    # set the default HOST on windows
+    if OPERATING_SYSTEM == 'Windows' and args.HOST[0] == '0.0.0.0':
+        args.HOST[0] = '127.0.0.1'
+
     # check apps, updates all submodules
     if args.UPDATE[0]:
         check_apps()
@@ -162,3 +168,6 @@ if __name__ == '__main__':
 # python3 start_webgs.py -HOST {HOST}
 # python3 start_webgs.py -DEV True
 # python3 start_webgs.py -DEV True -UPDATE True
+
+# WINDOWS: (linux and mac use 0.0.0.0 by default)
+# python3 start_webgs.py -DEV True -HOST 127.0.0.1

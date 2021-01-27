@@ -166,6 +166,11 @@ export function createConnection(ip, port) {
             } else {
                 F.alertBannerRed(m.I + m.name)
             }
+        
+        } else if (m.name = 'SERVER_OS') {
+            F.alertBannerGreen(`Server OS: ${m.I}`)
+            MODE.server_os = m.I
+            F.updateSettingsPanel()
 
         } else if (m.name == 'SAVE') {
             if (MODE.alert) {

@@ -36,6 +36,7 @@ import multiprocessing
 import asyncio
 import websockets
 import os
+import platform
 import functools
 import signal
 import time
@@ -43,7 +44,6 @@ import logging
 import json
 import subprocess
 import ssl
-import pathlib
 from argparse import ArgumentParser
 
 import GsProcesses.icProcesses as ICP
@@ -122,42 +122,45 @@ async def consumer_handler(websocket, path):
                 del m
                 logger.info('SERVER: Active children: {}'.format(
                             multiprocessing.active_children()))
+        elif 'CHECK_OS' in message:
+            q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+platform.system()+'"}')
 
         elif 'CHECK_PATH' in message:
-            complete_path = os.path.join(
-                os.path.expanduser('~'), message[1][1:], 'exe/cpu1/core-cpu1')
-            print(complete_path)
+            if platform.system() is not 'Windows':
+                complete_path = os.path.join(
+                    os.path.expanduser('~'), message[1][1:], 'exe/cpu1/core-cpu1')
+                print(complete_path)
 
-            try:
-                f = open(complete_path, 'r')
-                print('valid')
-                q.put(
-                    '{"name":"PATH_ICAROUS", "type":"PASS", "I":"VALID PATH"}')
-                path_icarous = complete_path
-            except Exception as e:
-                print('check path error', e)
-                q.put(
-                    '{"name":"PATH_ICAROUS", "type":"FAIL", "I":"INVALID PATH:"}')
+                try:
+                    f = open(complete_path, 'r')
+                    print('valid')
+                    q.put('{"name":"PATH_ICAROUS", "type":"PASS", "I":"VALID PATH"}')
+                    path_icarous = complete_path
+                except Exception as e:
+                    print('check path error', e)
+                    q.put('{"name":"PATH_ICAROUS", "type":"FAIL", "I":"INVALID PATH:"}')
+            else:
+                q.put('{"name":"PATH_ICAROUS", "type":"FAIL", "I":"INVALID OS"}')
 
         elif 'CHECK_PATH_A' in message:
-            complete_path = os.path.join(
-                os.path.expanduser('~'), message[1][1:], 'Tools/autotest/sim_vehicle.py')
-            print(complete_path)
-            try:
-                f = open(complete_path, 'r')
-                print('valid')
-                q.put(
-                    '{"name":"PATH_ARDUPILOT", "type":"PASS", "I":"VALID PATH"}')
-            except Exception as e:
-                print('check path error', e)
-                q.put(
-                    '{"name":"PATH_ARDUPILOT", "type":"FAIL", "I":"INVALID PATH:"}')
+            if platform.system() is not 'Windows':
+                complete_path = os.path.join(
+                    os.path.expanduser('~'), message[1][1:], 'Tools/autotest/sim_vehicle.py')
+                print(complete_path)
+                try:
+                    f = open(complete_path, 'r')
+                    print('valid')
+                    q.put('{"name":"PATH_ARDUPILOT", "type":"PASS", "I":"VALID PATH"}')
+                except Exception as e:
+                    print('check path error', e)
+                    q.put('{"name":"PATH_ARDUPILOT", "type":"FAIL", "I":"INVALID PATH:"}')
+            else: 
+                q.put('{"name":"PATH_ICAROUS", "type":"FAIL", "I":"INVALID OS"}')
 
         elif 'AIRCRAFT' in message:
             if message[1] != 'None' and not playback:
 
                 if 'HITL_DISCONNECT' in message:
-
                     ac = int(message[3])
                     print('HITL_DISCONNECT function', message)
                     q.put('{"AIRCRAFT":'+message[3]+', "name":"SHUT_DOWN"}')
@@ -244,16 +247,14 @@ async def consumer_handler(websocket, path):
                     m_lists.append([-1, m])
                     processes.append([-1, p])
                     p.start()
-                    logger.info(
-                        'SERVER: Starting Playback {}'.format(processes))
+                    logger.info('SERVER: Starting Playback {}'.format(processes))
 
                 else:
                     #  pass the message
                     m.append(message)
 
             else:
-                logger.info(
-                    'SERVER: Ignoring unassigned aircraft messages for now. {}'.format(message))
+                logger.info('SERVER: Ignoring unassigned aircraft messages for now. {}'.format(message))
 
         elif 'ADD_TRAFFIC' in message:
             for m in m_lists:
@@ -331,10 +332,12 @@ if __name__ == "__main__":
 
     um = UM.UserManager()
 
-    logging.basicConfig(filename='LogFiles/server_log_{}.log'.format(time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime(time.time()))),
-                        filemode='w',
-                        format='%(asctime)s - %(message)s',
-                        level=logging.INFO)
+    logging.basicConfig(
+        filename=os.path.join('LogFiles','server_log_{}.log'.format(time.strftime("%Y-%m-%d_%H-%M-%S", 
+                                                                        time.localtime(time.time())))),
+        filemode='w',
+        format='%(asctime)s - %(message)s',
+        level=logging.INFO)
 
     logging.info('MAIN: Starting Logger')
     m_lists = []
@@ -342,22 +345,23 @@ if __name__ == "__main__":
     processes = []
 
     with Manager() as manager:
-
         if DEV:
             # start ws server
             start_server = websockets.serve(handler, IP, PORT)
         else:
             # start wss server
             ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER) # this allows only server side, and auto negotiates highest tls level
-            certfile = os.getcwd() +'/certs/'+CERT
-            keyfile = os.getcwd() +'/certs/'+KEY
+            certfile = os.path.join(os.getcwd(), 'certs', CERT)
+            keyfile =  os.path.join(os.getcwd(), 'certs', KEY)
             ssl_context.load_cert_chain(certfile=certfile, keyfile=keyfile)
             start_server = websockets.serve(handler, IP, PORT, ssl=ssl_context)
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(start_server)
-        for signame in ('SIGINT', 'SIGTERM'):
-            loop.add_signal_handler(getattr(signal, signame),functools.partial(ask_exit, signame))
+        
+        if platform.system() is not 'Windows':
+            for signame in ('SIGINT', 'SIGTERM'):
+                loop.add_signal_handler(getattr(signal, signame),functools.partial(ask_exit, signame))
 
         print("Event loop running forever, press Ctrl+C to interrupt.")
         print("pid %s: send SIGINT or SIGTERM to exit." % os.getpid())

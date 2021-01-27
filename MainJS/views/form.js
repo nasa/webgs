@@ -351,6 +351,26 @@ export function createSettingsPanel() {
  * @memberof module:form
  */
 export function updateSettingsPanel() {
+
+    // update selection box based on os
+    if (MODE.server_os != 'Linux') {
+        let sel = document.getElementById('select_mode')
+        let last
+        if (sel) {
+            while (last = sel.lastChild) {
+                sel.removeChild(last)
+            }
+        }
+        let opt1 = document.createElement('option');
+        opt1.setAttribute('value', 'HITL');
+        opt1.innerHTML = 'Connect to Hardware'
+        sel.appendChild(opt1)
+        let opt2 = document.createElement('option');
+        opt2.setAttribute('value', 'Playback');
+        opt2.innerHTML = 'Playback'
+        sel.appendChild(opt2)
+    }
+
     // remove the old div
     let p_node = document.getElementById('mode_set_div')
     let last;

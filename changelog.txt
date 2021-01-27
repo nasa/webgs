@@ -1,9 +1,11 @@
 # Change Log
 
 ### v1.0.10
-update paths to allow windows users to spawn processes
-update forwarding 
-fix ._instance_field missing errors
+Update paths to allow windows users to spawn processes
+Limit GS Mode options based on server os
+Change windows default host to '127.0.0.1'
+Update forwarding 
+Fix mavlink '._instance_field missing' errors
 
 ### v1.0.9
 Add center map on aircraft button to ac panel

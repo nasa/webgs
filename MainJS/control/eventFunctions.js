@@ -115,6 +115,7 @@ export function loadBody() {
     F.makePanelActive('settings')
 
     setTimeout(function () {
+        C.sendFullMessage('CHECK_OS')
         // check path to icarous
         C.sendFullMessage('CHECK_PATH ' + MODE.ic_path)
         // check path to ardupilot

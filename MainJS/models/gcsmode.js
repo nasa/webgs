@@ -64,6 +64,7 @@ export class GCSmode {
      */
     constructor() {
         this.mode = 'SITL';
+        this.server_os = 'Linux'
         this.observeonly = false
         this.con_status = 'Connection Status: Disconnected'
         this.serviceWorker = false;
