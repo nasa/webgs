@@ -21,7 +21,9 @@ If updating WebGS and having trouble with submodules not loading. You may need t
 
 Webgs is setup by default to connect to Open Street Maps. Webgs is also configured to use mapbox for the background display. To get an authorization key go to <https://www.mapbox.com/> and create an account. After receiving an authorization token open `/webgs/MainJS/settings/MapSettings.js` in a text editor, and follow the instructions to update.
 
-[DAA-Displays](https://github.com/nasa/daa-displays) is installed as a submodule in the applications folder `/DAA/daa-displays` by default. The installation script will build the daa-displays automatically. This behavior can be skipped by running `install.sh -D`. [DAA-Displays](https://github.com/nasa/daa-displays) can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on <https://github.com/nasa/daa-displays>).
+[DAA-Displays](https://github.com/nasa/daa-displays) is installed as a submodule in the applications folder `/DAA/daa-displays` by default. The installation script will build the daa-displays automatically. This behavior can be skipped by running `install.sh -D`. [DAA-Displays](https://github.com/nasa/daa-displays) can be launched from WebGS after connecting to an aircraft (no need to follow the instructions on <https://github.com/nasa/daa-displays>).  
+
+WINDOWS USERS: SITL is disabled since ICAROUS cannot be built and run on Windows. Use 'Connect to Hardware' instead. DAA-Displays are also not able to be built on Windows. Run the install script with the `-D` option. Efforts have been made to make WebGS usable on Windows, but there may still be issues. Please notify the developers of any issues. We will happily fix what we can.  
 
 ## Startup
 By default WebGS uses https. This assumes the proper ssl certs have been generated and loaded into the `/certs` directory. Webgs can also be run in developer mode which uses http and does not require certs. Detailed instructions on creating self signed certificates are located in `/certs.README.md`.
