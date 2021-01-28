@@ -46,7 +46,7 @@ class IcClass:
         self.ac_pids = []
         self.da = int(time.time())
         self.da_formated = time.strftime(
-            "%Y-%m-%d_%H:%M:%S", time.localtime(self.da))
+            "%Y-%m-%d_%H-%M-%S", time.localtime(self.da))
         self.logplayer = None
         self.wp_count = {}
         self.wp_list = {}

@@ -111,7 +111,7 @@ export function loadBody() {
 
     setTimeout(function () {
         // check server os
-        C.sendFullMessage('CHECK_OS')
+        // C.sendFullMessage('CHECK_OS')
         // check path to icarous
         C.sendFullMessage(`CHECK_PATH ${MODE.ic_path}`)
         // check path to ardupilot

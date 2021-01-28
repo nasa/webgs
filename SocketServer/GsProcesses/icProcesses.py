@@ -432,7 +432,7 @@ def completeCommands(q, msg, TM, master, mlog):
 
             d = int(time.time())
             d_formated = time.strftime(
-                "%Y-%m-%d_%H:%M:%S", time.localtime(d))
+                "%Y-%m-%d_%H-%M-%S", time.localtime(d))
             log = 'LogFiles/flight_log_ac_{0}_{1}.tlog'.format(
                 ac, d_formated)
             with open(log, 'w') as f:

@@ -123,8 +123,8 @@ async def consumer_handler(websocket, path):
                 logger.info('SERVER: Active children: {}'.format(
                             multiprocessing.active_children()))
         elif 'CHECK_OS' in message:
-            # q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+platform.system()+'"}')
-            q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+'Windows'+'"}')
+            q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+platform.system()+'"}')
+            # q.put('{"name":"SERVER_OS", "type":"OS", "I":"'+'Windows'+'"}')
 
         elif 'CHECK_PATH' in message:
             if platform.system() != 'Windows':
