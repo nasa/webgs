@@ -2,6 +2,7 @@
 
 ### v1.0.10
 Update paths to allow windows users to spawn processes
+Change filenames for windows users
 Limit GS Mode options based on server os
 Change windows default host to '127.0.0.1'
 Update forwarding 
