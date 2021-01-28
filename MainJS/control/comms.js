@@ -168,7 +168,7 @@ export function createConnection(ip, port) {
                 FM.alertBannerRed(`${m.I}${m.name}`)
             }
 
-        } else if (m.name = 'SERVER_OS') {
+        } else if (m.name == 'SERVER_OS') {
             FM.alertBannerGreen(`Server OS: ${m.I}`)
             MODE.server_os = m.I
             F.updateSettingsPanel()
